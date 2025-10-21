@@ -47,7 +47,7 @@ const PopupContainer = styled.div`
 const Header = styled.div`
   padding: 32px 32px 24px;
   border-bottom: 2px solid #f8f9fa;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   color: white;
   border-radius: 24px 24px 0 0;
 
@@ -304,7 +304,7 @@ const Button = styled.button`
   overflow: hidden;
 
   &.primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
     color: white;
 
     &:hover:not(:disabled) {

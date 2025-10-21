@@ -18,7 +18,7 @@ const TemplesContainer = styled.div`
 `;
 
 const HeaderSection = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   border-radius: 1.5rem;
   padding: 2rem;
   color: white;
@@ -325,7 +325,7 @@ const TempleTimings = styled.div`
 
 const BookSevaButton = styled(motion.button)`
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   color: white;
   font-weight: 700;
   padding: 1rem 2rem;
@@ -463,11 +463,22 @@ const CustomerTemples = () => {
       setLoading(true);
       const response = await gettemplist();
       const templesData = response.data || [];
-      setTemples(templesData);
+
+      // Determine environment
+      const isLocal =
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1";
+
+      // Filter based on environment
+      const filteredTemples = templesData.filter((temple) =>
+        isLocal ? temple.is_live_data === false : temple.is_live_data === true
+      );
+
+      setTemples(filteredTemples);
 
       // Initialize carousel indices
       const initialIndices = {};
-      templesData.forEach((temple) => {
+      filteredTemples.forEach((temple) => {
         initialIndices[temple.temple_id] = 0;
       });
       setCarouselIndices(initialIndices);

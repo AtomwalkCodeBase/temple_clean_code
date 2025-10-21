@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { MdTempleHindu, MdEventAvailable, MdHomeWork } from "react-icons/md";
 import { FaPrayingHands, FaBed } from "react-icons/fa";
 import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Container = styled.div`
   position: relative;
@@ -19,7 +20,7 @@ const Header = styled(motion.div)`
   .title {
     font-size: clamp(1.75rem, 4vw, 2.5rem);
     font-weight: 900;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background: linear-gradient(145deg, #d4af37ff, #c44536ff);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -35,7 +36,7 @@ const Header = styled(motion.div)`
       transform: translateX(-50%);
       width: 80px;
       height: 4px;
-      background: linear-gradient(90deg, #667eea, #764ba2);
+      background: linear-gradient(90deg, #d4af37ff, #c44536ff);
       border-radius: 2px;
     }
   }
@@ -315,7 +316,8 @@ const LoadingContainer = styled.div`
 
 export default function SevaCategories({ categories, onSelect, allServices }) {
   const [loading, setLoading] = useState(true);
-
+  const navigater = useNavigate();
+  const location = useLocation();
   useEffect(() => {
     if (categories && categories.length > 0 && allServices) {
       setTimeout(() => {
@@ -355,7 +357,11 @@ export default function SevaCategories({ categories, onSelect, allServices }) {
       </Container>
     );
   }
-
+  const navigateto = (id) => {
+    const pathParts = location.pathname.split("/");
+    const templeid = pathParts[pathParts.length - 1];
+    navigater(`/customer-services?id=${id}&&templeId=${templeid}`);
+  };
   return (
     <Container>
       <Header
@@ -378,7 +384,7 @@ export default function SevaCategories({ categories, onSelect, allServices }) {
               variants={itemVariants}
               gradient={categoryGradients[cat.code]}
               glowColor={glowColors[cat.code]}
-              onClick={() => onSelect(cat.code)}
+              onClick={() => navigateto(cat.code)}
               whileHover={{
                 scale: 1.02,
                 transition: { type: "spring", stiffness: 400, damping: 25 },

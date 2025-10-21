@@ -51,7 +51,7 @@ const ServiceTypeBadge = styled.span`
   position: absolute;
   top: 12px;
   left: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
@@ -139,13 +139,13 @@ const VariationTags = styled.div`
 `;
 
 const VariationTag = styled.span`
-  background: #e3f2fd;
-  color: #1976d2;
+  background: #faf3eeff;
+  border: 1px solid #f8c4abff;
   padding: 6px 12px;
   border-radius: 16px;
   font-size: 0.8rem;
   font-weight: 500;
-  border: 1px solid #bbdefb;
+  color: #fc795cff;
 `;
 
 const PriceSection = styled.div`
@@ -185,7 +185,7 @@ const PriceRange = styled.div`
 `;
 
 const ViewButton = styled.button`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   color: white;
   border: none;
   padding: 14px 28px;
@@ -197,15 +197,19 @@ const ViewButton = styled.button`
   font-size: 0.95rem;
 
   &:hover {
-    background: linear-gradient(135deg, #5a67d8 0%, #6b4e9d 100%);
+    background: linear-gradient(
+      145deg,
+      rgba(145, 120, 38, 1),
+      rgba(152, 53, 42, 1)
+    );
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
   }
 `;
 
 const PolicyInfo = styled.div`
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
+  background: #faf3eeff;
+  border: 1px solid #f8c4abff;
   border-radius: 8px;
   padding: 12px;
   margin-top: 16px;
@@ -213,7 +217,7 @@ const PolicyInfo = styled.div`
 
 const PolicyText = styled.div`
   font-size: 0.8rem;
-  color: #0369a1;
+  color: #fc795cff;
   font-weight: 500;
 `;
 

@@ -5,62 +5,66 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   FiMenu,
   FiX,
-  FiBell,
   FiSearch,
   FiChevronDown,
   FiChevronLeft,
   FiChevronRight,
+  FiUser,
+  FiLogOut,
 } from "react-icons/fi";
-import { FaHome, FaCalendarAlt, FaBook } from "react-icons/fa";
+import { FaHome, FaCalendarAlt, FaBook, FaThList } from "react-icons/fa";
 import { IoPerson, IoSettingsSharp } from "react-icons/io5";
 import { FaPersonWalkingDashedLineArrowRight } from "react-icons/fa6";
 import { MdTempleHindu } from "react-icons/md";
 import { useCustomerAuth } from "../../contexts/CustomerAuthContext";
-import {
-  BookAIcon,
-  BookCheck,
-  CheckCircleIcon,
-  Notebook,
-  NotebookIcon,
-  NotebookTabs,
-  ServerIcon,
-} from "lucide-react";
+import { ServerIcon } from "lucide-react";
+
+/* Spiritual Color Palette */
+const SPIRITUAL_GOLD = "#d4af37";
+const SPIRITUAL_GOLD_LIGHT = "#f4e4a6";
+const SPIRITUAL_GOLD_DARK = "#b8941f";
+const SPIRITUAL_SAND = "#e6d2aa";
+const SPIRITUAL_CREAM = "#f8f4e6";
+const SPIRITUAL_TERRACOTTA = "#c44536";
+const SPIRITUAL_SAGE = "#87a96b";
+const SPIRITUAL_DEEP_BLUE = "#2c3e50";
+const SPIRITUAL_LIGHT_BLUE = "#3498db";
+const SPIRITUAL_MAROON = "#8b4513";
+const SPIRITUAL_OFFWHITE = "#fefcf5";
 
 /* Shared sizing */
 const SIDEBAR_W_COLLAPSED = 88;
 const SIDEBAR_W_EXPANDED = 260;
-const NAV_HEIGHT = 88; // px
+const NAV_HEIGHT = 88;
 
 /* Global animation tokens */
 const TRANSITION_EASE = "ease-in-out";
-const TRANSITION_S = 0.3; // seconds (Framer + CSS)
+const TRANSITION_S = 0.3;
 const TRANSITION_CSS = `${TRANSITION_S}s ${TRANSITION_EASE}`;
 
-/* Glass tokens */
+/* Spiritual Glass tokens */
 const GLASS_BG_IDLE =
-  "linear-gradient(135deg, rgb(255 255 255 / 18%), rgb(255 255 255 / 10%))";
+  "linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(244, 228, 166, 0.08))";
 const GLASS_BG_HOVER =
-  "linear-gradient(135deg, rgb(255 255 255 / 24%), rgb(255 255 255 / 14%))";
-const GLASS_HILITE = "rgb(255 255 255 / 25%)";
+  "linear-gradient(135deg, rgba(212, 175, 55, 0.18), rgba(244, 228, 166, 0.12))";
+const GLASS_HILITE = "rgba(212, 175, 55, 0.2)";
 const GLASS_BLUR = "16px";
 const GLASS_SAT = "140%";
-const PURPLE = "#667eea";
-const PURPLE_2 = "#764ba2";
-const PURPLE_HOVER = "#7c3aed";
+
 const LayoutContainer = styled.div`
   display: flex;
   min-height: 100vh;
   background: radial-gradient(
       1100px 700px at 6% -12%,
-      rgb(99 102 241 / 16%) 0%,
+      rgba(212, 175, 55, 0.08) 0%,
       transparent 60%
     ),
     radial-gradient(
       900px 600px at 96% 108%,
-      rgb(16 185 129 / 14%) 0%,
+      rgba(135, 169, 107, 0.06) 0%,
       transparent 60%
     ),
-    linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    linear-gradient(135deg, ${SPIRITUAL_OFFWHITE} 0%, ${SPIRITUAL_CREAM} 100%);
 `;
 
 const Sidebar = styled(motion.div)`
@@ -73,7 +77,6 @@ const Sidebar = styled(motion.div)`
   z-index: 1000;
   overflow: visible;
 
-  /* IMPORTANT: do NOT transition width in CSS (Framer owns width) */
   transition: background ${TRANSITION_CSS}, box-shadow ${TRANSITION_CSS},
     border-color ${TRANSITION_CSS}, transform ${TRANSITION_CSS};
 
@@ -81,9 +84,9 @@ const Sidebar = styled(motion.div)`
   backdrop-filter: blur(${GLASS_BLUR}) saturate(${GLASS_SAT});
   -webkit-backdrop-filter: blur(${GLASS_BLUR}) saturate(${GLASS_SAT});
 
-  box-shadow: 0 18px 48px rgb(17 24 39 / 14%), 0 4px 12px rgb(17 24 39 / 10%),
-    inset 0 1px 0 ${GLASS_HILITE};
-  border-right: 1px solid #0b020226;
+  box-shadow: 0 18px 48px rgba(44, 62, 80, 0.08),
+    0 4px 12px rgba(44, 62, 80, 0.06), inset 0 1px 0 ${GLASS_HILITE};
+  border-right: 1px solid rgba(212, 175, 55, 0.15);
 
   &::before {
     content: "";
@@ -94,15 +97,15 @@ const Sidebar = styled(motion.div)`
     border-bottom-right-radius: 18px;
     background: linear-gradient(
       180deg,
-      rgb(255 255 255 / 18%) 0%,
+      rgba(212, 175, 55, 0.08) 0%,
       transparent 38%
     );
   }
 
   &:hover {
     background: ${GLASS_BG_HOVER};
-    box-shadow: 0 22px 60px rgb(17 24 39 / 18%), 0 6px 16px rgb(17 24 39 / 12%),
-      inset 0 1px 0 ${GLASS_HILITE};
+    box-shadow: 0 22px 60px rgba(44, 62, 80, 0.12),
+      0 6px 16px rgba(44, 62, 80, 0.08), inset 0 1px 0 ${GLASS_HILITE};
   }
 
   @media (max-width: 768px) {
@@ -114,7 +117,7 @@ const Sidebar = styled(motion.div)`
   @supports not (
     (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
   ) {
-    background: rgb(255 255 255 / 75%);
+    background: rgba(248, 244, 230, 0.85);
   }
 `;
 
@@ -124,8 +127,8 @@ const SidebarHeader = styled.div`
   display: flex;
   align-items: center;
   border-bottom: 0;
+  cursor: pointer;
 
-  /* Keep transitions consistent (if any style toggles happen) */
   transition: background ${TRANSITION_CSS}, color ${TRANSITION_CSS},
     border-color ${TRANSITION_CSS};
 
@@ -136,7 +139,12 @@ const SidebarHeader = styled.div`
     left: 20px;
     right: 20px;
     height: 1px;
-    background: #0b020226;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(212, 175, 55, 0.3),
+      transparent
+    );
     pointer-events: none;
     border-radius: 1px;
     transition: background ${TRANSITION_CSS};
@@ -157,10 +165,9 @@ const Logo = styled.div`
 
   .om-symbol {
     font-size: 1.75rem;
-    color: ${PURPLE};
+    color: ${SPIRITUAL_GOLD};
     background: none;
-    -webkit-text-fill-color: initial;
-    filter: none;
+    filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.3));
   }
 
   .brand-text {
@@ -169,15 +176,23 @@ const Logo = styled.div`
 
     .title {
       font-size: 1.08rem;
-      font-weight: 800;
+      font-weight: 700;
       margin: 0;
-      color: #0f172a;
+      color: ${SPIRITUAL_DEEP_BLUE};
       letter-spacing: 0.2px;
+      background: linear-gradient(
+        135deg,
+        ${SPIRITUAL_GOLD_DARK},
+        ${SPIRITUAL_TERRACOTTA}
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
     .subtitle {
       font-size: 0.78rem;
-      color: #94a3b8;
+      color: ${SPIRITUAL_SAGE};
       margin: 0;
       font-weight: 500;
     }
@@ -191,22 +206,24 @@ const CollapseButton = styled.button`
   transform: translateY(-50%);
   width: 38px;
   height: 38px;
-  border: 1px solid rgb(255 255 255 / 35%);
+  border: 1px solid rgba(212, 175, 55, 0.4);
   border-radius: 20px;
-  background: #6d28d9;
+  background: linear-gradient(
+    135deg,
+    ${SPIRITUAL_GOLD},
+    ${SPIRITUAL_GOLD_DARK}
+  );
   backdrop-filter: blur(8px) saturate(140%);
   -webkit-backdrop-filter: blur(8px) saturate(140%);
-  color: #ffffff;
+  color: ${SPIRITUAL_OFFWHITE};
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.05rem;
-  transition: transform 0.16s ${TRANSITION_EASE},
-    background 0.16s ${TRANSITION_EASE}, box-shadow 0.16s ${TRANSITION_EASE},
-    border-color 0.16s ${TRANSITION_EASE};
-  box-shadow: 0 10px 22px rgba(109, 40, 217, 0.36),
-    0 3px 8px rgba(17, 24, 39, 0.12), inset 0 1px 0 rgb(255 255 255 / 25%);
+  transition: all 0.16s ${TRANSITION_EASE};
+  box-shadow: 0 10px 22px rgba(212, 175, 55, 0.25),
+    0 3px 8px rgba(44, 62, 80, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3);
   z-index: 2000;
   pointer-events: auto;
 
@@ -217,7 +234,7 @@ const CollapseButton = styled.button`
     border-radius: inherit;
     background: radial-gradient(
       120% 100% at -10% -20%,
-      rgb(255 255 255 / 28%) 0%,
+      rgba(255, 255, 255, 0.4) 0%,
       transparent 50%
     );
     pointer-events: none;
@@ -227,15 +244,15 @@ const CollapseButton = styled.button`
 
   &:hover {
     transform: translateY(-50%) scale(1.06);
-    border-color: rgb(255 255 255 / 50%);
-    box-shadow: 0 14px 28px rgba(109, 40, 217, 0.42),
-      0 5px 12px rgba(17, 24, 39, 0.16), inset 0 1px 0 rgb(255 255 255 / 28%);
+    border-color: rgba(212, 175, 55, 0.6);
+    box-shadow: 0 14px 28px rgba(212, 175, 55, 0.35),
+      0 5px 12px rgba(44, 62, 80, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
   &:active {
     transform: translateY(-50%) scale(0.97);
-    box-shadow: 0 8px 18px rgba(109, 40, 217, 0.32),
-      0 2px 8px rgba(17, 24, 39, 0.1), inset 0 1px 0 rgb(255 255 255 / 22%);
+    box-shadow: 0 8px 18px rgba(212, 175, 55, 0.2),
+      0 2px 8px rgba(44, 62, 80, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   }
 
   @media (max-width: 768px) {
@@ -255,7 +272,7 @@ const SidebarContent = styled.div`
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background: #e5e7eb;
+    background: rgba(212, 175, 55, 0.3);
     border-radius: 4px;
   }
 `;
@@ -268,11 +285,11 @@ const SectionTitle = styled.div`
   padding: 0 1.25rem 0.5rem;
   font-size: 0.72rem;
   font-weight: 700;
-  color: #9aa4b2;
+  color: ${SPIRITUAL_SAGE};
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: ${(props) => (props.collapsed ? "none" : "block")};
-  border-bottom: 1px solid rgb(255 255 255 / 18%);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.15);
 `;
 
 const MenuItem = styled.div`
@@ -282,34 +299,34 @@ const MenuItem = styled.div`
   margin: 0.28rem 0.75rem;
   border-radius: 12px;
   cursor: pointer;
-  transition: background 0.18s ${TRANSITION_EASE},
-    color 0.18s ${TRANSITION_EASE}, box-shadow 0.18s ${TRANSITION_EASE},
-    border-color 0.18s ${TRANSITION_EASE};
+  transition: all 0.18s ${TRANSITION_EASE};
 
-  color: ${(props) => (props.active ? "#ffffff" : "#334155")};
+  color: ${(props) =>
+    props.active ? SPIRITUAL_OFFWHITE : SPIRITUAL_DEEP_BLUE};
   background: ${(props) =>
     props.active
-      ? `linear-gradient(145deg, ${PURPLE}, ${PURPLE_2})`
-      : "rgb(255 255 255 / 12%)"};
-  border: 1px solid
-    ${(props) => (props.active ? "transparent" : "rgb(255 255 255 / 22%)")};
+      ? `linear-gradient(145deg, ${SPIRITUAL_GOLD}, ${SPIRITUAL_TERRACOTTA})`
+      : "transparent"};
+  /* border: 1px solid
+    ${(props) => (props.active ? "transparent" : "rgba(212, 175, 55, 0.2)")}; */
   box-shadow: ${(props) =>
     props.active
-      ? "0 2px 10px rgba(109, 40, 217, 0.35)"
-      : "inset 0 1px 0 rgb(255 255 255 / 18%)"};
+      ? "0 2px 10px rgba(212, 175, 55, 0.4)"
+      : "inset 0 1px 0 rgba(255, 255, 255, 0.3)"};
 
   &:hover {
     background: ${(props) =>
       props.active
-        ? `linear-gradient(145deg, ${PURPLE_HOVER}, ${PURPLE_2})`
-        : "rgb(255 255 255 / 18%)"};
+        ? `linear-gradient(145deg, ${SPIRITUAL_GOLD_DARK}, ${SPIRITUAL_MAROON})`
+        : "rgba(212, 175, 55, 0.15)"};
     border-color: ${(props) =>
-      props.active ? "transparent" : "rgb(255 255 255 / 30%)"};
-    color: ${(props) => (props.active ? "#ffffff" : "#1f2937")};
+      props.active ? "transparent" : "rgba(212, 175, 55, 0.3)"};
+    color: ${(props) =>
+      props.active ? SPIRITUAL_OFFWHITE : SPIRITUAL_DEEP_BLUE};
     box-shadow: ${(props) =>
       props.active
-        ? "0 4px 14px rgba(109, 40, 217, 0.42)"
-        : "inset 0 1px 0 rgb(255 255 255 / 22%), 0 2px 8px rgb(15 23 42 / 6%)"};
+        ? "0 4px 14px rgba(212, 175, 55, 0.5)"
+        : "inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 2px 8px rgba(44, 62, 80, 0.08)"};
   }
 
   .icon {
@@ -318,7 +335,7 @@ const MenuItem = styled.div`
     display: flex;
     align-items: center;
     justify-content: center;
-    color: ${(props) => (props.active ? "#ffffff" : "#6b7280")};
+    color: ${(props) => (props.active ? SPIRITUAL_OFFWHITE : SPIRITUAL_GOLD)};
     transition: color 0.18s ${TRANSITION_EASE};
   }
 
@@ -332,8 +349,8 @@ const MenuItem = styled.div`
 
   .badge {
     margin-left: auto;
-    background: #ef4444;
-    color: #ffffff;
+    background: ${SPIRITUAL_TERRACOTTA};
+    color: ${SPIRITUAL_OFFWHITE};
     font-size: 0.7rem;
     padding: 0.125rem 0.375rem;
     border-radius: 9999px;
@@ -343,7 +360,7 @@ const MenuItem = styled.div`
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.35);
+    box-shadow: 0 1px 3px rgba(196, 69, 54, 0.4);
   }
 `;
 
@@ -353,7 +370,7 @@ const MainContent = styled.div`
     props.sidebarCollapsed
       ? `${SIDEBAR_W_COLLAPSED}px`
       : `${SIDEBAR_W_EXPANDED}px`};
-  padding-top: ${NAV_HEIGHT}px; /* space for fixed navbar */
+  padding-top: ${NAV_HEIGHT}px;
   transition: margin-left ${TRANSITION_CSS};
   will-change: margin-left;
 
@@ -363,14 +380,13 @@ const MainContent = styled.div`
   }
 `;
 
-/* Fixed navbar aligned to sidebar width */
 const TopNavbar = styled.div`
-  background: rgb(255 255 255 / 52%);
+  background: rgba(248, 244, 230, 0.7);
   backdrop-filter: blur(10px) saturate(130%);
   -webkit-backdrop-filter: blur(10px) saturate(130%);
-  border-bottom: 1px solid rgb(255 255 255 / 36%);
-  box-shadow: 0 6px 18px rgb(17 24 39 / 10%),
-    inset 0 1px 0 rgb(255 255 255 / 30%);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  box-shadow: 0 6px 18px rgba(44, 62, 80, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 
   height: ${NAV_HEIGHT}px;
   padding: 0 2rem;
@@ -385,9 +401,8 @@ const TopNavbar = styled.div`
       ? `${SIDEBAR_W_COLLAPSED}px`
       : `${SIDEBAR_W_EXPANDED}px`};
   right: 0;
-  z-index: 900; /* above sidebar */
+  z-index: 900;
 
-  /* Smooth realignment when sidebar width changes */
   transition: left ${TRANSITION_CSS};
   will-change: left;
 
@@ -409,64 +424,19 @@ const MobileMenuButton = styled.button`
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #6b7280;
+  color: ${SPIRITUAL_GOLD};
   padding: 0.5rem;
   border-radius: 0.5rem;
   transition: all 0.2s ${TRANSITION_EASE};
 
   &:hover {
-    background: rgb(255 255 255 / 40%);
+    background: rgba(212, 175, 55, 0.1);
   }
 
   @media (max-width: 768px) {
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-`;
-
-const SearchContainer = styled.div`
-  position: relative;
-  max-width: 420px;
-  flex: 1;
-  border: 1px solid #0b020226;
-  border-radius: 12px;
-
-  .search-icon {
-    position: absolute;
-    left: 0.9rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: black;
-    font-size: 1rem;
-  }
-
-  input {
-    width: 100%;
-    padding: 0.72rem 1rem 0.72rem 2.4rem;
-    border: 1px solid rgb(255 255 255 / 38%);
-    border-radius: 12px;
-    font-size: 0.92rem;
-    background: rgb(255 255 255 / 46%);
-    backdrop-filter: blur(8px) saturate(125%);
-    -webkit-backdrop-filter: blur(8px) saturate(125%);
-    transition: all 0.2s ${TRANSITION_EASE};
-    color: #111827;
-
-    &:focus {
-      outline: none;
-      border-color: ${PURPLE};
-      box-shadow: 0 0 0 3px rgb(109 40 217 / 18%);
-      background: rgb(255 255 255 / 58%);
-    }
-
-    &::placeholder {
-      color: #9ca3af;
-    }
-  }
-
-  @media (max-width: 768px) {
-    display: none;
   }
 `;
 
@@ -476,59 +446,19 @@ const NavRight = styled.div`
   gap: 1rem;
 `;
 
-const NotificationButton = styled(motion.button)`
-  background: rgb(255 255 255 / 46%);
-  border: 1px solid rgb(255 255 255 / 36%);
-  backdrop-filter: blur(8px) saturate(125%);
-  -webkit-backdrop-filter: blur(8px) saturate(125%);
-  border-radius: 12px;
-  padding: 0.6rem;
-  color: #6b7280;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.18s ${TRANSITION_EASE};
-  font-size: 1.25rem;
-  position: relative;
-  border: 1px solid #0b020226;
-
-  &:hover {
-    background: rgb(255 255 255 / 58%);
-    color: #374151;
-    box-shadow: inset 0 1px 0 rgb(255 255 255 / 28%);
-  }
-
-  .badge {
-    position: absolute;
-    top: 0.35rem;
-    right: 0.35rem;
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-    font-size: 0.7rem;
-    padding: 0.125rem 0.375rem;
-    border-radius: 9999px;
-    min-width: 1rem;
-    height: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
-  }
-`;
-
 const UserMenu = styled.div`
   position: relative;
-  border: 1px solid #0b020226;
+  border: 1px solid rgba(212, 175, 55, 0.2);
   border-radius: 12px;
+  background: rgba(248, 244, 230, 0.6);
 `;
 
 const UserButton = styled(motion.button)`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: rgb(255 255 255 / 46%);
-  border: 1px solid rgb(255 255 255 / 36%);
+  background: rgba(248, 244, 230, 0.8);
+  border: 1px solid rgba(212, 175, 55, 0.25);
   backdrop-filter: blur(8px) saturate(125%);
   -webkit-backdrop-filter: blur(8px) saturate(125%);
   cursor: pointer;
@@ -537,23 +467,27 @@ const UserButton = styled(motion.button)`
   transition: all 0.18s ${TRANSITION_EASE};
 
   &:hover {
-    background: rgb(255 255 255 / 58%);
-    border-color: rgb(255 255 255 / 42%);
+    background: rgba(248, 244, 230, 0.9);
+    border-color: rgba(212, 175, 55, 0.4);
   }
 `;
 
 const UserAvatar = styled.div`
   width: 2.25rem;
   height: 2.25rem;
-  background: linear-gradient(135deg, ${PURPLE}, ${PURPLE_2});
+  background: linear-gradient(
+    135deg,
+    ${SPIRITUAL_GOLD},
+    ${SPIRITUAL_TERRACOTTA}
+  );
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: ${SPIRITUAL_OFFWHITE};
   font-weight: 700;
   font-size: 0.9rem;
-  box-shadow: 0 2px 8px rgba(109, 40, 217, 0.3);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
 `;
 
 const UserInfo = styled.div`
@@ -561,14 +495,14 @@ const UserInfo = styled.div`
 
   .name {
     font-weight: 600;
-    color: #1f2937;
+    color: ${SPIRITUAL_DEEP_BLUE};
     font-size: 0.9rem;
     margin: 0;
   }
 
   .role {
     font-size: 0.75rem;
-    color: #6b7280;
+    color: ${SPIRITUAL_SAGE};
     margin: 0;
   }
 
@@ -580,6 +514,7 @@ const UserInfo = styled.div`
 const PageContent = styled.div`
   padding: 2rem;
   min-height: calc(100vh - 80px);
+  background: ${SPIRITUAL_OFFWHITE};
 
   @media (max-width: 768px) {
     padding: 1.5rem;
@@ -592,7 +527,7 @@ const MobileOverlay = styled(motion.div)`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(44, 62, 80, 0.5);
   z-index: 999;
   display: none;
 
@@ -601,6 +536,74 @@ const MobileOverlay = styled(motion.div)`
   }
 `;
 
+const UserDropdown = styled(motion.div)`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: ${SPIRITUAL_OFFWHITE};
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(44, 62, 80, 0.12),
+    0 2px 8px rgba(44, 62, 80, 0.08);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  min-width: 180px;
+  z-index: 1000;
+  overflow: hidden;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+`;
+
+const DropdownItem = styled(motion.div)`
+  display: flex;
+  align-items: center;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s ${TRANSITION_EASE};
+  color: ${SPIRITUAL_DEEP_BLUE};
+  background: transparent;
+
+  .icon {
+    margin-right: 0.75rem;
+    font-size: 1.1rem;
+    color: ${SPIRITUAL_GOLD};
+    transition: all 0.2s ${TRANSITION_EASE};
+  }
+
+  .label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ${TRANSITION_EASE};
+  }
+
+  &:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(212, 175, 55, 0.1),
+      rgba(135, 169, 107, 0.05)
+    );
+    color: ${SPIRITUAL_TERRACOTTA};
+
+    .icon {
+      color: ${SPIRITUAL_TERRACOTTA};
+      transform: scale(1.1);
+    }
+
+    .label {
+      color: ${SPIRITUAL_TERRACOTTA};
+    }
+  }
+`;
+
+const DropdownDivider = styled.div`
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(212, 175, 55, 0.3),
+    transparent
+  );
+  margin: 0.25rem 0;
+`;
 const CustomerLayout = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
@@ -610,7 +613,7 @@ const CustomerLayout = ({ children }) => {
       return false;
     }
   });
-
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -664,7 +667,7 @@ const CustomerLayout = ({ children }) => {
           },
           {
             path: "/customer-services",
-            icon: ServerIcon,
+            icon: FaThList,
             label: "All Services",
             badge: null,
           },
@@ -717,7 +720,6 @@ const CustomerLayout = ({ children }) => {
     }
     return "C";
   };
-
   return (
     <LayoutContainer>
       <Sidebar
@@ -730,7 +732,7 @@ const CustomerLayout = ({ children }) => {
         transition={{ duration: TRANSITION_S, ease: "easeInOut" }}
       >
         <SidebarHeader>
-          <Logo collapsed={sidebarCollapsed}>
+          <Logo collapsed={sidebarCollapsed} onClick={() => navigate("/")}>
             <motion.div
               className="om-symbol"
               animate={{ opacity: [0.9, 1, 0.9] }}
@@ -800,34 +802,63 @@ const CustomerLayout = ({ children }) => {
             >
               {mobileMenuOpen ? <FiX /> : <FiMenu />}
             </MobileMenuButton>
-
-            <SearchContainer>
-              <FiSearch className="search-icon" />
-              <input type="text" placeholder="Search temples, services..." />
-            </SearchContainer>
           </NavLeft>
-
           <NavRight>
-            {/* <NotificationButton
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <FiBell />
-              <span className="badge">2</span>
-            </NotificationButton> */}
-
             <UserMenu>
               <UserButton
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => setDropdownOpen(!dropdownOpen)}
               >
                 <UserAvatar>{getUserInitials()}</UserAvatar>
                 <UserInfo>
                   <div className="name">Devotee</div>
                   <div className="role">{customerData?.custRefCode}</div>
                 </UserInfo>
-                <FiChevronDown />
+                <FiChevronDown
+                  style={{
+                    transform: dropdownOpen ? "rotate(180deg)" : "rotate(0)",
+                    transition: "transform 0.2s ease",
+                  }}
+                />
               </UserButton>
+
+              <AnimatePresence>
+                {dropdownOpen && (
+                  <UserDropdown
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <DropdownItem
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        navigate("/customer-profile");
+                      }}
+                    >
+                      <span className="icon">
+                        <FiUser />
+                      </span>
+                      <span className="label">Profile</span>
+                    </DropdownItem>
+
+                    <DropdownDivider />
+
+                    <DropdownItem
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        handleLogout();
+                      }}
+                    >
+                      <span className="icon">
+                        <FiLogOut />
+                      </span>
+                      <span className="label">Logout</span>
+                    </DropdownItem>
+                  </UserDropdown>
+                )}
+              </AnimatePresence>
             </UserMenu>
           </NavRight>
         </TopNavbar>

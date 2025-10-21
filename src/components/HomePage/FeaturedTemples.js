@@ -205,7 +205,21 @@ const FeaturedTemples = () => {
   useEffect(() => {
     gettemplist().then((data) => {
       const temples = data.data;
-      setTempleList(temples.length > 6 ? temples.slice(0, 6) : temples);
+      // Determine environment
+      const isLocal =
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1";
+
+      // Filter based on environment
+      const filteredTemples = temples.filter((temple) =>
+        isLocal ? temple.is_live_data === false : temple.is_live_data === true
+      );
+
+      setTempleList(
+        filteredTemples.length > 6
+          ? filteredTemples.slice(0, 6)
+          : filteredTemples
+      );
     });
   }, []);
   const handleBookSeva = (templeId) => {

@@ -90,7 +90,7 @@ const helpSteps = [
     description:
       "Smart time-slot management and priest coordination ensure every ritual is conducted smoothly and on time.",
     buttonText: "Book a Puja",
-    to: "/book-puja",
+    to: "/customer-login",
   },
   {
     title: "Clear Policies & Pricing",

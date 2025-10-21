@@ -752,18 +752,12 @@ function ManageTemple(props) {
     temple_sub_group: "",
     temple_group_id: null,
     temple_sub_group_id: null,
+    is_live_data: window.location.hostname === "localhost" ? false : true,
   });
 
   const [imageFiles, setImageFiles] = useState({
     mainImage: null,
     additionalImages: [],
-  });
-
-  const [timings, setTimings] = useState({
-    morning_opening: "",
-    morning_closing: "",
-    evening_opening: "",
-    evening_closing: "",
   });
 
   const [details, setDetails] = useState([{ title: "", paragraph: "" }]);

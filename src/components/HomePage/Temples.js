@@ -676,7 +676,17 @@ const Temples = () => {
         setLoading(true);
         setError("");
         const response = await gettemplist();
-        const list = Array.isArray(response?.data) ? response.data : [];
+        // Determine environment
+        const isLocal =
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1";
+
+        // Filter based on environment
+        const filteredTemples = response.data?.filter((temple) =>
+          isLocal ? temple.is_live_data === false : temple.is_live_data === true
+        );
+
+        const list = Array.isArray(filteredTemples) ? filteredTemples : [];
         const mapped = list.map((t) => {
           const timingsObj = t?.additional_field_list?.temple_timings;
           let timingsText = "";

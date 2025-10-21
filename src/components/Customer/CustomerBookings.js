@@ -32,7 +32,7 @@ const BookingsContainer = styled.div`
 `;
 
 const HeaderSection = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   border-radius: 1.5rem;
   padding: 2rem;
   color: white;
@@ -764,7 +764,17 @@ const CustomerBookings = () => {
       [key]: value,
     });
   };
-  useEffect(() => {}, []);
+  // Set filter from URL query param (e.g., /customer-bookings?status=A)
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlStatus = params.get("status");
+    const serchcode = params.get("refcode");
+    if (urlStatus) {
+      handleFilterChange("status", urlStatus);
+    } else if (serchcode) {
+      handleFilterChange("search", serchcode);
+    }
+  }, [location.search]);
 
   const handleBookingAction = async (bookingRefCode, action) => {
     setActionLoading(bookingRefCode);

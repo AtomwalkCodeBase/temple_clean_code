@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import CustomerLayout from "./CustomerLayout";
 import ServiceCard from "./ServiceCard";
@@ -13,7 +13,7 @@ const ServicesContainer = styled.div`
   margin: 0 auto;
 `;
 const HeaderSection = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   border-radius: 1.5rem;
   padding: 2rem;
   color: white;
@@ -90,17 +90,66 @@ const NoServicesMessage = styled.div`
   font-size: 1.1rem;
   grid-column: 1 / -1;
 `;
+// Add these styled components for pagination (or use your existing styling approach)
+const PaginationContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 30px;
+  padding: 20px;
+`;
+
+const PaginationButton = styled.button`
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background-color: ${(props) => (props.active ? "#ff4d00ff" : "white")};
+  color: ${(props) => (props.active ? "white" : "#333")};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  border-radius: 4px;
+  opacity: ${(props) => (props.disabled ? 0.5 : 1)};
+
+  &:hover:not(:disabled) {
+    background-color: ${(props) => (props.active ? "#ff4d00ff" : "#f8f9fa")};
+  }
+`;
 
 const MyServices = ({ servicesdata }) => {
   const [services, setServices] = useState([]);
   const [filteredServices, setFilteredServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(9); // You can adjust this number
   const navigate = useNavigate();
+  const routerLocation = useLocation();
+
+  console.log(filteredServices, "filteredServices");
 
   useEffect(() => {
     fetchServices();
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(routerLocation.search);
+    const urlStatus = params.get("id");
+    if (urlStatus) {
+      const filters = {
+        search: params.get("templeId") || "",
+        category: urlStatus,
+      };
+      handleFilter(filters);
+    }
+  }, [routerLocation.search, services]);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentServices = filteredServices.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
 
   const fetchServices = async () => {
     if (servicesdata && servicesdata.length > 0) {
@@ -110,9 +159,17 @@ const MyServices = ({ servicesdata }) => {
     } else {
       try {
         setLoading(true);
+        const isLocal =
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1";
         const serviceList = await getTempleServicesList();
-        setServices(serviceList);
-        setFilteredServices(serviceList);
+        const filteredservices = serviceList?.filter((service) =>
+          isLocal
+            ? service.is_live_temple === false
+            : service.is_live_temple === true
+        );
+        setServices(filteredservices);
+        setFilteredServices(filteredservices);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -122,6 +179,7 @@ const MyServices = ({ servicesdata }) => {
   };
 
   const handleFilter = (filters) => {
+    console.log(filters, "filters");
     let filtered = services;
 
     if (filters.search) {
@@ -130,7 +188,8 @@ const MyServices = ({ servicesdata }) => {
           service.name.toLowerCase().includes(filters.search.toLowerCase()) ||
           service.description
             .toLowerCase()
-            .includes(filters.search.toLowerCase())
+            .includes(filters.search.toLowerCase()) ||
+          service.temple_id.toLowerCase().includes(filters.search.toLowerCase())
       );
     }
 
@@ -151,10 +210,23 @@ const MyServices = ({ servicesdata }) => {
     }
 
     setFilteredServices(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   };
 
   const handleViewDetails = (serviceId) => {
     navigate(`/customer-services/${serviceId}`);
+  };
+
+  // Pagination handlers
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleItemsPerPageChange = (value) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1); // Reset to first page when items per page changes
   };
 
   if (loading)
@@ -177,7 +249,7 @@ const MyServices = ({ servicesdata }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <div className="title">🛕 Sacred Temples</div>
+        <div className="title">🛕 Sacred Seva</div>
         <div className="subtitle">
           Discover divine temples and book your spiritual journey with us
         </div>
@@ -190,8 +262,48 @@ const MyServices = ({ servicesdata }) => {
         ]}
       />
 
+      {/* Items per page selector */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+          padding: "0 20px",
+        }}
+      >
+        <div style={{ color: "#666", fontSize: "14px" }}>
+          Showing {indexOfFirstItem + 1}-
+          {Math.min(indexOfLastItem, filteredServices.length)} of{" "}
+          {filteredServices.length} services
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <label
+            htmlFor="itemsPerPage"
+            style={{ fontSize: "14px", color: "#666" }}
+          >
+            Items per page:
+          </label>
+          <select
+            id="itemsPerPage"
+            value={itemsPerPage}
+            onChange={(e) => handleItemsPerPageChange(e.target.value)}
+            style={{
+              padding: "5px 10px",
+              border: "1px solid #ddd",
+              borderRadius: "4px",
+            }}
+          >
+            <option value="6">6</option>
+            <option value="9">9</option>
+            <option value="12">12</option>
+            <option value="18">18</option>
+          </select>
+        </div>
+      </div>
+
       <ServiceGrid>
-        {filteredServices.map((service) => (
+        {currentServices.map((service) => (
           <ServiceCard
             key={service.service_id}
             service={service}
@@ -205,6 +317,35 @@ const MyServices = ({ servicesdata }) => {
           </NoServicesMessage>
         )}
       </ServiceGrid>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <PaginationContainer>
+          <PaginationButton
+            disabled={currentPage === 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+          >
+            Previous
+          </PaginationButton>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <PaginationButton
+              key={page}
+              active={page === currentPage}
+              onClick={() => handlePageChange(page)}
+            >
+              {page}
+            </PaginationButton>
+          ))}
+
+          <PaginationButton
+            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(currentPage + 1)}
+          >
+            Next
+          </PaginationButton>
+        </PaginationContainer>
+      )}
     </CustomerLayout>
   );
 };

@@ -95,11 +95,11 @@ const HeroOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(
+  /* background: linear-gradient(
     45deg,
-    rgba(102, 126, 234, 0.8) 0%,
-    rgba(118, 75, 162, 0.6) 100%
-  );
+    rgba(234, 164, 102, 0.8) 0%,
+    rgba(162, 88, 75, 0.6) 100%
+  ); */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -513,7 +513,7 @@ const FloatingBookButton = styled.button`
   position: fixed;
   bottom: 30px;
   right: 30px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   color: white;
   border: none;
   padding: 20px 40px;
@@ -537,7 +537,7 @@ const FloatingBookButton = styled.button`
 
   &:hover {
     transform: translateY(-8px) scale(1.05);
-    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+    box-shadow: 0 15px 40px rgba(234, 172, 102, 0.6);
     animation: ${pulse} 2s infinite;
   }
 
@@ -609,6 +609,7 @@ const ServiceDetails = () => {
   const [chosenVariation, setChosenVariation] = useState(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [disabledDateKeys, setDisabledDateKeys] = useState(new Set());
+  const [selectateddate, setselecteddate] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [bookingData, setBookingData] = useState([]);
   const { customerData } = useCustomerAuth();
@@ -616,37 +617,10 @@ const ServiceDetails = () => {
     fetchServiceDetails();
   }, [serviceId]);
   const onConfirmDate = async (dateKey) => {
+    setselecteddate(dateKey);
     setCalendarOpen(false);
-    setShowConfirmation(true);
-    if (!chosenService) return;
-    const booking = {
-      booking_data: {
-        cust_ref_code: customerData.custRefCode,
-        call_mode: "ADD_BOOKING",
-        service_id: chosenService.service_id,
-        // IMPORTANT: include service_variation_id for API
-        service_variation_id:
-          chosenVariation?.id || chosenVariation?.variation_id || null,
-        booking_date: toAPIDate(dateKey),
-        end_date: toAPIDate(dateKey),
-        start_time: chosenVariation?.start_time || "",
-        end_time: chosenVariation?.end_time || "",
-        notes: "",
-        quantity: chosenVariation?.max_participant || 1,
-        duration: Number.parseInt(
-          chosenService.duration_minutes || chosenService.duration || 60,
-          10
-        ),
-        unit_price: Number.parseFloat(
-          (parseFloat(chosenVariation?.base_price) || 0) +
-            (parseFloat(chosenVariation?.pricing_rule_data?.week_day_price) ||
-              0) +
-            (parseFloat(chosenVariation?.pricing_rule_data?.time_price) || 0) +
-            (parseFloat(chosenVariation?.pricing_rule_data?.date_price) || 0)
-        ),
-      },
-    };
-    setBookingData(booking);
+    setVariationOpen(true);
+
     // try {
     //   await processBooking(booking);
     //   navigate("/customer-bookings", {
@@ -735,8 +709,37 @@ const ServiceDetails = () => {
     setVariationOpen(false);
     setChosenVariation(variationOrNull || null);
     if (!chosenService) return;
+    const booking = {
+      booking_data: {
+        cust_ref_code: customerData.custRefCode,
+        call_mode: "ADD_BOOKING",
+        service_id: chosenService.service_id,
+        // IMPORTANT: include service_variation_id for API
+        service_variation_id:
+          variationOrNull?.id || variationOrNull?.variation_id || null,
+        booking_date: toAPIDate(selectateddate || ""),
+        end_date: toAPIDate(selectateddate || ""),
+        start_time: variationOrNull?.start_time || "",
+        end_time: variationOrNull?.end_time || "",
+        notes: "",
+        quantity: variationOrNull?.max_participant || 1,
+        duration: Number.parseInt(
+          chosenService.duration_minutes || chosenService.duration || 60,
+          10
+        ),
+        unit_price: Number.parseFloat(
+          (parseFloat(chosenVariation?.base_price) || 0) +
+            (parseFloat(chosenVariation?.pricing_rule_data?.week_day_price) ||
+              0) +
+            (parseFloat(chosenVariation?.pricing_rule_data?.time_price) || 0) +
+            (parseFloat(chosenVariation?.pricing_rule_data?.date_price) || 0)
+        ),
+      },
+    };
+    setBookingData(booking);
+    if (!chosenService) return;
     await loadDisabledDates(chosenService.service_id, variationOrNull);
-    setCalendarOpen(true);
+    setShowConfirmation(true);
   };
   const loadDisabledDates = async (serviceId, variationOrNull) => {
     const starttime = variationOrNull?.start_time;
@@ -794,7 +797,7 @@ const ServiceDetails = () => {
   };
 
   const handleBookNow = () => {
-    setVariationOpen(true);
+    setCalendarOpen(true);
   };
 
   const getServiceImages = () => {
@@ -1066,10 +1069,11 @@ const ServiceDetails = () => {
           service={chosenService}
           onClose={() => setVariationOpen(false)}
           onSelect={onSelectVariation}
+          selectateddate={selectateddate}
         />
         <AvailabilityCalendarModal
           open={calendarOpen}
-          disabledDateKeys={disabledDateKeys}
+          // disabledDateKeys={disabledDateKeys}
           onClose={() => setCalendarOpen(false)}
           onConfirm={onConfirmDate}
         />

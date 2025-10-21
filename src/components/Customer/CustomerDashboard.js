@@ -19,6 +19,7 @@ import { MdTempleHindu, MdEmojiPeople } from "react-icons/md";
 import { useCustomerAuth } from "../../contexts/CustomerAuthContext";
 import { getBookingList } from "../../services/customerServices";
 import CustomerLayout from "../../components/Customer/CustomerLayout";
+import EventSlider from "./CustomerModal/EventSlider";
 
 const DashboardContainer = styled.div`
   max-width: 1400px;
@@ -27,14 +28,14 @@ const DashboardContainer = styled.div`
 `;
 
 const WelcomeSection = styled(motion.div)`
-  background: #f9fafb;
+  background: #f8f4e6b3;
   border-radius: 1.5rem;
   padding: 3rem;
   color: #1f2937;
   margin-bottom: 2.5rem;
   position: relative;
   overflow: hidden;
-  border: 2px solid transparent;
+  border: 2px solid #f8f080ff;
   background-clip: padding-box;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
 
@@ -339,7 +340,7 @@ const ContentGrid = styled.div`
 `;
 
 const RecentBookings = styled(motion.div)`
-  background: linear-gradient(180deg, #ffffff, #f9fafb);
+  background: #f8f4e6b3;
   border-radius: 1.25rem;
   padding: 2rem;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
@@ -405,7 +406,7 @@ const BookingItem = styled(motion.div)`
     width: 3rem;
     height: 3rem;
     border-radius: 0.75rem;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -521,6 +522,7 @@ const CustomerDashboard = () => {
     try {
       if (customerData?.custRefCode) {
         const response = await getBookingList(customerData.custRefCode);
+
         setBookings(response || []);
       }
     } catch (error) {
@@ -565,6 +567,7 @@ const CustomerDashboard = () => {
   };
   return (
     <CustomerLayout>
+      <EventSlider />
       <DashboardContainer>
         <WelcomeSection
           initial={{ opacity: 0, y: 20 }}
@@ -706,12 +709,12 @@ const CustomerDashboard = () => {
                 .reverse()
                 .map((booking, index) => (
                   <BookingItem
-                    key={booking.booking_ref_code || index}
+                    key={booking.ref_code || index}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                     onClick={() =>
-                      navigate(`/booking-details/${booking.booking_ref_code}`)
+                      navigate(`/customer-bookings?refcode=${booking.ref_code}`)
                     }
                   >
                     <div className="booking-icon">

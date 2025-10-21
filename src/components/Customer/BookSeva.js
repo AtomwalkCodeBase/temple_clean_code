@@ -19,7 +19,7 @@ import AvailabilityCalendarModal from "./CustomerModal/AvailabilityCalendarModal
 import VariationModal from "./CustomerModal/VariationModal";
 
 const HeaderSection = styled(motion.div)`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   border-radius: 1.5rem;
   padding: 2rem;
   color: white;
