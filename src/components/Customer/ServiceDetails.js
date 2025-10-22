@@ -728,11 +728,11 @@ const ServiceDetails = () => {
           10
         ),
         unit_price: Number.parseFloat(
-          (parseFloat(chosenVariation?.base_price) || 0) +
-            (parseFloat(chosenVariation?.pricing_rule_data?.week_day_price) ||
+          (parseFloat(variationOrNull?.base_price) || 0) +
+            (parseFloat(variationOrNull?.pricing_rule_data?.week_day_price) ||
               0) +
-            (parseFloat(chosenVariation?.pricing_rule_data?.time_price) || 0) +
-            (parseFloat(chosenVariation?.pricing_rule_data?.date_price) || 0)
+            (parseFloat(variationOrNull?.pricing_rule_data?.time_price) || 0) +
+            (parseFloat(variationOrNull?.pricing_rule_data?.date_price) || 0)
         ),
       },
     };
@@ -866,7 +866,7 @@ const ServiceDetails = () => {
             <ServiceTitle>{service.name}</ServiceTitle>
             <TempleName>{service.temple_name}</TempleName>
 
-            <QuickStats>
+            {/* <QuickStats>
               <StatItem>
                 <span className="stat-value">
                   ₹{parseFloat(service.base_price || 0).toFixed(0)}
@@ -883,7 +883,7 @@ const ServiceDetails = () => {
                   <span className="stat-label">Minutes</span>
                 </StatItem>
               )}
-            </QuickStats>
+            </QuickStats> */}
           </HeroOverlay>
         </HeroSection>
 

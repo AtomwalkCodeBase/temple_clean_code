@@ -36,6 +36,7 @@ import ServiceDetails from "./components/Customer/ServiceDetails";
 import BookSeva from "./components/Customer/BookSeva";
 import TempleDetails from "./components/HomePage/TempleDetails";
 import ManageTemple from "./components/Admin/ManageTemple";
+import SellerRegistration from "./components/Seller/SellerRegistartion";
 
 function AppContent() {
   const location = useLocation();
@@ -62,6 +63,7 @@ function AppContent() {
     "/seller-Application",
     "/customer-services",
     "/customer-profile",
+    "/seller-Application",
   ].some((route) => location.pathname.startsWith(route));
 
   const hideNavAndFooter = isAdminRoute || isCustomerRoute;
@@ -153,6 +155,7 @@ function AppContent() {
         <Route path="/customer-bookings" element={<CustomerBookings />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
         <Route path="/book-seva/:templeId" element={<BookSeva />} />
+        <Route path="/seller-Application" element={<SellerRegistration />} />
         <Route
           path="/customer-services/:serviceId"
           element={<ServiceDetails />}

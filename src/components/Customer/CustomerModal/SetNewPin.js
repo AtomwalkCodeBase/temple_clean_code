@@ -51,7 +51,7 @@ const PopupContent = styled(motion.div)`
 `;
 
 const HeaderSection = styled.div`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   padding: 2rem 2rem 1.5rem;
   text-align: center;
   position: relative;
@@ -155,7 +155,7 @@ const Label = styled.label`
 
   svg {
     font-size: 1rem;
-    color: #667eea;
+    color: #ea7866ff;
   }
 `;
 
@@ -247,7 +247,7 @@ const SuccessMessage = styled(MessageBase)`
 `;
 
 const SubmitButton = styled.button`
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   color: white;
   border: none;
   padding: 1.25rem 2rem;

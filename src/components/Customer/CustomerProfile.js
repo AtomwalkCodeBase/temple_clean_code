@@ -36,7 +36,7 @@ const ProfileSection = styled.div`
 const Avatar = styled.div`
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #585bf1ff, #764ba2);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -68,7 +68,7 @@ const ProfileInfo = styled.div`
 
 const EditButton = styled.button`
   padding: 12px 24px;
-  background: linear-gradient(135deg, #6366f1, #764ba2);
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   color: white;
   border: none;
   border-radius: 8px;
@@ -78,7 +78,11 @@ const EditButton = styled.button`
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
 
   &:hover {
-    background: linear-gradient(135deg, #9563f1ff, #5c7bf6ff);
+    background: linear-gradient(
+      145deg,
+      rgba(212, 120, 55, 1),
+      rgba(135, 46, 36, 1)
+    );
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(249, 115, 22, 0.4);
   }

@@ -123,9 +123,6 @@ const MyServices = ({ servicesdata }) => {
   const [itemsPerPage, setItemsPerPage] = useState(9); // You can adjust this number
   const navigate = useNavigate();
   const routerLocation = useLocation();
-
-  console.log(filteredServices, "filteredServices");
-
   useEffect(() => {
     fetchServices();
   }, []);

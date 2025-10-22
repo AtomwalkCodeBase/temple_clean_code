@@ -110,13 +110,11 @@ export default function VariationModal({
 }) {
   console.log(service, "service");
   const variations = service?.service_variation_list || [];
-  const serviceName = service?.service || 1;
-  const temple_id = service?.temple_id || "";
+  const serviceId = service?.service_id || 1;
+  const capacity = service?.capacity || "";
   const service_type = service?.service_type || "";
   const [bookingList, setBookingList] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Fetch booking list when modal opens or date changes
-  console.log(service_type, "bookingList");
   useEffect(() => {
     const fetchBookingData = async () => {
       if (open && selectateddate) {
@@ -148,8 +146,18 @@ export default function VariationModal({
 
   // Check if a variation is already booked
   const isVariationBooked = (variation) => {
-    console.log(variation, "variation");
     if (service_type == "EVENT") {
+      const sameVariationBookings = bookingList.filter(
+        (booking) => booking?.service_data?.service_id === serviceId
+      );
+      // Calculate total quantity already booked
+      const totalBookedQty = sameVariationBookings.reduce(
+        (sum, booking) => sum + (booking.quantity || 0),
+        0
+      );
+      // Compare with event capacity
+      const eventCapacity = capacity;
+      return totalBookedQty + variation.max_participant >= eventCapacity;
     } else {
       if (!bookingList.length) return false;
       return bookingList.some((booking) => {

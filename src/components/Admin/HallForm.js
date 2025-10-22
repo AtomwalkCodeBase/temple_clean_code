@@ -668,12 +668,13 @@ const Select = styled.select`
 const HiddenInput = styled.input`
   display: none;
 `;
-
-// Service types
-const mockServiceTypes = [
-  ["HALL", "Hall"],
-  ["PUJA", "Puja"],
-];
+const HelpText = styled.div`
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  font-style: italic;
+  line-height: 1.4;
+`;
 
 export default function HallForm({
   onCancel,
@@ -682,16 +683,11 @@ export default function HallForm({
   editService,
   serviceType = "HALL",
 }) {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [currentStep, setCurrentStep] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showCloneModal, setShowCloneModal] = useState(false);
-
-  const [serviceTypes, setServiceTypes] = useState(mockServiceTypes);
   const [templeId, setTempleId] = useState(
     () => getCurrentTempleId() || "T_0000010"
   );
@@ -716,8 +712,8 @@ export default function HallForm({
     event_to_date: "",
     booking_from_date: "",
     booking_to_date: "",
+    booking_type: "E", // Default to Exclusive (E)
   });
-
   const currentTempleId = useMemo(
     () => getCurrentTempleId() || templeId,
     [templeId]
@@ -798,6 +794,7 @@ export default function HallForm({
         booking_to_date: editService.booking_to_date
           ? parseAPIDate(editService.booking_to_date)
           : "",
+        booking_type: editService.booking_type || "E", // Default to Exclusive if not set
       };
 
       setFormData(initialFormData);
@@ -892,6 +889,7 @@ export default function HallForm({
         event_to_date: "",
         booking_from_date: "",
         booking_to_date: "",
+        booking_type: "E", // Default to Exclusive
       });
       setExistingImages({
         image_file: null,
@@ -1020,6 +1018,7 @@ export default function HallForm({
         serviceData.booking_to_date = formatDateForAPI(
           formData.booking_to_date
         );
+        serviceData.booking_type = formData.booking_type; // Add booking_type
       }
 
       // Add service_id for UPDATE mode to prevent duplicates
@@ -1108,6 +1107,7 @@ export default function HallForm({
                 event_to_date: serviceData.event_to_date,
                 booking_from_date: serviceData.booking_from_date,
                 booking_to_date: serviceData.booking_to_date,
+                booking_type: serviceData.booking_type, // Include booking_type
               }),
             });
         } catch {}
@@ -1457,6 +1457,25 @@ export default function HallForm({
                       <option value="M">Monthly</option>
                       <option value="Y">Yearly</option>
                     </Select>
+                  </FormGroup>
+
+                  <FormGroup>
+                    <Label required>Booking Type</Label>
+                    <Select
+                      name="booking_type"
+                      value={formData.booking_type}
+                      onChange={handleChange}
+                    >
+                      <option value="E">Exclusive (Private Event)</option>
+                      <option value="S">
+                        Shared (Multiple Bookings Allowed)
+                      </option>
+                    </Select>
+                    <HelpText>
+                      {formData.booking_type === "E"
+                        ? "Exclusive: Only one booking allowed at a time. Perfect for private events."
+                        : "Shared: Multiple bookings can happen simultaneously. Ideal for community events."}
+                    </HelpText>
                   </FormGroup>
                 </>
               )}

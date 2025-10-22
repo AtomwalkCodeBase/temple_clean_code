@@ -584,7 +584,7 @@ const CustomerDashboard = () => {
             </div>
 
             <div className="quick-stats">
-              <StatCard onClick={() => mybooking("A")}>
+              <StatCard onClick={() => mybooking("")}>
                 <div className="stat">
                   <div>
                     <div className="stat-value">{totalBookings}</div>
