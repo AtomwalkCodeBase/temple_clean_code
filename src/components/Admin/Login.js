@@ -66,6 +66,37 @@ const Logo = styled.div`
   }
 `;
 
+const TabContainer = styled.div`
+  display: flex;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 1rem;
+  padding: 0.5rem;
+  margin-bottom: 2rem;
+  gap: 0.5rem;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+`;
+
+const Tab = styled(motion.button)`
+  flex: 1;
+  padding: 5px 2px;
+  border: 2px solid rgba(212, 175, 55, 0.2);
+  background: ${(props) =>
+    props.active ? "linear-gradient(135deg, #d4af37, #c44536)" : "transparent"};
+  color: ${(props) => (props.active ? "white" : "#666")};
+  font-weight: 600;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+
+  &:hover {
+    background: ${(props) =>
+      props.active
+        ? "linear-gradient(135deg, #d4af37, #c44536)"
+        : "rgba(212, 175, 55, 0.1)"};
+  }
+`;
+
 const Form = styled.form`
   display: flex;
   flex-direction: column;
@@ -194,7 +225,9 @@ const Login = () => {
       setLoading(false);
     }
   };
-
+  const navigatetopage = (path) => {
+    navigate(path);
+  };
   return (
     <LoginContainer>
       <LoginCard
@@ -202,8 +235,16 @@ const Login = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        <TabContainer>
+          <Tab onClick={() => navigatetopage("/seller-login")}>
+            👥 Seller Login
+          </Tab>
+          <Tab onClick={() => navigatetopage("/customer-login")}>
+            👤 Customer Login
+          </Tab>
+        </TabContainer>
         <Logo>
-          <div className="om-symbol">🕉️</div>
+          {/* <div className="om-symbol">🕉️</div> */}
           <div className="title">Temple Admin</div>
         </Logo>
 

@@ -1,9 +1,10 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, use } from "react";
 import styled from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
 import TempleTimeSlots from "../../components/Admin/TempleTimeSlots";
 import {
   addupdatetempale,
+  getTempleGroups,
   gettemplist,
   uploadTempleImages,
 } from "../../services/productServices";
@@ -713,14 +714,6 @@ const ProgressBar = ({ steps, currentStep }) => (
   </ProgressContainer>
 );
 
-const TempleList = ({ onEditTemple }) => (
-  <motion.div variants={fadeIn} initial="hidden" animate="visible">
-    <InfoBox>
-      📋 Temple list functionality will load existing temples here
-    </InfoBox>
-  </motion.div>
-);
-
 function ManageTemple(props) {
   // State management
   const [activeTab, setActiveTab] = useState("add-temple");
@@ -794,14 +787,8 @@ function ManageTemple(props) {
   });
 
   // Temple Groups state
-  const [groups, setGroups] = useState([
-    { id: 1, name: "South Indian Temples", image: null },
-    { id: 2, name: "North Indian Temples", image: null },
-  ]);
-  const [subGroups, setSubGroups] = useState([
-    { id: 1, name: "Dravidian Architecture", image: null },
-    { id: 2, name: "Nagara Architecture", image: null },
-  ]);
+  const [groups, setGroups] = useState([]);
+  const [subGroups, setSubGroups] = useState([]);
 
   const fetchCurrentImages = async (id) => {
     const effectiveId =
@@ -832,7 +819,35 @@ function ManageTemple(props) {
       setCurrentImages(keys.map((k) => t[k]).filter(Boolean));
     } catch {}
   };
+  useEffect(() => {
+    fetchTempleGroups();
+  }, []);
+  // Temple Groups functions
+  const fetchTempleGroups = async () => {
+    // setLoadingGroups(true);
+    try {
+      const response = await getTempleGroups();
+      console.log("Temple Groups API Response:", response);
 
+      const data = response?.data?.data || response?.data || [];
+      console.log("Temple Groups Data:", data);
+
+      // Separate groups and subgroups
+      const groupsData = data.filter((item) => item.group_type === "T");
+      const subGroupsData = data.filter((item) => item.group_type === "S");
+
+      console.log("Groups Data:", groupsData);
+      console.log("Sub Groups Data:", subGroupsData);
+
+      setGroups(groupsData);
+      setSubGroups(subGroupsData);
+    } catch (err) {
+      console.error("Error fetching temple groups:", err);
+      setError("Failed to fetch temple groups");
+    } finally {
+      // setLoadingGroups(false);
+    }
+  };
   // Constants
   const tabs = useMemo(() => {
     const baseTabs = [
@@ -985,6 +1000,9 @@ function ManageTemple(props) {
         templeData.additional_field_list.temple_timings.selected_time_slots.map(
           (s) => s.id
         );
+      setTimeSlots(
+        templeData.additional_field_list.temple_timings.selected_time_slots
+      );
       setSelectedTimeSlotIds(ids);
     }
 
@@ -1306,28 +1324,67 @@ function ManageTemple(props) {
       <Grid>
         <FormGroup>
           <Label>Temple Group</Label>
-          <Input
-            value={
-              groups.find((g) => g.id === (templeForm.temple_group_id || 0))
-                ?.name ||
-              templeForm.temple_group ||
-              "Not assigned"
-            }
-            readOnly
-          />
+          <select
+            name="temple_group_id"
+            value={templeForm.temple_group_id || ""}
+            onChange={handleTempleChange}
+            style={{
+              padding: "0.75rem 1rem",
+              border: "2px solid #fed7aa",
+              borderRadius: "0.5rem",
+              fontSize: "1rem",
+              transition: "all 0.2s",
+              backgroundColor: "#fff",
+              cursor: "pointer",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#ea580c";
+              e.target.style.boxShadow = "0 0 0 3px rgba(234, 88, 12, 0.1)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "#fed7aa";
+              e.target.style.boxShadow = "none";
+            }}
+          >
+            <option value="">Select Temple Group</option>
+            {groups.map((group) => (
+              <option key={group.id} value={group.id}>
+                {group.name}
+              </option>
+            ))}
+          </select>
         </FormGroup>
         <FormGroup>
           <Label>Temple Sub Group</Label>
-          <Input
-            value={
-              subGroups.find(
-                (sg) => sg.id === (templeForm.temple_sub_group_id || 0)
-              )?.name ||
-              templeForm.temple_sub_group ||
-              "Not assigned"
-            }
-            readOnly
-          />
+          <select
+            name="temple_sub_group_id"
+            value={templeForm.temple_sub_group_id || ""}
+            onChange={handleTempleChange}
+            style={{
+              padding: "0.75rem 1rem",
+              border: "2px solid #fed7aa",
+              borderRadius: "0.5rem",
+              fontSize: "1rem",
+              transition: "all 0.2s",
+              backgroundColor: "#fff",
+              cursor: "pointer",
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = "#ea580c";
+              e.target.style.boxShadow = "0 0 0 3px rgba(234, 88, 12, 0.1)";
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = "#fed7aa";
+              e.target.style.boxShadow = "none";
+            }}
+          >
+            <option value="">Select Temple Sub Group</option>
+            {subGroups.map((subGroup) => (
+              <option key={subGroup.id} value={subGroup.id}>
+                {subGroup.name}
+              </option>
+            ))}
+          </select>
         </FormGroup>
         <FormGroup className="full">
           <Label>Remarks</Label>
@@ -1335,13 +1392,12 @@ function ManageTemple(props) {
             name="remarks"
             value={templeForm.remarks}
             onChange={handleTempleChange}
-            placeholder="Any additional information about the temple..."
+            placeholder="Renovated recently"
           />
         </FormGroup>
       </Grid>
     </motion.div>
   );
-
   const renderTimingsStep = () => (
     <motion.div variants={slideIn} initial="hidden" animate="visible">
       <div style={{ marginBottom: "2rem" }}>
@@ -1502,8 +1558,8 @@ function ManageTemple(props) {
           Documents Required
         </Label>
         <p style={{ color: theme.colors.gray600, marginBottom: "1.5rem" }}>
-          Specify which documents are required from devotees for temple services
-          and bookings.
+          Please specify which documents are required for seller registration
+          under your temple.
         </p>
       </div>
 

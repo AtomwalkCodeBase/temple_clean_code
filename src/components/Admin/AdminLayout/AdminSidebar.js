@@ -306,6 +306,12 @@ const AdminSidebar = ({
                 badge: null,
               },
               {
+                path: "/add-groups",
+                icon: FaPlusSquare,
+                label: "Add Groups",
+                badge: null,
+              },
+              {
                 path: "/temple-list",
                 icon: MdTempleHindu,
                 label: "All Temples",

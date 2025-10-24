@@ -404,7 +404,7 @@ const Navbar = () => {
               transition={{ duration: 0.5, delay: 0.4 }}
             >
               <NavLink
-                to="#"
+                to="/customer-login"
                 className={
                   loginOptions.some(
                     (option) => location.pathname === option.path
@@ -412,45 +412,10 @@ const Navbar = () => {
                     ? "active"
                     : ""
                 }
-                onClick={(e) => {
-                  e.preventDefault();
-                  setLoginDropdownOpen(!loginDropdownOpen);
-                }}
               >
                 Login
               </NavLink>
             </motion.div>
-
-            <AnimatePresence>
-              {loginDropdownOpen && (
-                <LoginDropdown
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {loginOptions.map((option, index) => (
-                    <motion.div
-                      key={option.path}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.2, delay: index * 0.1 }}
-                    >
-                      <DropdownItem
-                        to={option.path}
-                        className={
-                          location.pathname === option.path ? "active" : ""
-                        }
-                        onClick={() => setLoginDropdownOpen(false)}
-                      >
-                        {option.icon}
-                        {option.label}
-                      </DropdownItem>
-                    </motion.div>
-                  ))}
-                </LoginDropdown>
-              )}
-            </AnimatePresence>
           </LoginContainer>
         </NavLinks>
 

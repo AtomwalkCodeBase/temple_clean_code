@@ -289,12 +289,43 @@ const LoadingSpinner = styled.div`
     }
   }
 `;
+const TabContainer = styled.div`
+  display: flex;
+  background: rgba(248, 250, 252, 0.8);
+  border-radius: 1rem;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+`;
+
+const Tab = styled(motion.button)`
+  flex: 1;
+  padding: 5px 2px;
+  border: 2px solid rgba(212, 175, 55, 0.2);
+  background: ${(props) =>
+    props.active ? "linear-gradient(135deg, #d4af37, #c44536)" : "transparent"};
+  color: ${(props) => (props.active ? "white" : "#666")};
+  font-weight: 600;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+
+  &:hover {
+    background: ${(props) =>
+      props.active
+        ? "linear-gradient(135deg, #d4af37, #c44536)"
+        : "rgba(212, 175, 55, 0.1)"};
+  }
+`;
 
 const CustomerLogin = () => {
   const [credentials, setCredentials] = useState({
     mobile_number: "",
     pin: "",
   });
+
   const [showPin, setShowPin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -339,13 +370,33 @@ const CustomerLogin = () => {
       setLoading(false);
     }
   };
-
+  const navigatetopage = (path) => {
+    navigate(path);
+  };
+  console.log(pathname, "pathname");
   return (
     <LoginContainer>
       <LoginCard>
+        <TabContainer>
+          <Tab
+            onClick={() =>
+              navigatetopage(
+                pathname == "/seller-login"
+                  ? "/customer-login"
+                  : "/seller-login"
+              )
+            }
+          >
+            {pathname == "/seller-login"
+              ? "👤 Login as Customer"
+              : "👥 Login as Seller"}
+          </Tab>
+          <Tab onClick={() => navigatetopage("/login")}>🙏 Login as Admin</Tab>
+        </TabContainer>
+        <Logo></Logo>
         <Logo>
           <div className="title">Welcome Back</div>
-          <div className="subtitle">Continue your spiritual journey</div>
+          {/* <div className="subtitle">Continue your spiritual journey</div> */}
         </Logo>
 
         <Form onSubmit={handleSubmit}>

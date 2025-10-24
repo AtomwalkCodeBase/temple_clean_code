@@ -37,6 +37,7 @@ import BookSeva from "./components/Customer/BookSeva";
 import TempleDetails from "./components/HomePage/TempleDetails";
 import ManageTemple from "./components/Admin/ManageTemple";
 import SellerRegistration from "./components/Seller/SellerRegistartion";
+import TempleGroup from "./components/Admin/TempleGroup";
 
 function AppContent() {
   const location = useLocation();
@@ -52,6 +53,7 @@ function AppContent() {
     "/pricing-rules",
     "/templeadmin",
     "/addtemple",
+    "/add-groups",
   ].some((route) => location.pathname.startsWith(route));
 
   const isCustomerRoute = [
@@ -91,6 +93,14 @@ function AppContent() {
           element={
             <AdminLayout>
               <ManageTemple />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/add-groups"
+          element={
+            <AdminLayout>
+              <TempleGroup />
             </AdminLayout>
           }
         />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { motion } from "framer-motion";
@@ -12,9 +12,9 @@ import CustomerLayout from "../../components/Customer/CustomerLayout";
 import { gettemplist } from "../../services/productServices";
 
 const TemplesContainer = styled.div`
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  /* max-width: 1200px; */
+  /* margin: 0 auto; */
+  /* padding: 0 1rem; */
 `;
 
 const HeaderSection = styled(motion.div)`
@@ -436,6 +436,256 @@ const EmptyState = styled.div`
   }
 `;
 
+export const LocationScrollContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-top: 2rem;
+  overflow: hidden;
+  max-width: 1150px;
+`;
+
+export const LocationScroll = styled.div`
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 1rem 2rem;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+export const StateCard = styled.div`
+  flex: 0 0 auto;
+  width: 120px;
+  height: 140px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+  border: 0.3px solid #fad0beff;
+
+  .image-container {
+    width: 100%;
+    height: 85px;
+    overflow: hidden;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.5rem;
+    color: #333;
+  }
+
+  &:hover img {
+    transform: scale(1.05);
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  &.active {
+    border-color: #e45417ff;
+    box-shadow: 0 0 10px rgba(162, 100, 75, 0.3);
+  }
+`;
+
+export const ScrollButton = styled.button`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: none;
+  font-size: 2rem;
+  color: #764ba2;
+  cursor: pointer;
+  z-index: 2;
+  padding: 0.2rem 0.6rem;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    background: #f8f8f8;
+  }
+
+  &:first-of-type {
+    left: 0.4rem;
+  }
+
+  &:last-of-type {
+    right: 0.4rem;
+  }
+`;
+const indianStates = [
+  {
+    name: "Andhra Pradesh",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Tirumala_090615.jpg/330px-Tirumala_090615.jpg",
+  },
+  {
+    name: "Arunachal Pradesh",
+    image:
+      "https://s7ap1.scene7.com/is/image/incredibleindia/giant-budhha-statue-tawang-arunachal-pradesh-2-attr-hero?qlt=82&ts=1742178821432",
+  },
+  {
+    name: "Assam",
+    image:
+      "https://www.tusktravel.com/blog/wp-content/uploads/2023/05/Places-to-Visit-in-Assam-in-June.jpg",
+  },
+  {
+    name: "Bihar",
+    image: "https://www.capertravelindia.com/images/bihar1.jpg",
+  },
+  {
+    name: "Chhattisgarh",
+    image:
+      "https://stylesatlife.com/wp-content/uploads/2018/01/chhattisgarh-festivals-list.jpg",
+  },
+  {
+    name: "Goa",
+    image:
+      "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/3e/36/95/baga-sea-beach.jpg?w=500&h=500&s=1",
+  },
+  {
+    name: "Gujarat",
+    image:
+      "https://imgcdn.flamingotravels.co.in/Images/Country/GujaratTourism.jpg",
+  },
+  {
+    name: "Haryana",
+    image:
+      "https://haryanatourism.gov.in/wp-content/uploads/2024/08/OnStage_067-scaled.jpg",
+  },
+  {
+    name: "Himachal Pradesh",
+    image:
+      "https://cdn.britannica.com/12/1612-050-8A4D277F/Settlement-Kullu-Valley-India-Himachal-Pradesh.jpg",
+  },
+  {
+    name: "Jharkhand",
+    image:
+      "https://indiano.travel/wp-content/uploads/2022/03/Patratu-valley-located-in-Ranchi-Jharkhand..jpg",
+  },
+  {
+    name: "Karnataka",
+    image:
+      "https://www.tripsavvy.com/thmb/2Te8NxqI0AHakN-bXkmn2HqN7eI=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc()/GettyImages-157455052-56a87ea73df78cf7729e572c.jpg",
+  },
+  {
+    name: "Kerala",
+    image:
+      "https://images.nativeplanet.com/img/2014/04/24-1398325628-houseboat.jpg",
+  },
+  {
+    name: "Madhya Pradesh",
+    image:
+      "https://gandhisagarforestretreat.com/wp-content/uploads/2024/06/BLOG-head-title-1-1.webp",
+  },
+  {
+    name: "Maharashtra",
+    image:
+      "https://www.fabhotels.com/blog/wp-content/uploads/2019/05/Gateway-Of-India_600.jpg",
+  },
+  {
+    name: "Manipur",
+    image: "https://www.holidify.com/images/bgImages/MANIPUR.jpg",
+  },
+  {
+    name: "Meghalaya",
+    image:
+      "https://res.cloudinary.com/ddjuftfy2/image/upload/f_webp,c_fill,q_auto/memphis/xlarge/154154142_3.jpg",
+  },
+  {
+    name: "Mizoram",
+    image: "https://ichef.bbci.co.uk/images/ic/480xn/p091swjv.jpg.webp",
+  },
+  {
+    name: "Nagaland",
+    image:
+      "https://m.economictimes.com/thumb/msid-104419864,width-1200,height-1200,resizemode-4,imgsize-1785990/nagaland.jpg",
+  },
+  {
+    name: "Odisha",
+    image:
+      "https://s7ap1.scene7.com/is/image/incredibleindia/1-sri-jagannath-temple-puri-odisha-2-city-hero?qlt=82&ts=1726663809131",
+  },
+  {
+    name: "Punjab",
+    image:
+      "https://shop.gaatha.com/image/cache/catalog/1-Category%20images/blog/jan-25/famous-crafts-of-punjab-600x315h.jpg",
+  },
+  {
+    name: "Rajasthan",
+    image:
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Thar_Khuri.jpg/330px-Thar_Khuri.jpg",
+  },
+  {
+    name: "Sikkim",
+    image:
+      "https://nomadicweekends.com/blog/wp-content/uploads/2019/03/Lachung-City-In-between-the-Mountain-Ranges.jpg",
+  },
+  {
+    name: "Tamil Nadu",
+    image:
+      "https://assets.cntraveller.in/photos/60c07ef28fc45ba3917d99f0/16:9/w_1024%2Cc_limit/chennai-tamil-nadu-lockdown-1366x768.jpg",
+  },
+  {
+    name: "Telangana",
+    image:
+      "https://s7ap1.scene7.com/is/image/incredibleindia/2-charminar-hyderabad-telangana-state-hero?qlt=82&ts=1726653487606",
+  },
+  {
+    name: "Tripura",
+    image:
+      "https://www.incredibleindia.gov.in/content/dam/incredible-india/images/trips/tripura/7-day-trip-tripura-a-week-in-the-crown-of-the-east/1-ujjayanta-palace-tripura-tri-iter-day1.jpg",
+  },
+  {
+    name: "Uttar Pradesh",
+    image:
+      "https://s7ap1.scene7.com/is/image/incredibleindia/dashashwamedh-ghat-varanasi-uttar-pradesh-city-hero?qlt=82&ts=1726649273578",
+  },
+  {
+    name: "Uttarakhand",
+    image:
+      "https://www.tusktravel.com/blog/wp-content/uploads/2023/02/Mussoorie-Uttarakhand4.jpg",
+  },
+  {
+    name: "West Bengal",
+    image: "https://www.trawell.in/images/pics/west-bengal_all_main.jpg",
+  },
+  {
+    name: "Delhi",
+    image:
+      "https://cdn.britannica.com/37/189837-050-F0AF383E/New-Delhi-India-War-Memorial-arch-Sir.jpg",
+  },
+  {
+    name: "Jammu and Kashmir",
+    image:
+      "https://www.easeindiatrip.com/blog/wp-content/uploads/2025/03/Jammu-Kashmir-in-May-05.jpg",
+  },
+  {
+    name: "Ladakh",
+    image:
+      "https://grandholidayparkvacation.com/uploads/62208357b184e_1646297943.jpg",
+  },
+];
+
 const CustomerTemples = () => {
   const [temples, setTemples] = useState([]);
   const [filteredTemples, setFilteredTemples] = useState([]);
@@ -449,6 +699,16 @@ const CustomerTemples = () => {
   const [carouselIndices, setCarouselIndices] = useState({});
   const navigate = useNavigate();
   const { customerData } = useCustomerAuth();
+  const scrollRef = useRef(null);
+
+  const scrollStates = (direction) => {
+    if (!scrollRef.current) return;
+    const scrollAmount = 300;
+    scrollRef.current.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
 
   useEffect(() => {
     loadTemples();
@@ -649,6 +909,29 @@ const CustomerTemples = () => {
               </select>
             </div>
           </div>
+          {/* Horizontal Scroll of Indian States */}
+          <LocationScrollContainer>
+            <ScrollButton onClick={() => scrollStates("left")}>
+              &#8249;
+            </ScrollButton>
+            <LocationScroll ref={scrollRef}>
+              {indianStates.map((state, idx) => (
+                <StateCard
+                  key={idx}
+                  className={filters.location === state.name ? "active" : ""}
+                  onClick={() => handleFilterChange("location", state.name)}
+                >
+                  <div className="image-container">
+                    <img src={state.image} alt={state.name} />
+                  </div>
+                  <div className="name">{state.name}</div>
+                </StateCard>
+              ))}
+            </LocationScroll>
+            <ScrollButton onClick={() => scrollStates("right")}>
+              &#8250;
+            </ScrollButton>
+          </LocationScrollContainer>
         </FilterSection>
 
         {filteredTemples.length === 0 ? (

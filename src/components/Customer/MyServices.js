@@ -7,11 +7,22 @@ import { motion } from "framer-motion";
 import FilterBar from "./FilterBar";
 import { getTempleServicesList } from "../../services/templeServices";
 
+// Add these icon imports (you can use react-icons or custom SVGs)
+import {
+  FaAllergies,
+  FaBuilding,
+  FaCalendarAlt,
+  FaFireAlt,
+  FaHotel,
+  FaUmbrellaBeach,
+} from "react-icons/fa";
+
 const ServicesContainer = styled.div`
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
 `;
+
 const HeaderSection = styled(motion.div)`
   background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
   border-radius: 1.5rem;
@@ -62,8 +73,124 @@ const HeaderSection = styled(motion.div)`
     }
   }
 `;
+
+// Updated Category Cards Section
+const CategoryCardsContainer = styled.div`
+  display: flex;
+  gap: 20px;
+  margin: 30px 0;
+  padding: 0 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+`;
+
+const CategoryCard = styled(motion.div)`
+  background: ${(props) =>
+    props.active
+      ? "linear-gradient(135deg, #d4af37, #c44536)"
+      : "linear-gradient(135deg, #ffffff, #f8f9fa)"};
+  color: ${(props) => (props.active ? "white" : "#333")};
+  padding: 25px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  border: 2px solid ${(props) => (props.active ? "transparent" : "#e9ecef")};
+  font-weight: 600;
+  text-align: center;
+  min-width: 140px;
+  flex: 1;
+  max-width: 160px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: ${(props) =>
+    props.active
+      ? "0 10px 30px rgba(212, 175, 55, 0.3)"
+      : "0 4px 15px rgba(0,0,0,0.08)"};
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: ${(props) =>
+      props.active
+        ? "linear-gradient(90deg, #d4af37, #c44536)"
+        : "transparent"};
+  }
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: ${(props) =>
+      props.active
+        ? "0 15px 40px rgba(212, 175, 55, 0.4)"
+        : "0 8px 25px rgba(0,0,0,0.15)"};
+    border-color: ${(props) => (props.active ? "transparent" : "#d4af37")};
+  }
+
+  .category-icon {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    display: block;
+    color: ${(props) => (props.active ? "white" : "#d4af37")};
+    filter: ${(props) => (props.active ? "brightness(0) invert(1)" : "none")};
+    transition: all 0.3s ease;
+  }
+
+  .category-name {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .category-count {
+    font-size: 0.85rem;
+    opacity: ${(props) => (props.active ? 0.9 : 0.7)};
+    font-weight: 500;
+    background: ${(props) =>
+      props.active ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.05)"};
+    padding: 4px 8px;
+    border-radius: 12px;
+    display: inline-block;
+  }
+
+  @media (max-width: 768px) {
+    min-width: 110px;
+    max-width: 120px;
+    padding: 20px 15px;
+
+    .category-icon {
+      font-size: 2rem;
+    }
+
+    .category-name {
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    min-width: 90px;
+    max-width: 100px;
+    padding: 15px 10px;
+
+    .category-icon {
+      font-size: 1.8rem;
+    }
+
+    .category-name {
+      font-size: 0.8rem;
+    }
+
+    .category-count {
+      font-size: 0.75rem;
+    }
+  }
+`;
+
 const ServiceGrid = styled.div`
-  /* display: grid; */
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 25px;
   margin-top: 30px;
@@ -90,7 +217,7 @@ const NoServicesMessage = styled.div`
   font-size: 1.1rem;
   grid-column: 1 / -1;
 `;
-// Add these styled components for pagination (or use your existing styling approach)
+
 const PaginationContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -114,15 +241,35 @@ const PaginationButton = styled.button`
   }
 `;
 
+// Helper function to normalize category names
+const normalizeCategory = (category) => {
+  if (!category) return "";
+  return category.toLowerCase().trim();
+};
+
+// Category configuration with icons
+const categoryConfig = {
+  all: { icon: FaAllergies, label: "All Services" },
+  hall: { icon: FaBuilding, label: "Hall" },
+  event: { icon: FaCalendarAlt, label: "Event" },
+  puja: { icon: FaFireAlt, label: "Puja" },
+  accommodation: { icon: FaHotel, label: "Accommodation" },
+  // Add more categories as needed
+};
+
 const MyServices = ({ servicesdata }) => {
   const [services, setServices] = useState([]);
   const [filteredServices, setFilteredServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(9); // You can adjust this number
+  const [itemsPerPage, setItemsPerPage] = useState(9);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [categories, setCategories] = useState([]);
+
   const navigate = useNavigate();
   const routerLocation = useLocation();
+
   useEffect(() => {
     fetchServices();
   }, []);
@@ -136,8 +283,37 @@ const MyServices = ({ servicesdata }) => {
         category: urlStatus,
       };
       handleFilter(filters);
+      setSelectedCategory(urlStatus);
     }
   }, [routerLocation.search, services]);
+
+  // Extract unique categories from services and count items
+  useEffect(() => {
+    if (services.length > 0) {
+      const categoryCounts = { all: services.length };
+
+      services.forEach((service) => {
+        const category = normalizeCategory(service.service_type);
+        if (category) {
+          categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+        }
+      });
+
+      // Create categories array with counts
+      const availableCategories = Object.keys(categoryConfig).filter(
+        (cat) => cat === "all" || categoryCounts[cat] > 0
+      );
+
+      const formattedCategories = availableCategories.map((cat) => ({
+        value: cat,
+        label: categoryConfig[cat].label,
+        icon: categoryConfig[cat].icon,
+        count: categoryCounts[cat] || 0,
+      }));
+
+      setCategories(formattedCategories);
+    }
+  }, [services]);
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredServices.length / itemsPerPage);
@@ -150,8 +326,12 @@ const MyServices = ({ servicesdata }) => {
 
   const fetchServices = async () => {
     if (servicesdata && servicesdata.length > 0) {
-      setServices(servicesdata);
-      setFilteredServices(servicesdata);
+      const normalizedServices = servicesdata.map((service) => ({
+        ...service,
+        service_type: normalizeCategory(service.service_type),
+      }));
+      setServices(normalizedServices);
+      setFilteredServices(normalizedServices);
       setLoading(false);
     } else {
       try {
@@ -160,7 +340,15 @@ const MyServices = ({ servicesdata }) => {
           window.location.hostname === "localhost" ||
           window.location.hostname === "127.0.0.1";
         const serviceList = await getTempleServicesList();
-        const filteredservices = serviceList?.filter((service) =>
+
+        // Normalize category names in services
+        const normalizedServices =
+          serviceList?.map((service) => ({
+            ...service,
+            service_type: normalizeCategory(service.service_type),
+          })) || [];
+
+        const filteredservices = normalizedServices?.filter((service) =>
           isLocal
             ? service.is_live_temple === false
             : service.is_live_temple === true
@@ -175,8 +363,16 @@ const MyServices = ({ servicesdata }) => {
     }
   };
 
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
+    const filters = {
+      category: category === "all" ? "" : category,
+      search: "",
+    };
+    handleFilter(filters);
+  };
+
   const handleFilter = (filters) => {
-    console.log(filters, "filters");
     let filtered = services;
 
     if (filters.search) {
@@ -192,7 +388,8 @@ const MyServices = ({ servicesdata }) => {
 
     if (filters.category && filters.category !== "all") {
       filtered = filtered.filter(
-        (service) => service.service_type === filters.category
+        (service) =>
+          service.service_type === normalizeCategory(filters.category)
       );
     }
 
@@ -207,7 +404,7 @@ const MyServices = ({ servicesdata }) => {
     }
 
     setFilteredServices(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   };
 
   const handleViewDetails = (serviceId) => {
@@ -217,13 +414,12 @@ const MyServices = ({ servicesdata }) => {
   // Pagination handlers
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    // Scroll to top when page changes
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleItemsPerPageChange = (value) => {
     setItemsPerPage(Number(value));
-    setCurrentPage(1); // Reset to first page when items per page changes
+    setCurrentPage(1);
   };
 
   if (loading)
@@ -254,10 +450,32 @@ const MyServices = ({ servicesdata }) => {
 
       <FilterBar
         onFilter={handleFilter}
-        serviceTypes={[
-          ...new Set(services.map((service) => service.service_type)),
-        ]}
+        serviceTypes={categories.map((cat) => cat.value)}
       />
+
+      {/* Beautiful Category Cards Section */}
+      {categories.length > 0 && (
+        <CategoryCardsContainer>
+          {categories.map((category) => {
+            const IconComponent = category.icon;
+            return (
+              <CategoryCard
+                key={category.value}
+                active={selectedCategory === category.value}
+                onClick={() => handleCategoryClick(category.value)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <IconComponent className="category-icon" />
+                <div className="category-name">{category.label}</div>
+                <div className="category-count">
+                  {category.count} {category.count === 1 ? "item" : "items"}
+                </div>
+              </CategoryCard>
+            );
+          })}
+        </CategoryCardsContainer>
+      )}
 
       {/* Items per page selector */}
       <div
