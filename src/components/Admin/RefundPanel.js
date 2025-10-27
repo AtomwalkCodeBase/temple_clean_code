@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-const StyledAdvancePanel = styled.div`
+const StyledRefundPanel = styled.div`
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
   /* Loading State */
-  .advance-panel-loading {
+  .refund-panel-loading {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -102,7 +102,7 @@ const StyledAdvancePanel = styled.div`
   }
 
   /* View Mode */
-  .advance-panel-view {
+  .refund-panel-view {
     padding: 0;
   }
 
@@ -114,6 +114,7 @@ const StyledAdvancePanel = styled.div`
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 20px 40px rgba(0, 0, 0, 0.03);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 0;
   }
 
   .policy-card:hover {
@@ -128,26 +129,6 @@ const StyledAdvancePanel = styled.div`
     padding: 16px 16px 12px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.04);
     background: rgba(255, 255, 255, 0.6);
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .meta-chips {
-    display: flex;
-    gap: 8px;
-  }
-  .meta-chip {
-    padding: 6px 10px;
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #374151;
-    letter-spacing: -0.2px;
   }
 
   .policy-title {
@@ -199,9 +180,10 @@ const StyledAdvancePanel = styled.div`
     margin-right: 8px;
   }
 
-  .policy-content {
+  .policy-details {
     padding: 16px;
   }
+
   .content-chips {
     display: flex;
     gap: 8px;
@@ -222,6 +204,13 @@ const StyledAdvancePanel = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .policy-name-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
   }
 
   .policy-name {
@@ -260,8 +249,9 @@ const StyledAdvancePanel = styled.div`
   }
 
   /* Edit Mode */
-  .advance-panel-edit {
+  .refund-panel-edit {
     padding: 0;
+    display: block;
   }
 
   .edit-header {
@@ -300,6 +290,10 @@ const StyledAdvancePanel = styled.div`
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.5px;
+  }
+
+  .policy-selection-container {
+    display: block;
   }
 
   .policy-selection {
@@ -367,6 +361,13 @@ const StyledAdvancePanel = styled.div`
     color: rgba(60, 60, 67, 1);
     font-size: 14px;
     letter-spacing: -0.2px;
+    margin: 0 0 2px 0;
+  }
+
+  .option-specs {
+    font-size: 12px;
+    color: rgba(60, 60, 67, 0.6);
+    letter-spacing: -0.24px;
     margin: 0;
   }
 
@@ -388,6 +389,7 @@ const StyledAdvancePanel = styled.div`
     gap: 12px;
     padding-top: 24px;
     border-top: 1px solid rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.8);
   }
 
   .cancel-button {
@@ -443,7 +445,7 @@ const StyledAdvancePanel = styled.div`
     transition: all 0.1s;
   }
 
-  /* Force light theme - remove dark mode auto-detection */
+  /* Force light theme */
 
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
@@ -453,47 +455,192 @@ const StyledAdvancePanel = styled.div`
       transition-duration: 0.01ms !important;
     }
   }
+  .policy-details {
+    .refund-rules-section {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .rules-title {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .refund-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .timeline-marker {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .timeline-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #0056d6;
+      flex-shrink: 0;
+    }
+
+    .timeline-line {
+      width: 1px;
+      flex: 1;
+      background: #d1d5db;
+      margin-top: 0.25rem;
+    }
+
+    .timeline-content {
+      flex: 1;
+      padding-bottom: 0.75rem;
+    }
+
+    .rule-main {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .rule-percent {
+      font-weight: 600;
+      color: #059669;
+      font-size: 0.9rem;
+    }
+
+    .rule-days {
+      color: #6b7280;
+      font-size: 0.8rem;
+    }
+
+    .rule-notes {
+      color: #6b7280;
+      font-size: 0.8rem;
+      font-style: italic;
+    }
+
+    .default-badge {
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+  }
+
+  .policy-option {
+    .refund-rules-preview {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      margin-top: 0.5rem;
+    }
+
+    .preview-rule {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+    }
+
+    .preview-percent {
+      font-weight: 600;
+      color: #059669;
+    }
+
+    .preview-condition {
+      color: #6b7280;
+    }
+
+    .preview-more {
+      color: #9ca3af;
+      font-size: 0.75rem;
+      font-style: italic;
+    }
+
+    .option-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .option-rules-count {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-left: 3px;
+    }
+  }
 `;
 
-const AdvancePanel = ({
+const RefundPanel = ({
   hall,
-  advancePolicies = [],
-  selectedAdvPolicyId,
+  refundPolicies = [],
+  selectedRefundPolicyId,
   onSelect,
   onSave,
   successMessage,
   loading,
 }) => {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [tempSelectedPolicyId, setTempSelectedPolicyId] =
-    useState(selectedAdvPolicyId);
+  const [tempSelectedPolicyId, setTempSelectedPolicyId] = useState(
+    selectedRefundPolicyId
+  );
+  console.log(refundPolicies, "refundPolicies");
 
   // Reset edit mode when hall changes
   useEffect(() => {
     setIsEditMode(false);
-    setTempSelectedPolicyId(selectedAdvPolicyId);
-  }, [hall?.service_id, selectedAdvPolicyId]);
+    setTempSelectedPolicyId(selectedRefundPolicyId);
+  }, [hall?.service_id, selectedRefundPolicyId]);
 
   // Get current policy (selected only; no cross-temple defaults)
   const getCurrentPolicy = () => {
-    if (selectedAdvPolicyId) {
-      return advancePolicies.find(
-        (p) => Number(p.id) === Number(selectedAdvPolicyId)
+    if (selectedRefundPolicyId) {
+      return refundPolicies.find(
+        (p) => Number(p.id) === Number(selectedRefundPolicyId)
       );
     }
     return undefined;
   };
 
+  // Helper function to format refund rules for display
+  const formatRefundRules = (policy) => {
+    if (!policy?.refund_rules?.length) return [];
+
+    // Sort rules by days before (descending) so most generous refund comes first
+    return [...policy.refund_rules].sort((a, b) => {
+      const daysA = a.min_days_before || 0;
+      const daysB = b.min_days_before || 0;
+      return daysB - daysA;
+    });
+  };
+
   const currentPolicy = getCurrentPolicy();
+  const currentPolicyRules = currentPolicy
+    ? formatRefundRules(currentPolicy)
+    : [];
 
   const handleEditClick = () => {
     setIsEditMode(true);
-    setTempSelectedPolicyId(selectedAdvPolicyId);
+    setTempSelectedPolicyId(selectedRefundPolicyId);
   };
 
   const handleCancel = () => {
     setIsEditMode(false);
-    setTempSelectedPolicyId(selectedAdvPolicyId);
+    setTempSelectedPolicyId(selectedRefundPolicyId);
   };
 
   const handleSave = () => {
@@ -511,34 +658,34 @@ const AdvancePanel = ({
 
   if (loading) {
     return (
-      <StyledAdvancePanel>
-        <div className="advance-panel-loading">
+      <StyledRefundPanel>
+        <div className="refund-panel-loading">
           <div className="loading-spinner"></div>
-          <span className="loading-text">Loading advance policies...</span>
+          <span className="loading-text">Loading refund policies...</span>
         </div>
-      </StyledAdvancePanel>
+      </StyledRefundPanel>
     );
   }
 
-  if (advancePolicies.length === 0) {
+  if (refundPolicies.length === 0) {
     return (
-      <StyledAdvancePanel>
+      <StyledRefundPanel>
         <div className="empty-state">
-          <div className="empty-icon">📋</div>
-          <h3 className="empty-title">No Advance Policies</h3>
+          <div className="empty-icon">💸</div>
+          <h3 className="empty-title">No Refund Policies</h3>
           <p className="empty-description">
-            Create policies in the Advance Policies section to get started
+            Create policies in the Refund Policies section to get started
           </p>
         </div>
-      </StyledAdvancePanel>
+      </StyledRefundPanel>
     );
   }
 
   // View Mode
   if (!isEditMode) {
     return (
-      <StyledAdvancePanel>
-        <div className="advance-panel-view">
+      <StyledRefundPanel>
+        <div className="refund-panel-view">
           {successMessage && (
             <div className="success-message">
               <svg
@@ -560,60 +707,93 @@ const AdvancePanel = ({
           <div className="policy-card">
             <div className="policy-header">
               <div className="policy-title-section">
-                <h2 className="policy-title">
-                  Advance Policy for {hall?.name}
-                </h2>
+                <h2 className="policy-title">Refund Policy for {hall?.name}</h2>
                 <p className="policy-subtitle">
                   {currentPolicy ? "Current Policy" : "No policy selected"}
                 </p>
               </div>
-              <div className="header-right">
-                <button className="edit-button" onClick={handleEditClick}>
-                  <svg
-                    className="edit-icon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                  </svg>
-                  {currentPolicy ? "Edit Policy" : "Add Policy"}
-                </button>
-              </div>
+              <button className="edit-button" onClick={handleEditClick}>
+                <svg
+                  className="edit-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                </svg>
+                {currentPolicy ? "Edit Policy" : "Add Policy"}
+              </button>
             </div>
+
             {currentPolicy ? (
-              <div className="policy-content">
+              <div className="policy-details">
                 <div className="policy-name-section">
-                  <h3 className="policy-name">{currentPolicy.name}</h3>
-                  <div className="content-chips">
-                    <span className="content-chip">{`Advance: ${
-                      Number.isFinite(Number(currentPolicy?.percent))
-                        ? Math.round(Number(currentPolicy.percent))
-                        : 0
-                    }%`}</span>
-                    <span className="content-chip">{`Min Amount: ₹${Number(
-                      currentPolicy.min_amount ?? 0
-                    ).toFixed(2)}`}</span>
+                  <div className="policy-name-container">
+                    <h3 className="policy-name">{currentPolicy.name}</h3>
+                    {currentPolicy.is_default && (
+                      <span className="default-badge">Default Policy</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Refund Rules Timeline */}
+                <div className="refund-rules-section">
+                  <h4 className="rules-title">Refund Rules:</h4>
+                  <div className="refund-timeline">
+                    {currentPolicyRules.map((rule, index) => (
+                      <div key={rule.id} className="timeline-item">
+                        <div className="timeline-marker">
+                          <div className="timeline-dot"></div>
+                          {index < currentPolicyRules.length - 1 && (
+                            <div className="timeline-line"></div>
+                          )}
+                        </div>
+                        <div className="timeline-content">
+                          <div className="rule-main">
+                            <span className="rule-percent">
+                              {Math.round(Number(rule.refund_percent || 0))}%
+                              Refund
+                            </span>
+                            <span className="rule-days">
+                              {rule.min_days_before === null ||
+                              rule.min_days_before === undefined
+                                ? "Any time"
+                                : rule.min_days_before === 0
+                                ? "Same day cancellation"
+                                : `${rule.min_days_before} days before service`}
+                            </span>
+                          </div>
+                          {rule.notes && (
+                            <div className="rule-notes">{rule.notes}</div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="policy-content">
+              <div className="policy-details">
                 <div className="policy-name-section">
-                  <h3 className="policy-name">No Advance Policy defined</h3>
+                  <div className="policy-name-container">
+                    <h3 className="policy-name">No Refund Policy defined</h3>
+                    <p className="no-policy-description">
+                      Select a policy to define refund rules for this hall
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
           </div>
         </div>
-      </StyledAdvancePanel>
+      </StyledRefundPanel>
     );
   }
 
   // Edit Mode
   return (
-    <StyledAdvancePanel>
-      <div className="advance-panel-edit">
+    <StyledRefundPanel>
+      <div className="refund-panel-edit">
         {successMessage && (
           <div className="success-message">
             <svg
@@ -636,75 +816,100 @@ const AdvancePanel = ({
           <div>
             <h2 className="edit-title">Select Policy</h2>
             <p className="edit-subtitle">
-              Choose an advance policy for {hall?.name}
+              Choose a refund policy for {hall?.name}
             </p>
           </div>
 
           <div className="edit-mode-badge">Edit Mode</div>
         </div>
 
-        <div className="policy-selection">
-          <div className="policy-options">
-            {advancePolicies.map((p) => (
-              <label
-                key={p.id}
-                className={`policy-option ${
-                  Number(tempSelectedPolicyId) === Number(p.id)
-                    ? "selected"
-                    : ""
-                }`}
-              >
-                <div className="option-content">
-                  <input
-                    type="radio"
-                    name={`adv_policy_${hall?.service_id}`}
-                    value={String(p.id)}
-                    checked={Number(tempSelectedPolicyId) === Number(p.id)}
-                    onChange={() => handlePolicySelect(Number(p.id))}
-                    className="policy-radio"
-                  />
-                  <div className="option-details">
-                    <div className="option-name">{p.name}</div>
-                    <div className="option-meta">
-                      <span className="meta-chip">{`Advance: ${
-                        Number.isFinite(Number(p?.percent))
-                          ? Math.round(Number(p.percent))
-                          : 0
-                      }%`}</span>
-                      <span className="meta-chip">{`Min Amount: ₹${Number(
-                        p.min_amount ?? 0
-                      ).toFixed(2)}`}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="option-badges">
-                  {Number(tempSelectedPolicyId) === Number(p.id) && (
-                    <span className="badge badge-selected">Selected</span>
-                  )}
-                  {p.is_default && (
-                    <span className="badge badge-default">Default</span>
-                  )}
-                </div>
-              </label>
-            ))}
-          </div>
+        <div className="policy-selection-container">
+          <div className="policy-selection">
+            <div className="policy-options">
+              {refundPolicies.map((policy) => {
+                const policyRules = formatRefundRules(policy);
+                return (
+                  <label
+                    key={policy.id}
+                    className={`policy-option ${
+                      Number(tempSelectedPolicyId) === Number(policy.id)
+                        ? "selected"
+                        : ""
+                    }`}
+                  >
+                    <div className="option-content">
+                      <input
+                        type="radio"
+                        name={`refund_policy_${hall?.service_id}`}
+                        value={String(policy.id)}
+                        checked={
+                          Number(tempSelectedPolicyId) === Number(policy.id)
+                        }
+                        onChange={() => handlePolicySelect(Number(policy.id))}
+                        className="policy-radio"
+                      />
+                      <div className="option-details">
+                        <div className="option-header">
+                          <div className="option-name">{policy.name}</div>
+                          <div className="option-rules-count">
+                            {policyRules.length} rule
+                            {policyRules.length !== 1 ? "s" : ""}
+                          </div>
+                        </div>
 
-          <div className="action-buttons">
-            <button className="cancel-button" onClick={handleCancel}>
-              Cancel
-            </button>
-            <button
-              className="save-button"
-              onClick={handleSave}
-              disabled={!tempSelectedPolicyId}
-            >
-              Save Changes
-            </button>
+                        {/* Refund Rules Preview */}
+                        <div className="refund-rules-preview">
+                          {policyRules.slice(0, 2).map((rule) => (
+                            <div key={rule.id} className="preview-rule">
+                              <span className="preview-percent">
+                                {Math.round(Number(rule.refund_percent || 0))}%
+                              </span>
+                              <span className="preview-condition">
+                                {rule.min_days_before === null ||
+                                rule.min_days_before === undefined
+                                  ? "any time"
+                                  : `${rule.min_days_before} days before`}
+                              </span>
+                            </div>
+                          ))}
+                          {policyRules.length > 2 && (
+                            <div className="preview-more">
+                              +{policyRules.length - 2} more rules
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="option-badges">
+                      {Number(tempSelectedPolicyId) === Number(policy.id) && (
+                        <span className="badge badge-selected">Selected</span>
+                      )}
+                      {policy.is_default && (
+                        <span className="badge badge-default">Default</span>
+                      )}
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+
+            <div className="action-buttons">
+              <button className="cancel-button" onClick={handleCancel}>
+                Cancel
+              </button>
+              <button
+                className="save-button"
+                onClick={handleSave}
+                disabled={!tempSelectedPolicyId}
+              >
+                Save Changes
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </StyledAdvancePanel>
+    </StyledRefundPanel>
   );
 };
 
-export default AdvancePanel;
+export default RefundPanel;

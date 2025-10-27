@@ -34,6 +34,56 @@ const AddButton = styled(motion.button)`
   }
 `;
 
+const RulesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const RuleItem = styled.div`
+  padding: 0.5rem;
+  background: #f8fafc;
+  border-radius: 0.375rem;
+  border-left: 3px solid #0056d6;
+  font-size: 0.8rem;
+  line-height: 1.3;
+`;
+
+const RuleText = styled.div`
+  color: #374151;
+  font-weight: 500;
+`;
+
+const RuleDetail = styled.div`
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin-top: 0.125rem;
+`;
+
+const ExpandableRules = styled.div`
+  max-height: 150px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+  }
+`;
+
 const RefundPolicies = () => {
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,6 +149,26 @@ const RefundPolicies = () => {
     handleModalClose();
   };
 
+  const formatRuleText = (rule) => {
+    if (rule.min_hours_before > 0) {
+      return `${rule.refund_percent}% refund if cancelled ${
+        rule.min_hours_before
+      } hour${rule.min_hours_before !== 1 ? "s" : ""} before`;
+    } else if (rule.min_days_before > 0) {
+      return `${rule.refund_percent}% refund if cancelled ${
+        rule.min_days_before
+      } day${rule.min_days_before !== 1 ? "s" : ""} before`;
+    } else {
+      return `${rule.refund_percent}% refund (no time restriction)`;
+    }
+  };
+
+  const getTimeType = (rule) => {
+    if (rule.min_hours_before > 0) return "hours";
+    if (rule.min_days_before > 0) return "days";
+    return "immediate";
+  };
+
   const columns = [
     {
       key: "name",
@@ -129,19 +199,29 @@ const RefundPolicies = () => {
       title: "Refund Rules",
       render: (rules) => (
         <div>
-          {rules?.length || 0} rule{rules?.length !== 1 ? "s" : ""}
+          <div
+            style={{
+              fontWeight: 500,
+              color: "#374151",
+              marginBottom: "0.5rem",
+            }}
+          >
+            {rules?.length || 0} rule{rules?.length !== 1 ? "s" : ""}
+          </div>
+
           {rules?.length > 0 && (
-            <div
-              style={{
-                fontSize: "0.75rem",
-                color: "#6b7280",
-                marginTop: "0.25rem",
-              }}
-            >
-              {rules[0].refund_percent}% if cancelled {rules[0].min_days_before}{" "}
-              day
-              {rules[0].min_days_before !== 1 ? "s" : ""} before
-            </div>
+            <ExpandableRules>
+              <RulesList>
+                {rules.map((rule, index) => (
+                  <RuleItem key={index}>
+                    <RuleText>
+                      Rule {index + 1}: {formatRuleText(rule)}
+                    </RuleText>
+                    {rule.notes && <RuleDetail>Note: {rule.notes}</RuleDetail>}
+                  </RuleItem>
+                ))}
+              </RulesList>
+            </ExpandableRules>
           )}
         </div>
       ),
@@ -153,7 +233,20 @@ const RefundPolicies = () => {
     {
       key: "is_active",
       title: "Status",
-      render: (value) => (value ? "Active" : "Inactive"),
+      render: (value) => (
+        <span
+          style={{
+            color: value ? "#059669" : "#dc2626",
+            fontWeight: 600,
+            background: value ? "#d1fae5" : "#fee2e2",
+            padding: "0.25rem 0.75rem",
+            borderRadius: "9999px",
+            fontSize: "0.875rem",
+          }}
+        >
+          {value ? "Active" : "Inactive"}
+        </span>
+      ),
     },
   ];
 

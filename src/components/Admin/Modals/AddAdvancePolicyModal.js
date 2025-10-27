@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { motion } from "framer-motion";
-import { FiX } from "react-icons/fi";
+import { FiX, FiInfo } from "react-icons/fi";
 import { processAdvancePolicyData } from "../../../services/templeServices";
 import { getStoredTempleId } from "../../../services/authServices";
 
@@ -80,6 +80,9 @@ const Label = styled.label`
   color: #374151;
   font-weight: 600;
   font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 const Input = styled.input`
@@ -96,19 +99,46 @@ const Input = styled.input`
   }
 `;
 
-const Select = styled.select`
-  padding: 0.75rem 1rem;
-  border: 2px solid #e5e7eb;
+const InfoText = styled.div`
+  background: #f0f9ff;
+  border: 1px solid #e0f2fe;
   border-radius: 0.5rem;
-  font-size: 1rem;
-  background: white;
-  transition: all 0.2s ease;
+  padding: 1rem;
+  margin-bottom: 1rem;
+`;
 
-  &:focus {
-    outline: none;
-    border-color: #0056d6;
-    box-shadow: 0 0 0 3px rgba(0, 86, 214, 0.1);
+const InfoItem = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+
+  &:last-child {
+    margin-bottom: 0;
   }
+
+  svg {
+    color: #0056d6;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+  }
+`;
+
+const InfoContent = styled.div`
+  flex: 1;
+`;
+
+const InfoTitle = styled.div`
+  font-weight: 600;
+  color: #0056d6;
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+`;
+
+const InfoDescription = styled.div`
+  color: #374151;
+  font-size: 0.85rem;
+  line-height: 1.4;
 `;
 
 const CheckboxGroup = styled.div`
@@ -174,12 +204,15 @@ const ErrorMessage = styled.div`
   margin-bottom: 1rem;
 `;
 
+const RequiredIndicator = styled.span`
+  color: #dc2626;
+`;
+
 const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: "",
     percent: "",
     min_amount: "",
-    due_mode: "BEFORE",
     due_days_before: "",
     is_default: false,
   });
@@ -194,7 +227,6 @@ const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
         name: policy.name || "",
         percent: policy.percent || "",
         min_amount: policy.min_amount || "",
-        due_mode: policy.due_mode || "BEFORE",
         due_days_before: policy.due_days_before || "",
         is_default: policy.is_default || false,
       });
@@ -222,7 +254,7 @@ const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
         name: formData.name,
         percent: Number.parseFloat(formData.percent),
         min_amount: Number.parseFloat(formData.min_amount),
-        due_mode: formData.due_mode,
+        due_mode: "BEFORE", // Always set to BEFORE as requested
         due_days_before: Number.parseInt(formData.due_days_before),
         is_default: formData.is_default,
       };
@@ -260,11 +292,27 @@ const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
         </ModalHeader>
 
         <ModalBody>
+          <InfoText>
+            <InfoItem>
+              <FiInfo size={16} />
+              <InfoContent>
+                <InfoTitle>What is an Advance Policy?</InfoTitle>
+                <InfoDescription>
+                  An advance policy defines how much payment is required upfront
+                  before a service can be booked. This helps ensure commitment
+                  and manage service scheduling.
+                </InfoDescription>
+              </InfoContent>
+            </InfoItem>
+          </InfoText>
+
           <Form onSubmit={handleSubmit}>
             {error && <ErrorMessage>{error}</ErrorMessage>}
 
             <FormGroup>
-              <Label htmlFor="name">Policy Name *</Label>
+              <Label htmlFor="name">
+                Policy Name <RequiredIndicator>*</RequiredIndicator>
+              </Label>
               <Input
                 type="text"
                 id="name"
@@ -272,12 +320,14 @@ const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                placeholder="Enter the policy name"
+                placeholder="e.g., Standard Advance, Wedding Policy, Festival Booking"
               />
             </FormGroup>
 
             <FormGroup>
-              <Label htmlFor="percent">Advance Percentage *</Label>
+              <Label htmlFor="percent">
+                Advance Percentage <RequiredIndicator>*</RequiredIndicator>
+              </Label>
               <Input
                 type="number"
                 id="percent"
@@ -288,12 +338,14 @@ const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
                 min="0"
                 max="100"
                 step="0.01"
-                placeholder="Enter percentage value"
+                placeholder="e.g., 50 for 50% advance"
               />
             </FormGroup>
 
             <FormGroup>
-              <Label htmlFor="min_amount">Minimum Amount (₹) *</Label>
+              <Label htmlFor="min_amount">
+                Minimum Amount (₹) <RequiredIndicator>*</RequiredIndicator>
+              </Label>
               <Input
                 type="number"
                 id="min_amount"
@@ -303,27 +355,15 @@ const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
                 required
                 min="0"
                 step="0.01"
-                placeholder="Enter minimum amount"
+                placeholder="e.g., 1000 for ₹100 minimum advance"
               />
             </FormGroup>
 
             <FormGroup>
-              <Label htmlFor="due_mode">Due Mode *</Label>
-              <Select
-                id="due_mode"
-                name="due_mode"
-                value={formData.due_mode}
-                onChange={handleChange}
-                required
-              >
-                <option value="BEFORE">Before Service</option>
-                <option value="AFTER">After Service</option>
-                <option value="IMMEDIATE">Immediate</option>
-              </Select>
-            </FormGroup>
-
-            <FormGroup>
-              <Label htmlFor="due_days_before">Due Days Before *</Label>
+              <Label htmlFor="due_days_before">
+                Advance Payment Due Before Service (Days){" "}
+                <RequiredIndicator>*</RequiredIndicator>
+              </Label>
               <Input
                 type="number"
                 id="due_days_before"
@@ -332,7 +372,7 @@ const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
                 onChange={handleChange}
                 required
                 min="0"
-                placeholder="Enter number of days"
+                placeholder="e.g., 7 days before service date"
               />
             </FormGroup>
 

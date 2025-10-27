@@ -2,8 +2,16 @@
 
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { motion } from "framer-motion";
-import { FiX, FiPlus, FiTrash2 } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FiX,
+  FiPlus,
+  FiTrash2,
+  FiChevronDown,
+  FiChevronUp,
+  FiEdit2,
+  FiAlertCircle,
+} from "react-icons/fi";
 import { processRefundPolicyData } from "../../../services/templeServices";
 import { getStoredTempleId } from "../../../services/authServices";
 
@@ -96,6 +104,11 @@ const Input = styled.input`
     border-color: #0056d6;
     box-shadow: 0 0 0 3px rgba(0, 86, 214, 0.1);
   }
+
+  &:disabled {
+    background: #f3f4f6;
+    cursor: not-allowed;
+  }
 `;
 
 const CheckboxGroup = styled.div`
@@ -122,6 +135,30 @@ const RulesSection = styled.div`
   background: #f9fafb;
 `;
 
+const InfoBanner = styled.div`
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: start;
+
+  svg {
+    color: #2563eb;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+  }
+
+  p {
+    margin: 0;
+    color: #1e40af;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+`;
+
 const RuleItem = styled.div`
   background: white;
   border: 1px solid #e5e7eb;
@@ -132,6 +169,84 @@ const RuleItem = styled.div`
   &:last-child {
     margin-bottom: 0;
   }
+`;
+
+const CollapsedRuleItem = styled.div`
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  overflow: hidden;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const RuleItemHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: #f9fafb;
+  }
+`;
+
+const RuleItemSummary = styled.div`
+  flex: 1;
+
+  h4 {
+    margin: 0 0 0.25rem 0;
+    color: #374151;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.85rem;
+  }
+`;
+
+const RuleItemActions = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+`;
+
+const IconButton = styled.button`
+  background: none;
+  border: none;
+  color: #6b7280;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  &.delete {
+    color: #dc2626;
+
+    &:hover {
+      background: #fee2e2;
+    }
+  }
+`;
+
+const RuleItemContent = styled(motion.div)`
+  padding: 1rem;
+  border-top: 1px solid #e5e7eb;
 `;
 
 const RuleHeader = styled.div`
@@ -148,26 +263,59 @@ const RuleHeader = styled.div`
 `;
 
 const RemoveRuleButton = styled.button`
-  background: #e0f2fe;
-  border: 1px solid #bae6fd;
-  color: #0369a1;
-  padding: 0.5rem;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.5rem 0.75rem;
   border-radius: 0.375rem;
   cursor: pointer;
   font-size: 0.8rem;
   display: flex;
   align-items: center;
   gap: 0.25rem;
+  font-weight: 500;
 
   &:hover {
-    background: #bae6fd;
+    background: #fecaca;
+  }
+`;
+
+const TimeframeSelector = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+`;
+
+const RadioOption = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid ${(props) => (props.checked ? "#0056d6" : "#e5e7eb")};
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  background: ${(props) => (props.checked ? "#eff6ff" : "white")};
+
+  &:hover {
+    border-color: #0056d6;
+  }
+
+  input[type="radio"] {
+    accent-color: #0056d6;
+  }
+
+  span {
+    font-weight: 500;
+    color: ${(props) => (props.checked ? "#0056d6" : "#374151")};
   }
 `;
 
 const RuleFormRow = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2.1rem;
+  gap: 1rem;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -187,10 +335,12 @@ const AddRuleButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  font-weight: 500;
 
   &:hover {
     background: #e5e7eb;
     border-color: #9ca3af;
+    color: #374151;
   }
 `;
 
@@ -248,8 +398,11 @@ const AddRefundPolicyModal = ({ policy, onClose, onSuccess }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [expandedRules, setExpandedRules] = useState(new Set());
+  const [editingNewRule, setEditingNewRule] = useState(false);
 
   const templeId = getStoredTempleId();
+  const isEditMode = !!policy;
 
   useEffect(() => {
     if (policy) {
@@ -271,19 +424,26 @@ const AddRefundPolicyModal = ({ policy, onClose, onSuccess }) => {
   };
 
   const addRule = () => {
+    const newRule = {
+      id: null,
+      timeframe_type: "hours", // default to hours
+      min_hours_before: "",
+      min_days_before: "",
+      refund_percent: "",
+      notes: "",
+    };
+
     setFormData((prev) => ({
       ...prev,
-      refund_rules: [
-        ...prev.refund_rules,
-        {
-          id: null,
-          min_hours_before: "",
-          min_days_before: "",
-          refund_percent: "",
-          notes: "",
-        },
-      ],
+      refund_rules: [...prev.refund_rules, newRule],
     }));
+
+    if (isEditMode) {
+      setExpandedRules(
+        new Set([...expandedRules, formData.refund_rules.length])
+      );
+    }
+    setEditingNewRule(true);
   };
 
   const removeRule = (index) => {
@@ -291,6 +451,9 @@ const AddRefundPolicyModal = ({ policy, onClose, onSuccess }) => {
       ...prev,
       refund_rules: prev.refund_rules.filter((_, i) => i !== index),
     }));
+    const newExpanded = new Set(expandedRules);
+    newExpanded.delete(index);
+    setExpandedRules(newExpanded);
   };
 
   const updateRule = (index, field, value) => {
@@ -302,10 +465,63 @@ const AddRefundPolicyModal = ({ policy, onClose, onSuccess }) => {
     }));
   };
 
+  const toggleRuleExpansion = (index) => {
+    const newExpanded = new Set(expandedRules);
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index);
+    } else {
+      newExpanded.add(index);
+    }
+    setExpandedRules(newExpanded);
+  };
+
+  const getRuleSummary = (rule) => {
+    const timeframe = rule.min_hours_before
+      ? `${rule.min_hours_before} hours before`
+      : rule.min_days_before
+      ? `${rule.min_days_before} days before`
+      : "No timeframe set";
+
+    const refund = rule.refund_percent
+      ? `${rule.refund_percent}% refund`
+      : "No refund percentage";
+
+    return `${timeframe} • ${refund}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    // Validation
+    if (formData.refund_rules.length === 0) {
+      setError("Please add at least one refund rule");
+      setLoading(false);
+      return;
+    }
+
+    for (let i = 0; i < formData.refund_rules.length; i++) {
+      const rule = formData.refund_rules[i];
+
+      if (!rule.min_hours_before && !rule.min_days_before) {
+        setError(`Rule ${i + 1}: Please specify either hours or days before`);
+        setLoading(false);
+        return;
+      }
+
+      if (rule.min_hours_before && rule.min_days_before) {
+        setError(`Rule ${i + 1}: Please specify only hours OR days, not both`);
+        setLoading(false);
+        return;
+      }
+
+      if (!rule.refund_percent) {
+        setError(`Rule ${i + 1}: Please specify refund percentage`);
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
       const policyData = {
@@ -315,8 +531,12 @@ const AddRefundPolicyModal = ({ policy, onClose, onSuccess }) => {
         is_default: formData.is_default,
         refund_rules: formData.refund_rules.map((rule) => ({
           ...rule,
-          min_hours_before: Number.parseInt(rule.min_hours_before),
-          min_days_before: Number.parseInt(rule.min_days_before),
+          min_hours_before: rule.min_hours_before
+            ? Number.parseInt(rule.min_hours_before)
+            : 0,
+          min_days_before: rule.min_days_before
+            ? Number.parseInt(rule.min_days_before)
+            : 0,
           refund_percent: Number.parseFloat(rule.refund_percent),
         })),
       };
@@ -332,6 +552,116 @@ const AddRefundPolicyModal = ({ policy, onClose, onSuccess }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderRuleForm = (rule, index) => {
+    const timeframeType = rule.min_hours_before
+      ? "hours"
+      : rule.min_days_before
+      ? "days"
+      : rule.timeframe_type || "hours";
+
+    return (
+      <>
+        <InfoBanner>
+          <FiAlertCircle size={18} />
+          <p>
+            <strong>Choose ONE timeframe:</strong> Set cancellation time in
+            either hours OR days before the booking. For example: "24 hours
+            before" OR "2 days before" (not both).
+          </p>
+        </InfoBanner>
+
+        <TimeframeSelector>
+          <RadioOption
+            checked={timeframeType === "hours"}
+            onClick={() => {
+              updateRule(index, "timeframe_type", "hours");
+              updateRule(index, "min_days_before", "");
+            }}
+          >
+            <input
+              type="radio"
+              name={`timeframe_${index}`}
+              checked={timeframeType === "hours"}
+              onChange={() => {}}
+            />
+            <span>Hours Before</span>
+          </RadioOption>
+
+          <RadioOption
+            checked={timeframeType === "days"}
+            onClick={() => {
+              updateRule(index, "timeframe_type", "days");
+              updateRule(index, "min_hours_before", "");
+            }}
+          >
+            <input
+              type="radio"
+              name={`timeframe_${index}`}
+              checked={timeframeType === "days"}
+              onChange={() => {}}
+            />
+            <span>Days Before</span>
+          </RadioOption>
+        </TimeframeSelector>
+
+        <RuleFormRow>
+          <FormGroup>
+            <Label>
+              {timeframeType === "hours" ? "Hours Before *" : "Days Before *"}
+            </Label>
+            <Input
+              type="number"
+              value={
+                timeframeType === "hours"
+                  ? rule.min_hours_before
+                  : rule.min_days_before
+              }
+              onChange={(e) => {
+                const field =
+                  timeframeType === "hours"
+                    ? "min_hours_before"
+                    : "min_days_before";
+                updateRule(index, field, e.target.value);
+              }}
+              disabled={
+                timeframeType === "hours" ? false : timeframeType !== "days"
+              }
+              min="0"
+              placeholder={timeframeType === "hours" ? "e.g., 24" : "e.g., 2"}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label>Refund Percentage *</Label>
+            <Input
+              type="number"
+              value={rule.refund_percent}
+              onChange={(e) =>
+                updateRule(index, "refund_percent", e.target.value)
+              }
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="e.g., 50"
+              required
+            />
+          </FormGroup>
+        </RuleFormRow>
+
+        <FormGroup>
+          <Label>Notes (Optional)</Label>
+          <Input
+            type="text"
+            value={rule.notes}
+            onChange={(e) => updateRule(index, "notes", e.target.value)}
+            placeholder="e.g., Processing fee of ₹50 will be deducted"
+          />
+        </FormGroup>
+      </>
+    );
   };
 
   return (
@@ -366,7 +696,7 @@ const AddRefundPolicyModal = ({ policy, onClose, onSuccess }) => {
                 value={formData.name}
                 onChange={handleChange}
                 required
-                placeholder="Enter the policy name"
+                placeholder="e.g., Standard Refund Policy"
               />
             </FormGroup>
 
@@ -386,77 +716,74 @@ const AddRefundPolicyModal = ({ policy, onClose, onSuccess }) => {
                 Refund Rules
               </h3>
 
-              {formData.refund_rules.map((rule, index) => (
-                <RuleItem key={index}>
-                  <RuleHeader>
-                    <h4>Rule {index + 1}</h4>
-                    <RemoveRuleButton
-                      type="button"
-                      onClick={() => removeRule(index)}
-                    >
-                      <FiTrash2 />
-                      Remove
-                    </RemoveRuleButton>
-                  </RuleHeader>
+              {isEditMode ? (
+                // Edit mode: Collapsed/Expandable view
+                <>
+                  {formData.refund_rules.map((rule, index) => (
+                    <CollapsedRuleItem key={index}>
+                      <RuleItemHeader
+                        onClick={() => toggleRuleExpansion(index)}
+                      >
+                        <RuleItemSummary>
+                          <h4>Rule {index + 1}</h4>
+                          <p>{getRuleSummary(rule)}</p>
+                        </RuleItemSummary>
+                        <RuleItemActions>
+                          <IconButton
+                            type="button"
+                            className="delete"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeRule(index);
+                            }}
+                          >
+                            <FiTrash2 />
+                          </IconButton>
+                          <IconButton type="button">
+                            {expandedRules.has(index) ? (
+                              <FiChevronUp />
+                            ) : (
+                              <FiChevronDown />
+                            )}
+                          </IconButton>
+                        </RuleItemActions>
+                      </RuleItemHeader>
 
-                  <RuleFormRow>
-                    <FormGroup>
-                      <Label>Hours Before</Label>
-                      <Input
-                        style={{ maxWidth: "200px" }}
-                        type="number"
-                        value={rule.min_hours_before}
-                        onChange={(e) =>
-                          updateRule(index, "min_hours_before", e.target.value)
-                        }
-                        min="0"
-                        placeholder="Enter hours before"
-                      />
-                    </FormGroup>
-
-                    <FormGroup>
-                      <Label>Days Before</Label>
-                      <Input
-                        style={{ maxWidth: "200px" }}
-                        type="number"
-                        value={rule.min_days_before}
-                        onChange={(e) =>
-                          updateRule(index, "min_days_before", e.target.value)
-                        }
-                        min="0"
-                        placeholder="Enter days before"
-                      />
-                    </FormGroup>
-                  </RuleFormRow>
-
-                  <FormGroup>
-                    <Label>Refund Percentage</Label>
-                    <Input
-                      type="number"
-                      value={rule.refund_percent}
-                      onChange={(e) =>
-                        updateRule(index, "refund_percent", e.target.value)
-                      }
-                      min="0"
-                      max="100"
-                      step="0.01"
-                      placeholder="Enter refund percentage"
-                    />
-                  </FormGroup>
-
-                  <FormGroup>
-                    <Label>Notes</Label>
-                    <Input
-                      type="text"
-                      value={rule.notes}
-                      onChange={(e) =>
-                        updateRule(index, "notes", e.target.value)
-                      }
-                      placeholder="Enter additional notes"
-                    />
-                  </FormGroup>
-                </RuleItem>
-              ))}
+                      <AnimatePresence>
+                        {expandedRules.has(index) && (
+                          <RuleItemContent
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            {renderRuleForm(rule, index)}
+                          </RuleItemContent>
+                        )}
+                      </AnimatePresence>
+                    </CollapsedRuleItem>
+                  ))}
+                </>
+              ) : (
+                // Add mode: Fully expanded view
+                <>
+                  {formData.refund_rules.map((rule, index) => (
+                    <RuleItem key={index}>
+                      <RuleHeader>
+                        <h4>Rule {index + 1}</h4>
+                        <RemoveRuleButton
+                          type="button"
+                          onClick={() => removeRule(index)}
+                        >
+                          <FiTrash2 />
+                          Remove
+                        </RemoveRuleButton>
+                      </RuleHeader>
+                      {renderRuleForm(rule, index)}
+                    </RuleItem>
+                  ))}
+                </>
+              )}
 
               <AddRuleButton type="button" onClick={addRule}>
                 <FiPlus />

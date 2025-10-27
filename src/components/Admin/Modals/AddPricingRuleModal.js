@@ -253,18 +253,26 @@ const RuleTypeCard = styled(motion.div)`
   }
 `;
 
+const EditBadge = styled.div`
+  background: #10b981;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+`;
+
 const StepIndicator = styled.div`
-  display: flex;
-  justify-content: center;
+  background: #f3f4f6;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
   margin-bottom: 1.5rem;
 
   span {
-    background: #f3f4f6;
-    color: #6b7280;
-    padding: 0.5rem 1rem;
-    border-radius: 1rem;
-    font-size: 0.9rem;
     font-weight: 600;
+    color: #374151;
+    font-size: 0.9rem;
   }
 `;
 
@@ -336,17 +344,17 @@ const AddPricingRuleModal = ({ rule, onClose, onSuccess }) => {
   useEffect(() => {
     fetchWeekDays();
     if (rule) {
-      // If editing an existing rule, determine the rule type
-      setRuleType(
+      // Determine the rule type but DON'T automatically go to step 2
+      const detectedRuleType =
         rule.start_time && rule.end_time
           ? "timing"
           : rule.day_of_week
           ? "day"
           : rule.start_date && rule.end_date
           ? "date_range"
-          : null
-      );
-      setStep(2);
+          : null;
+
+      setRuleType(detectedRuleType);
 
       setFormData({
         name: rule.name || "",
@@ -522,6 +530,9 @@ const AddPricingRuleModal = ({ rule, onClose, onSuccess }) => {
           <FiClock />
           <h3>Timing Price</h3>
           <p>Set prices based on specific time intervals</p>
+          {rule && ruleType === "timing" && (
+            <EditBadge>Currently Editing</EditBadge>
+          )}
         </RuleTypeCard>
 
         <RuleTypeCard
@@ -533,6 +544,9 @@ const AddPricingRuleModal = ({ rule, onClose, onSuccess }) => {
           <FiCalendar />
           <h3>Day Price</h3>
           <p>Set prices for specific days of the week</p>
+          {rule && ruleType === "day" && (
+            <EditBadge>Currently Editing</EditBadge>
+          )}
         </RuleTypeCard>
 
         <RuleTypeCard
@@ -544,6 +558,9 @@ const AddPricingRuleModal = ({ rule, onClose, onSuccess }) => {
           <FiCalendar />
           <h3>Date Range Price</h3>
           <p>Set prices for specific date ranges</p>
+          {rule && ruleType === "date_range" && (
+            <EditBadge>Currently Editing</EditBadge>
+          )}
         </RuleTypeCard>
       </RuleTypeSelector>
     </>
@@ -551,6 +568,10 @@ const AddPricingRuleModal = ({ rule, onClose, onSuccess }) => {
 
   const renderTimingPriceForm = () => (
     <>
+      <StepIndicator>
+        <span>Step 2 of 2: Configure Timing Price Rule</span>
+      </StepIndicator>
+
       <FormGroup>
         <Label htmlFor="name">Rule Name *</Label>
         <Input
@@ -609,6 +630,10 @@ const AddPricingRuleModal = ({ rule, onClose, onSuccess }) => {
 
   const renderDayPriceForm = () => (
     <>
+      <StepIndicator>
+        <span>Step 2 of 2: Configure Day Price Rule</span>
+      </StepIndicator>
+
       <FormGroup>
         <Label htmlFor="name">Rule Name *</Label>
         <Input
@@ -659,6 +684,10 @@ const AddPricingRuleModal = ({ rule, onClose, onSuccess }) => {
 
   const renderDateRangePriceForm = () => (
     <>
+      <StepIndicator>
+        <span>Step 2 of 2: Configure Date Range Price Rule</span>
+      </StepIndicator>
+
       <FormGroup>
         <Label htmlFor="name">Rule Name *</Label>
         <Input
@@ -716,6 +745,10 @@ const AddPricingRuleModal = ({ rule, onClose, onSuccess }) => {
   );
 
   const renderFormContent = () => {
+    if (step === 1) {
+      return renderRuleTypeSelection();
+    }
+
     switch (ruleType) {
       case "timing":
         return renderTimingPriceForm();
@@ -771,9 +804,10 @@ const AddPricingRuleModal = ({ rule, onClose, onSuccess }) => {
                 className="back"
                 onClick={() => {
                   setStep(1);
-                  setRuleType(null);
-                  // Clear form data when going back to rule type selection
+                  // Don't clear ruleType when going back in edit mode
                   if (!rule) {
+                    setRuleType(null);
+                    // Clear form data only when adding new rule
                     setFormData({
                       name: "",
                       start_time: "",
