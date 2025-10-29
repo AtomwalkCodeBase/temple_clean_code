@@ -5,19 +5,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   FiMenu,
   FiX,
-  FiSearch,
   FiChevronDown,
   FiChevronLeft,
   FiChevronRight,
   FiUser,
   FiLogOut,
+  FiMapPin,
 } from "react-icons/fi";
 import { FaHome, FaCalendarAlt, FaBook, FaThList } from "react-icons/fa";
 import { IoPerson, IoSettingsSharp } from "react-icons/io5";
 import { FaPersonWalkingDashedLineArrowRight } from "react-icons/fa6";
 import { MdTempleHindu } from "react-icons/md";
 import { useCustomerAuth } from "../../contexts/CustomerAuthContext";
-import { ServerIcon } from "lucide-react";
+import LocationModal from "./CustomerModal/LocationModal";
 
 /* Spiritual Color Palette */
 const SPIRITUAL_GOLD = "#d4af37";
@@ -605,6 +605,7 @@ const DropdownDivider = styled.div`
   margin: 0.25rem 0;
 `;
 const CustomerLayout = ({ children }) => {
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
       const saved = localStorage.getItem("sidebarCollapsed");
@@ -614,6 +615,13 @@ const CustomerLayout = ({ children }) => {
     }
   });
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState(() => {
+    try {
+      return localStorage.getItem("selectedState") || "";
+    } catch {
+      return "";
+    }
+  });
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -720,6 +728,17 @@ const CustomerLayout = ({ children }) => {
     }
     return "C";
   };
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const newLocation = localStorage.getItem("selectedState");
+      if (newLocation) {
+        setSelectedLocation(newLocation);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [sidebarCollapsed]);
   return (
     <LayoutContainer>
       <Sidebar
@@ -802,6 +821,26 @@ const CustomerLayout = ({ children }) => {
             >
               {mobileMenuOpen ? <FiX /> : <FiMenu />}
             </MobileMenuButton>
+            {selectedLocation && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  padding: "0.5rem 1rem",
+                  background: "rgba(212, 175, 55, 0.1)",
+                  borderRadius: "8px",
+                  color: "#2c3e50",
+                  fontWeight: "600",
+                  fontSize: "0.9rem",
+                  cursor: "pointer",
+                }}
+                onClick={() => setShowLocationModal(true)}
+              >
+                <FiMapPin style={{ color: "#d4af37" }} />
+                {selectedLocation}
+              </div>
+            )}
           </NavLeft>
           <NavRight>
             <UserMenu>
@@ -876,6 +915,10 @@ const CustomerLayout = ({ children }) => {
           />
         )}
       </AnimatePresence>
+      <LocationModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+      />
     </LayoutContainer>
   );
 };

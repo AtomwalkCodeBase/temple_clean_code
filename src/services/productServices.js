@@ -4,6 +4,7 @@ import {
   AddTempleImages,
   AddTempleGroupData,
   getTempleGroupData,
+  getduelists,
 } from "../services/ConstantServies";
 import {
   authAxios,
@@ -49,4 +50,7 @@ export function addTempleGroup(groupData) {
 
 export function getTempleGroups() {
   return authAxios(getTempleGroupData);
+}
+export function getduelist() {
+  return authAxios(getduelists);
 }

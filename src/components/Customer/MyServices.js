@@ -280,10 +280,10 @@ const MyServices = ({ servicesdata }) => {
     if (urlStatus) {
       const filters = {
         search: params.get("templeId") || "",
-        category: urlStatus,
+        category: urlStatus.toLowerCase(),
       };
       handleFilter(filters);
-      setSelectedCategory(urlStatus);
+      setSelectedCategory(urlStatus.toLowerCase());
     }
   }, [routerLocation.search, services]);
 

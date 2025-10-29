@@ -12,3 +12,4 @@ export const getTempleList = `${endpoint}/get_temple_list/`;
 export const AddTempleImages = `${endpoint}/process_temple_images/`;
 export const AddTempleGroupData = `${endpoint}/process_temple_group_data/`;
 export const getTempleGroupData = `${endpoint}/get_temple_group_list/`;
+export const getduelists = `${endpoint}/get_due_at_list/`;
