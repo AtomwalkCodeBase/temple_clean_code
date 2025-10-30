@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { FiX, FiInfo } from "react-icons/fi";
 import { processAdvancePolicyData } from "../../../services/templeServices";
 import { getStoredTempleId } from "../../../services/authServices";
+import { getduelist } from "../../../services/productServices";
 
 const ModalOverlay = styled(motion.div)`
   position: fixed;
@@ -127,7 +128,20 @@ const InfoItem = styled.div`
 const InfoContent = styled.div`
   flex: 1;
 `;
+const Select = styled.select`
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: white;
+  transition: all 0.2s ease;
 
+  &:focus {
+    outline: none;
+    border-color: #0056d6;
+    box-shadow: 0 0 0 3px rgba(0, 86, 214, 0.1);
+  }
+`;
 const InfoTitle = styled.div`
   font-weight: 600;
   color: #0056d6;
@@ -218,9 +232,13 @@ const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const [duedatas, setDueDates] = useState([]);
   const templeId = getStoredTempleId();
-
+  useEffect(() => {
+    getduelist().then((res) => {
+      setDueDates(res.data);
+    });
+  }, []);
   useEffect(() => {
     if (policy) {
       setFormData({
@@ -254,7 +272,7 @@ const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
         name: formData.name,
         percent: Number.parseFloat(formData.percent),
         min_amount: Number.parseFloat(formData.min_amount),
-        due_mode: "BEFORE", // Always set to BEFORE as requested
+        due_mode: formData.due_mode, // Always set to BEFORE as requested
         due_days_before: Number.parseInt(formData.due_days_before),
         is_default: formData.is_default,
       };
@@ -358,7 +376,36 @@ const AddAdvancePolicyModal = ({ policy, onClose, onSuccess }) => {
                 placeholder="e.g., 1000 for ₹100 minimum advance"
               />
             </FormGroup>
-
+            <FormGroup>
+              <Label htmlFor="due_mode">Due Mode *</Label>
+              <Select
+                id="due_mode"
+                name="due_mode"
+                value={formData.due_mode || ""}
+                onChange={handleChange}
+                required
+              >
+                <option value="" disabled>
+                  Select due mode
+                </option>
+                {Array.isArray(duedatas) && duedatas.length > 0 ? (
+                  duedatas.map((item) => {
+                    const [val, label] = item;
+                    return (
+                      <option key={val} value={val}>
+                        {label}
+                      </option>
+                    );
+                  })
+                ) : (
+                  <>
+                    <option value="BEFORE">Before Service</option>
+                    <option value="AFTER">After Service</option>
+                    <option value="IMMEDIATE">Immediate</option>
+                  </>
+                )}
+              </Select>
+            </FormGroup>
             <FormGroup>
               <Label htmlFor="due_days_before">
                 Advance Payment Due Before Service (Days){" "}

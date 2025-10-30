@@ -697,6 +697,7 @@ const CustomerTemples = () => {
     rating: "",
   });
   const [carouselIndices, setCarouselIndices] = useState({});
+  const [userSelectedState, setUserSelectedState] = useState("");
   const navigate = useNavigate();
   const { customerData } = useCustomerAuth();
   const scrollRef = useRef(null);
@@ -711,6 +712,11 @@ const CustomerTemples = () => {
   };
 
   useEffect(() => {
+    // Get user's selected state from localStorage
+    const savedState = localStorage.getItem("selectedState");
+    if (savedState) {
+      setUserSelectedState(savedState);
+    }
     loadTemples();
   }, []);
 
@@ -780,13 +786,38 @@ const CustomerTemples = () => {
 
     if (filters.rating) {
       filtered = filtered.filter((temple) => {
-        // This is a placeholder - you might need to adjust based on your actual rating data
         const rating = 4.8; // Default rating for now
         return rating >= parseFloat(filters.rating);
       });
     }
 
+    // Sort temples: user's selected state first, then others
+    if (userSelectedState) {
+      filtered = filtered.sort((a, b) => {
+        const aInSelectedState = isTempleInState(a, userSelectedState);
+        const bInSelectedState = isTempleInState(b, userSelectedState);
+
+        if (aInSelectedState && !bInSelectedState) return -1;
+        if (!aInSelectedState && bInSelectedState) return 1;
+        return 0;
+      });
+    }
+
     setFilteredTemples(filtered);
+  };
+
+  // Check if temple is in user's selected state
+  const isTempleInState = (temple, state) => {
+    if (!state) return false;
+
+    const stateLower = state.toLowerCase();
+    return (
+      temple.location?.toLowerCase().includes(stateLower) ||
+      temple.address_line_1?.toLowerCase().includes(stateLower) ||
+      temple.address_line_2?.toLowerCase().includes(stateLower) ||
+      temple.city?.toLowerCase().includes(stateLower) ||
+      temple.state?.toLowerCase().includes(stateLower)
+    );
   };
 
   const handleFilterChange = (key, value) => {
@@ -868,6 +899,18 @@ const CustomerTemples = () => {
           <div className="title">🛕 Sacred Temples</div>
           <div className="subtitle">
             Discover divine temples and book your spiritual journey with us
+            {userSelectedState && (
+              <span
+                style={{
+                  fontSize: "0.9rem",
+                  display: "block",
+                  marginTop: "0.5rem",
+                  color: "#666",
+                }}
+              >
+                Showing temples from {userSelectedState} first
+              </span>
+            )}
           </div>
         </HeaderSection>
 
@@ -949,6 +992,8 @@ const CustomerTemples = () => {
             {filteredTemples.map((temple, index) => {
               const images = getTempleImages(temple);
               const currentIndex = carouselIndices[temple.temple_id] || 0;
+              const isPreferredTemple =
+                userSelectedState && isTempleInState(temple, userSelectedState);
 
               return (
                 <TempleCard
@@ -957,7 +1002,31 @@ const CustomerTemples = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   whileHover={{ y: -8 }}
+                  style={{
+                    border: isPreferredTemple
+                      ? "2px solid #ea9966ff"
+                      : "1px solid #e5e7eb",
+                  }}
                 >
+                  {isPreferredTemple && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "10px",
+                        right: "10px",
+                        background: "#ea7e66ff",
+                        color: "white",
+                        padding: "4px 8px",
+                        borderRadius: "12px",
+                        fontSize: "0.7rem",
+                        fontWeight: "bold",
+                        zIndex: 10,
+                      }}
+                    >
+                      Your State
+                    </div>
+                  )}
+
                   <ImageCarousel>
                     <div
                       className="carousel-inner"
@@ -979,7 +1048,7 @@ const CustomerTemples = () => {
                           className="carousel-item"
                           style={{
                             background:
-                              "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                              "linear-gradient(135deg, #ea7e66ff 0%, #a29e4bff 100%)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",

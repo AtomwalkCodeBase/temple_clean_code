@@ -1,7 +1,6 @@
 import React, { useMemo, useState, useEffect, use } from "react";
 import styled from "styled-components";
 import { motion, AnimatePresence } from "framer-motion";
-import TempleTimeSlots from "../../components/Admin/TempleTimeSlots";
 import {
   addupdatetempale,
   getTempleGroups,
@@ -9,6 +8,7 @@ import {
   uploadTempleImages,
 } from "../../services/productServices";
 import TimeSlotModal from "./Modals/TimeSlotModal";
+import { indianStates } from "../../services/serviceUtils";
 
 // Premium White & Blue Design System
 const theme = {
@@ -753,6 +753,11 @@ function ManageTemple(props) {
     additionalImages: [],
   });
 
+  const [existingImages, setExistingImages] = useState({
+    mainImage: null,
+    additionalImages: [],
+  });
+  console.log(existingImages, "existingImages");
   const [details, setDetails] = useState([{ title: "", paragraph: "" }]);
   const [documents, setDocuments] = useState([
     { name: "", is_mandatory: false },
@@ -789,11 +794,20 @@ function ManageTemple(props) {
   // Temple Groups state
   const [groups, setGroups] = useState([]);
   const [subGroups, setSubGroups] = useState([]);
-
+  const getImagePreview = (img) => {
+    if (!img) return "";
+    // If it's a File or Blob (local upload)
+    if (img instanceof File || img instanceof Blob) {
+      return URL.createObjectURL(img);
+    }
+    // Otherwise assume it's already a URL (S3 or existing)
+    return img;
+  };
   const fetchCurrentImages = async (id) => {
     const effectiveId =
       id || (props.selectedTemple && props.selectedTemple.temple_id);
     if (!effectiveId) return;
+
     try {
       const listRes = await gettemplist();
       const payload = listRes?.data;
@@ -802,23 +816,33 @@ function ManageTemple(props) {
         : Array.isArray(payload)
         ? payload
         : [];
-      const t = list.find((x) => x.temple_id === effectiveId);
-      if (!t) return setCurrentImages([]);
-      const keys = [
-        "image",
-        "image_1",
-        "image_2",
-        "image_3",
-        "image_4",
-        "image_5",
-        "image_6",
-        "image_7",
-        "image_8",
-        "image_9",
-      ];
-      setCurrentImages(keys.map((k) => t[k]).filter(Boolean));
-    } catch {}
+
+      const temple = list.find((t) => t.temple_id === effectiveId);
+      if (!temple) return;
+
+      // ✅ Collect all non-null image URLs dynamically
+      const allImages = Object.keys(temple)
+        .filter((key) => key.startsWith("image") && temple[key])
+        .map((key) => temple[key]);
+
+      // ✅ If you got images, set first as main and rest as additional
+      if (allImages.length > 0) {
+        setImageFiles({
+          mainImage: allImages[0],
+          additionalImages: allImages.slice(1),
+        });
+      } else {
+        // fallback if no image
+        setImageFiles({
+          mainImage: null,
+          additionalImages: [],
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching temple images:", error);
+    }
   };
+
   useEffect(() => {
     fetchTempleGroups();
   }, []);
@@ -855,7 +879,7 @@ function ManageTemple(props) {
         id: "add-temple",
         label: templeId || props.selectedTemple ? "Edit Temple" : "Add Temple",
       },
-      { id: "time-slots", label: "Time Slots" },
+      // { id: "time-slots", label: "Time Slots" },
     ];
     return baseTabs;
   }, [templeId, props.selectedTemple]);
@@ -1042,38 +1066,7 @@ function ManageTemple(props) {
     }
   }, [activeTab, currentStep, templeId]);
 
-  const resetForm = () => {
-    setTempleId("");
-    setTempleForm({
-      name: "",
-      email_id: "",
-      mobile_number: "",
-      alternate_contact_number: "",
-      contact_name: "",
-      address_line_1: "",
-      address_line_2: "",
-      address_line_3: "",
-      state_code: "",
-      pin_code: "",
-      county_code: "IN",
-      established_date: "",
-      remarks: "",
-      web_page: "",
-      location: "",
-      geo_location_data: "",
-      temple_group: "",
-      temple_sub_group: "",
-      temple_group_id: "",
-      temple_sub_group_id: "",
-    });
-    setSelectedTimeSlotIds([]);
-    setDetails([{ title: "", paragraph: "" }]);
-    setDocuments([{ name: "", is_mandatory: false }]);
-    setImageFiles({ mainImage: null, additionalImages: [] });
-    setCurrentStep(0);
-  };
-
-  const submitTempleSections = async () => {
+  const submitTempleSections = async (data) => {
     setSaving(true);
     resetNotices();
     try {
@@ -1126,7 +1119,16 @@ function ManageTemple(props) {
           ? "Temple updated successfully!"
           : "Temple created successfully!"
       );
-      setCurrentStep(6);
+
+      if (data === "update") {
+        setTimeout(() => {
+          if (typeof window !== "undefined") {
+            window.location.assign("/temple-list");
+          }
+        }, 600);
+      } else {
+        setCurrentStep(6);
+      }
     } catch (err) {
       setError(
         err?.response?.data?.message || err?.message || "Failed to save temple"
@@ -1147,7 +1149,7 @@ function ManageTemple(props) {
           (props.selectedTemple && props.selectedTemple.temple_id) ||
           ""
       );
-      formData.append("call_mode", "TEMPLE_IMAGE");
+      formData.append("call_mode", "UPDATE_TEMPLE_IMAGE");
       if (imageFiles.mainImage) {
         formData.append("image_file", imageFiles.mainImage);
         formData.append("image_file_1", imageFiles.mainImage);
@@ -1281,13 +1283,29 @@ function ManageTemple(props) {
         </FormGroup>
         <FormGroup>
           <Label>State Code *</Label>
-          <Input
+          <select
             name="state_code"
             value={templeForm.state_code}
             onChange={handleTempleChange}
-            placeholder="KA"
-          />
+            style={{
+              width: "100%",
+              padding: "0.6rem 0.8rem",
+              borderRadius: "6px",
+              border: "1px solid #cbd5e1",
+              fontSize: "0.95rem",
+              background: "white",
+              outline: "none",
+            }}
+          >
+            <option value="">Select State</option>
+            {indianStates.map((state) => (
+              <option key={state.code} value={state.code}>
+                {state.name} ({state.short}) - {state.number}
+              </option>
+            ))}
+          </select>
         </FormGroup>
+
         <FormGroup>
           <Label>PIN Code *</Label>
           <Input
@@ -1594,7 +1612,7 @@ function ManageTemple(props) {
           </Button>
           <Button
             color="primary"
-            onClick={submitTempleSections}
+            onClick={() => submitTempleSections(templeId ? "Update" : "Create")}
             loading={saving}
             disabled={saving}
           >
@@ -1631,6 +1649,8 @@ function ManageTemple(props) {
         </p>
       </div>
 
+      {/* {templeId && renderExistingImagesSection()} */}
+
       {/* Main Image Section */}
       <Card style={{ marginBottom: "2rem", padding: "2rem" }}>
         <div
@@ -1658,7 +1678,7 @@ function ManageTemple(props) {
           </div>
           <div>
             <h3 style={{ margin: 0, color: theme.colors.gray800 }}>
-              Main Temple Image
+              {templeId ? "Replace Main Image" : "Main Temple Image"}
             </h3>
             <p
               style={{
@@ -1667,7 +1687,9 @@ function ManageTemple(props) {
                 fontSize: "0.9rem",
               }}
             >
-              This will be the primary image displayed for your temple
+              {templeId
+                ? "Upload a new image to replace the current main image"
+                : "This will be the primary image displayed for your temple"}
             </p>
           </div>
         </div>
@@ -1738,7 +1760,9 @@ function ManageTemple(props) {
               </div>
             ) : (
               <div style={{ color: theme.colors.gray500, fontStyle: "italic" }}>
-                No main image selected yet
+                {templeId
+                  ? "No replacement selected"
+                  : "No main image selected yet"}
               </div>
             )}
           </div>
@@ -1778,7 +1802,7 @@ function ManageTemple(props) {
                 style={{
                   width: "100%",
                   height: "200px",
-                  background: `url(${URL.createObjectURL(
+                  background: `url(${getImagePreview(
                     imageFiles.mainImage
                   )}) center/cover no-repeat`,
                   borderRadius: "8px",
@@ -1850,7 +1874,7 @@ function ManageTemple(props) {
           </div>
           <div>
             <h3 style={{ margin: 0, color: theme.colors.gray800 }}>
-              Additional Images
+              Additional Temple Images
             </h3>
             <p
               style={{
@@ -1859,44 +1883,36 @@ function ManageTemple(props) {
                 fontSize: "0.9rem",
               }}
             >
-              Add up to 9 supplementary images (optional)
+              Add up to 9 additional images to showcase your temple
             </p>
           </div>
         </div>
 
         <FormGroup className="full">
-          <Label>Upload Additional Images</Label>
-
-          {/* Image Upload Area */}
+          <Label>Upload Additional Images (Optional)</Label>
           <div
             style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
               padding: "2rem",
-              background: theme.colors.gray50,
+              border: `2px dashed ${theme.colors.primary}30`,
               borderRadius: "12px",
-              border: `2px dashed ${theme.colors.gray300}`,
-              marginBottom: "1.5rem",
               textAlign: "center",
+              background: theme.colors.gray50,
               cursor: "pointer",
               transition: "all 0.3s ease",
             }}
             onDragOver={(e) => {
               e.preventDefault();
-              e.currentTarget.style.background = theme.colors.primaryLight;
               e.currentTarget.style.borderColor = theme.colors.primary;
+              e.currentTarget.style.background = theme.colors.primaryLight;
             }}
             onDragLeave={(e) => {
-              e.preventDefault();
+              e.currentTarget.style.borderColor = theme.colors.primary + "30";
               e.currentTarget.style.background = theme.colors.gray50;
-              e.currentTarget.style.borderColor = theme.colors.gray300;
             }}
             onDrop={(e) => {
               e.preventDefault();
+              e.currentTarget.style.borderColor = theme.colors.primary + "30";
               e.currentTarget.style.background = theme.colors.gray50;
-              e.currentTarget.style.borderColor = theme.colors.gray300;
 
               if (
                 e.dataTransfer.files.length > 0 &&
@@ -2011,7 +2027,7 @@ function ManageTemple(props) {
                       style={{
                         width: "100%",
                         height: "120px",
-                        background: `url(${URL.createObjectURL(
+                        background: `url(${getImagePreview(
                           file
                         )}) center/cover no-repeat`,
                       }}
@@ -2262,54 +2278,45 @@ function ManageTemple(props) {
                         ← Previous
                       </Button>
                     )}
-                    <Button
-                      color="secondary"
-                      onClick={() =>
-                        setCurrentStep((s) =>
-                          Math.min(formSteps.length - 1, s + 1)
-                        )
-                      }
-                    >
-                      Next →
-                    </Button>
+                    {templeId ? (
+                      <>
+                        <Button
+                          color="primary"
+                          onClick={submitTempleSections}
+                          loading={saving}
+                          disabled={saving}
+                          style={{ minWidth: "200px" }}
+                        >
+                          {saving ? "Updating..." : "Update Temple Data"}
+                        </Button>
+                        <Button
+                          color="secondary"
+                          onClick={() =>
+                            setCurrentStep((s) =>
+                              Math.min(formSteps.length - 1, s + 1)
+                            )
+                          }
+                        >
+                          Next →
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        color="secondary"
+                        onClick={() =>
+                          setCurrentStep((s) =>
+                            Math.min(formSteps.length - 1, s + 1)
+                          )
+                        }
+                      >
+                        Next →
+                      </Button>
+                    )}
                   </ActionRow>
                 </>
               )}
             </>
           )}
-
-          {activeTab === "time-slots" && (
-            <TempleTimeSlots
-              timeSlots={timeSlots}
-              onAddTimeSlot={(slot) =>
-                setTimeSlots((prev) => [
-                  ...prev,
-                  { ...slot, id: Date.now(), status: slot.status || "Active" },
-                ])
-              }
-              onEditTimeSlot={(id, updated) =>
-                setTimeSlots((prev) =>
-                  prev.map((s) => (s.id === id ? { ...s, ...updated } : s))
-                )
-              }
-              onDeleteTimeSlot={(id) =>
-                setTimeSlots((prev) => prev.filter((s) => s.id !== id))
-              }
-              onToggleTimeSlotStatus={(id) =>
-                setTimeSlots((prev) =>
-                  prev.map((s) =>
-                    s.id === id
-                      ? {
-                          ...s,
-                          status: s.status === "Active" ? "Inactive" : "Active",
-                        }
-                      : s
-                  )
-                )
-              }
-            />
-          )}
-
           {activeTab === "temple-groups" && (
             <motion.div variants={fadeIn} initial="hidden" animate="visible">
               <div style={{ marginBottom: "2rem" }}>

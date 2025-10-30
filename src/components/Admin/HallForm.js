@@ -1137,6 +1137,11 @@ export default function HallForm({
       setSaving(false);
     }
   };
+  const fileFromUrl = (url) => {
+    if (!url) return null;
+    const name = url.split("/").pop().split("?")[0];
+    return { uri: url, name };
+  };
 
   const handleImageUpload = async () => {
     if (!serviceId) {
@@ -1145,6 +1150,7 @@ export default function HallForm({
       );
       return;
     }
+
     const hasMainImage = imageFiles.image_file || existingImages.image_file;
     if (!hasMainImage) {
       setError("Please upload at least one image to showcase your space.");
@@ -1159,19 +1165,30 @@ export default function HallForm({
         service_id: serviceId,
       };
 
-      // Add new/updated images to the API call
+      // include both new files and previous image URLs
       Object.keys(imageFiles).forEach((key) => {
         if (imageFiles[key]) {
+          // new uploaded file
           imageData[key] = imageFiles[key];
+        } else if (existingImages[key]) {
+          // keep old S3 image path
+          imageData[key] = fileFromUrl(existingImages[key]);
+        } else {
+          // image removed
+          imageData[key] = null;
         }
       });
 
-      // Only call API if there are new images to upload
-      const hasNewImages = Object.values(imageFiles).some(
-        (file) => file !== null
-      );
-      if (hasNewImages) {
-        await processTempleServiceImages(imageData);
+      const hasAnyImage =
+        Object.values(imageData).filter(
+          (v) => v && v !== null && v !== serviceId
+        ).length > 0;
+
+      if (hasAnyImage) {
+        await processTempleServiceImages(
+          imageData,
+          isEditing ? "UPDATE" : "ADD"
+        );
       }
 
       setSuccess(
@@ -1180,7 +1197,6 @@ export default function HallForm({
           : "Images uploaded successfully! You can now clone policies."
       );
 
-      // For newly created services, open clone modal instead of immediate success navigation
       if (!isEditing) {
         setShowCloneModal(true);
       } else {
@@ -1191,7 +1207,7 @@ export default function HallForm({
     } catch (err) {
       setError(
         err.message ||
-          "Image Size must be less than 1MB. Please check your files and try again."
+          "Image upload failed. Image size must be less than 1MB. Please try again."
       );
     } finally {
       setSaving(false);

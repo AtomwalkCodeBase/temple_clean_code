@@ -465,6 +465,89 @@ const AllTempleList = () => {
       }
     })();
   }, []);
+  const TempleCarousel = ({ temple }) => {
+    // Collect all non-null image URLs
+    const images = Object.keys(temple)
+      .filter((key) => key.startsWith("image") && temple[key])
+      .map((key) => temple[key]);
+
+    const [current, setCurrent] = useState(0);
+
+    // Auto-slide every 3 seconds
+    useEffect(() => {
+      if (images.length <= 1) return;
+      const interval = setInterval(() => {
+        setCurrent((prev) => (prev + 1) % images.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }, [images.length]);
+
+    if (images.length === 0) {
+      return (
+        <TempleImage image={null}>
+          <PlaceholderIcon>
+            <GiTempleGate />
+          </PlaceholderIcon>
+        </TempleImage>
+      );
+    }
+
+    return (
+      <div style={{ position: "relative", height: "100%", overflow: "hidden" }}>
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={images[current]}
+            src={images[current]}
+            alt={`Temple image ${current + 1}`}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: "0px",
+              position: "absolute",
+              top: 0,
+              left: 0,
+            }}
+          />
+        </AnimatePresence>
+
+        {/* Dots indicator */}
+        {images.length > 1 && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: "10px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              gap: "6px",
+              zIndex: 5,
+            }}
+          >
+            {images.map((_, idx) => (
+              <motion.div
+                key={idx}
+                onClick={() => setCurrent(idx)}
+                whileHover={{ scale: 1.2 }}
+                style={{
+                  width: current === idx ? "10px" : "8px",
+                  height: current === idx ? "10px" : "8px",
+                  borderRadius: "50%",
+                  background: current === idx ? "#0056d6" : "#cbd5e1",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const fetchTemples = async () => {
     try {
@@ -603,13 +686,7 @@ const AllTempleList = () => {
                   whileHover={{ y: -5 }}
                 >
                   <TempleImageContainer>
-                    <TempleImage image={temple.image}>
-                      {!temple.image && (
-                        <PlaceholderIcon>
-                          <GiTempleGate />
-                        </PlaceholderIcon>
-                      )}
-                    </TempleImage>
+                    <TempleCarousel temple={temple} />
                     <StatusBadge>Active</StatusBadge>
                   </TempleImageContainer>
 

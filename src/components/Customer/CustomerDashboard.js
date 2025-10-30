@@ -20,6 +20,10 @@ import { useCustomerAuth } from "../../contexts/CustomerAuthContext";
 import { getBookingList } from "../../services/customerServices";
 import CustomerLayout from "../../components/Customer/CustomerLayout";
 import EventSlider from "./CustomerModal/EventSlider";
+import LocationModal from "./CustomerModal/LocationModal";
+import SearchFilterComponent from "./CustomerModal/SearchFilterComponent";
+import ServiceTypeCards from "./CustomerModal/ServiceTypeCards";
+import PopularTemples from "./CustomerModal/PopularTemples";
 
 const DashboardContainer = styled.div`
   max-width: 1400px;
@@ -513,8 +517,18 @@ const CustomerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { customerData } = useCustomerAuth();
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState("");
 
   useEffect(() => {
+    const savedLocation = localStorage.getItem("selectedState");
+    if (savedLocation) {
+      setSelectedLocation(savedLocation);
+    } else {
+      setTimeout(() => {
+        setShowLocationModal(true);
+      }, 3000);
+    }
     loadRecentBookings();
   }, [customerData]);
 
@@ -565,9 +579,89 @@ const CustomerDashboard = () => {
   const mybooking = (data) => {
     navigate(`/customer-bookings?status=${data}`);
   };
+
+  const handleLocationSelect = (location) => {
+    setSelectedLocation(location);
+  };
+
+  const handleSearch = (filters) => {
+    console.log("Search filters:", filters);
+    navigate("/customer-services", { state: { filters } });
+  };
+
   return (
     <CustomerLayout>
+      <LocationModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onSelectLocation={handleLocationSelect}
+      />
+      <SectionTitle>
+        <FiActivity /> Dashboard Overview
+      </SectionTitle>
+
+      <StatsGrid>
+        <StatCard
+          onClick={() => navigate("/customer-temples")}
+          color="#4f46e5"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <div className="stat-header">
+            <div>
+              <div className="stat-value">Book New Seva</div>
+              <div className="stat-label">Find temples and book services</div>
+            </div>
+            <div className="stat-icon">
+              <MdTempleHindu />
+            </div>
+          </div>
+        </StatCard>
+        <StatCard
+          onClick={() => navigate("/customer-bookings")}
+          color="#10b981"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="stat-header">
+            <div>
+              <div className="stat-value">View Bookings</div>
+              <div className="stat-label">Manage your bookings</div>
+            </div>
+            <div className="stat-icon">
+              <FiCalendar />
+            </div>
+          </div>
+        </StatCard>
+
+        <StatCard
+          onClick={() => navigate("/customer-profile")}
+          color="#f59e0b"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div className="stat-header">
+            <div>
+              <div className="stat-value">Profile Settings</div>
+              <div className="stat-label">Update your information</div>
+            </div>
+            <div className="stat-icon">
+              <FiUser />
+            </div>
+          </div>
+        </StatCard>
+      </StatsGrid>
+      <SearchFilterComponent
+        onSearch={handleSearch}
+        currentLocation={selectedLocation}
+      />
+
+      <ServiceTypeCards />
       <EventSlider />
+      <PopularTemples />
       <DashboardContainer>
         <WelcomeSection
           initial={{ opacity: 0, y: 20 }}
@@ -620,65 +714,6 @@ const CustomerDashboard = () => {
             </div>
           </div>
         </WelcomeSection>
-
-        <SectionTitle>
-          <FiActivity /> Dashboard Overview
-        </SectionTitle>
-
-        <StatsGrid>
-          <StatCard
-            onClick={() => navigate("/customer-temples")}
-            color="#4f46e5"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <div className="stat-header">
-              <div>
-                <div className="stat-value">Book New Seva</div>
-                <div className="stat-label">Find temples and book services</div>
-              </div>
-              <div className="stat-icon">
-                <MdTempleHindu />
-              </div>
-            </div>
-          </StatCard>
-          <StatCard
-            onClick={() => navigate("/customer-bookings")}
-            color="#10b981"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-          >
-            <div className="stat-header">
-              <div>
-                <div className="stat-value">View Bookings</div>
-                <div className="stat-label">Manage your bookings</div>
-              </div>
-              <div className="stat-icon">
-                <FiCalendar />
-              </div>
-            </div>
-          </StatCard>
-
-          <StatCard
-            onClick={() => navigate("/customer-profile")}
-            color="#f59e0b"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <div className="stat-header">
-              <div>
-                <div className="stat-value">Profile Settings</div>
-                <div className="stat-label">Update your information</div>
-              </div>
-              <div className="stat-icon">
-                <FiUser />
-              </div>
-            </div>
-          </StatCard>
-        </StatsGrid>
 
         <ContentGrid>
           <RecentBookings

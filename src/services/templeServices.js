@@ -167,11 +167,13 @@ export const processTempleServiceData = async (serviceData) => {
     throw error.response?.data || error.message;
   }
 };
-export const processTempleServiceImages = async (imageData) => {
+export const processTempleServiceImages = async (imageData, call_mode) => {
   try {
     // Create FormData for file uploads
     const formData = new FormData();
-
+    if (call_mode) {
+      formData.append("call_mode", call_mode);
+    }
     // Add service_id
     formData.append("service_id", imageData.service_id);
 

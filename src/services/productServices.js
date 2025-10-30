@@ -30,7 +30,7 @@ export function uploadTempleImages(templeId, formData) {
   // Legacy support for array of files
   const legacyFormData = new FormData();
   legacyFormData.append("temple_id", templeId);
-  legacyFormData.append("call_mode", "TEMPLE_IMAGE");
+  legacyFormData.append("call_mode", "UPDATE_TEMPLE_IMAGE");
   const filesArray = Array.from(formData || []);
   filesArray.forEach((file, index) => {
     const key = index === 0 ? "image_file" : `image_file_${index}`;
