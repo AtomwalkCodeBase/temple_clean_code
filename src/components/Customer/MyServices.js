@@ -285,7 +285,7 @@ const MyServices = ({ servicesdata }) => {
     const urlStatus = params.get("id");
     if (urlStatus) {
       const filters = {
-        search: params.get("templeId") || "",
+        temple_id: params.get("templeId") || "",
         category: urlStatus.toLowerCase(),
         state_code: urllocation || "all",
       };
@@ -393,6 +393,12 @@ const MyServices = ({ servicesdata }) => {
       filtered = filtered.filter(
         (service) =>
           service.state_code?.toLowerCase() === filters.state_code.toLowerCase()
+      );
+    }
+    if (filters.temple_id) {
+      filtered = filtered.filter(
+        (service) =>
+          service.temple_id?.toLowerCase() === filters.temple_id.toLowerCase()
       );
     }
 
