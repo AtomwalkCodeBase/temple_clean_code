@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { indianStates } from "../../services/serviceUtils";
 
 const FilterContainer = styled.div`
   background: white;
@@ -63,9 +64,9 @@ const Button = styled.button`
 const FilterBar = ({ onFilter, serviceTypes }) => {
   const [filters, setFilters] = useState({
     search: "",
-    category: "all",
+    state_code: serviceTypes ? serviceTypes : "all",
   });
-
+  console.log(filters, "serviceTypes");
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
@@ -86,15 +87,15 @@ const FilterBar = ({ onFilter, serviceTypes }) => {
         </FilterGroup>
 
         <FilterGroup>
-          <Label>Category</Label>
+          <Label>Location</Label>
           <Select
-            value={filters.category}
-            onChange={(e) => handleFilterChange("category", e.target.value)}
+            value={filters.state_code}
+            onChange={(e) => handleFilterChange("state_code", e.target.value)}
           >
-            <option value="all">All Categories</option>
-            {serviceTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
+            <option value="all">All Location</option>
+            {indianStates.map((type) => (
+              <option key={type.number} value={type.code}>
+                {type.name}
               </option>
             ))}
           </Select>

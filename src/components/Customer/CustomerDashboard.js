@@ -586,7 +586,9 @@ const CustomerDashboard = () => {
 
   const handleSearch = (filters) => {
     console.log("Search filters:", filters);
-    navigate("/customer-services", { state: { filters } });
+    navigate(
+      `/customer-services?location=${filters.state}&id=${filters.serviceType}&date=${filters.date}`
+    );
   };
 
   return (

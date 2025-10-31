@@ -258,6 +258,8 @@ const categoryConfig = {
 };
 
 const MyServices = ({ servicesdata }) => {
+  const routerLocation = useLocation();
+  const params = new URLSearchParams(routerLocation.search);
   const [services, setServices] = useState([]);
   const [filteredServices, setFilteredServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -266,21 +268,26 @@ const MyServices = ({ servicesdata }) => {
   const [itemsPerPage, setItemsPerPage] = useState(9);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [categories, setCategories] = useState([]);
-
+  const [filterState, setFilterState] = useState({
+    search: "",
+    category: "all",
+    state_code: "all",
+    priceRange: null,
+  });
+  const urllocation = params.get("location");
   const navigate = useNavigate();
-  const routerLocation = useLocation();
 
   useEffect(() => {
     fetchServices();
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(routerLocation.search);
     const urlStatus = params.get("id");
     if (urlStatus) {
       const filters = {
         search: params.get("templeId") || "",
         category: urlStatus.toLowerCase(),
+        state_code: urllocation || "all",
       };
       handleFilter(filters);
       setSelectedCategory(urlStatus.toLowerCase());
@@ -362,18 +369,8 @@ const MyServices = ({ servicesdata }) => {
       }
     }
   };
-
-  const handleCategoryClick = (category) => {
-    setSelectedCategory(category);
-    const filters = {
-      category: category === "all" ? "" : category,
-      search: "",
-    };
-    handleFilter(filters);
-  };
-
-  const handleFilter = (filters) => {
-    let filtered = services;
+  const applyFilters = (filters) => {
+    let filtered = [...services];
 
     if (filters.search) {
       filtered = filtered.filter(
@@ -381,8 +378,7 @@ const MyServices = ({ servicesdata }) => {
           service.name.toLowerCase().includes(filters.search.toLowerCase()) ||
           service.description
             .toLowerCase()
-            .includes(filters.search.toLowerCase()) ||
-          service.temple_id.toLowerCase().includes(filters.search.toLowerCase())
+            .includes(filters.search.toLowerCase())
       );
     }
 
@@ -390,6 +386,13 @@ const MyServices = ({ servicesdata }) => {
       filtered = filtered.filter(
         (service) =>
           service.service_type === normalizeCategory(filters.category)
+      );
+    }
+
+    if (filters.state_code && filters.state_code !== "all") {
+      filtered = filtered.filter(
+        (service) =>
+          service.state_code?.toLowerCase() === filters.state_code.toLowerCase()
       );
     }
 
@@ -405,6 +408,20 @@ const MyServices = ({ servicesdata }) => {
 
     setFilteredServices(filtered);
     setCurrentPage(1);
+  };
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category); // ensures visual highlight updates
+
+    const updatedFilter = { ...filterState, category };
+    setFilterState(updatedFilter);
+    applyFilters(updatedFilter);
+  };
+
+  const handleFilter = (filters) => {
+    const updatedFilter = { ...filterState, ...filters };
+    setFilterState(updatedFilter);
+    applyFilters(updatedFilter);
   };
 
   const handleViewDetails = (serviceId) => {
@@ -448,10 +465,7 @@ const MyServices = ({ servicesdata }) => {
         </div>
       </HeaderSection>
 
-      <FilterBar
-        onFilter={handleFilter}
-        serviceTypes={categories.map((cat) => cat.value)}
-      />
+      <FilterBar onFilter={handleFilter} serviceTypes={urllocation} />
 
       {/* Beautiful Category Cards Section */}
       {categories.length > 0 && (
