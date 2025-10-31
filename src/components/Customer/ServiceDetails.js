@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import styled, { keyframes, css } from "styled-components";
+"use client";
+
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import styled, { keyframes } from "styled-components";
 import {
   extractDisabledDatesFromBookings,
   getServiceBookings,
@@ -8,8 +10,7 @@ import {
   processpayment,
 } from "../../services/customerServices";
 import CustomerLayout from "./CustomerLayout";
-import VariationModal from "./CustomerModal/VariationModal";
-import AvailabilityCalendarModal from "./CustomerModal/AvailabilityCalendarModal";
+import CombinedBookingModal from "./CustomerModal/CombinedBookingModal";
 import BookingConfirmationPopup from "./CustomerModal/BookingConfirmationPopup";
 import { useCustomerAuth } from "../../contexts/CustomerAuthContext";
 import { getTempleServicesList } from "../../services/templeServices";
@@ -598,63 +599,60 @@ const LoadingCard = styled.div`
 const ServiceDetails = () => {
   const { serviceId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [variationOpen, setVariationOpen] = useState(false);
+  const [combinedModalOpen, setCombinedModalOpen] = useState(false);
   const [chosenService, setChosenService] = useState(null);
   const [chosenVariation, setChosenVariation] = useState(null);
-  const [calendarOpen, setCalendarOpen] = useState(false);
   const [disabledDateKeys, setDisabledDateKeys] = useState(new Set());
   const [selectateddate, setselecteddate] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [bookingData, setBookingData] = useState([]);
   const { customerData } = useCustomerAuth();
+  const [preSelectedDate, setPreSelectedDate] = useState(null);
+
   useEffect(() => {
     fetchServiceDetails();
   }, [serviceId]);
-  const onConfirmDate = async (dateKey) => {
-    setselecteddate(dateKey);
-    setCalendarOpen(false);
-    setVariationOpen(true);
 
-    // try {
-    //   await processBooking(booking);
-    //   navigate("/customer-bookings", {
-    //     state: {
-    //       message: "🎉 Booking confirmed successfully!",
-    //       booking: booking.booking_data,
-    //     },
-    //   });
-    // } catch (err) {
-    //   console.error(err);
-    //   setError(err?.message || "Failed to confirm booking. Please try again.");
-    // }
-  };
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const urlDate = params.get("date");
+    if (urlDate) {
+      // Validate date format (YYYY-MM-DD)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const [year, month, day] = urlDate.split("-");
+      const preDate = new Date(year, month - 1, day);
+
+      if (preDate >= today) {
+        setPreSelectedDate(urlDate);
+        // Auto-open the combined modal if date is in URL
+        setTimeout(() => setCombinedModalOpen(true), 500);
+      }
+    }
+  }, [location.search]);
 
   const handleConfirmBooking = async () => {
-    let latestBooking = null; // use let, not const
+    let latestBooking = null;
     const id = localStorage.getItem("customerRefCode");
     setIsLoading(true);
 
     try {
-      // Step 1: Process initial booking
       await processBooking(bookingData);
-
-      // Step 2: Fetch latest booking
       const res = await getServiceBookings(id);
       latestBooking = res[res.length - 1];
 
-      // Step 3: Proceed only if booking exists
       if (latestBooking?.ref_code) {
         const data = { ref_code: latestBooking.ref_code };
         const paymentRes = await processpayment(data);
 
         if (paymentRes?.data?.payment?.status === "F") {
-          // Payment failed -> Cancel booking
           const cancelData = {
             booking_data: {
               cust_ref_code: customerData.custRefCode,
@@ -673,7 +671,6 @@ const ServiceDetails = () => {
             },
           });
         } else if (paymentRes?.data?.payment?.status === "P") {
-          // Payment pending
           navigate("/customer-bookings", {
             state: {
               message:
@@ -682,7 +679,6 @@ const ServiceDetails = () => {
             },
           });
         } else {
-          // Payment success
           navigate("/customer-bookings", {
             state: {
               message: "🎉 Booking and payment successful!",
@@ -705,42 +701,50 @@ const ServiceDetails = () => {
     }
   };
 
-  const onSelectVariation = async (variationOrNull) => {
-    setVariationOpen(false);
-    setChosenVariation(variationOrNull || null);
+  const onCombinedBookingConfirm = async (selectedDate, selectedVariation) => {
+    setCombinedModalOpen(false);
+    setselecteddate(selectedDate);
+    setChosenVariation(selectedVariation || null);
+
     if (!chosenService) return;
+
     const booking = {
       booking_data: {
         cust_ref_code: customerData.custRefCode,
         call_mode: "ADD_BOOKING",
         service_id: chosenService.service_id,
-        // IMPORTANT: include service_variation_id for API
         service_variation_id:
-          variationOrNull?.id || variationOrNull?.variation_id || null,
-        booking_date: toAPIDate(selectateddate || ""),
-        end_date: toAPIDate(selectateddate || ""),
-        start_time: variationOrNull?.start_time || "",
-        end_time: variationOrNull?.end_time || "",
+          selectedVariation?.id || selectedVariation?.variation_id || null,
+        booking_date: toAPIDate(selectedDate || ""),
+        end_date: toAPIDate(selectedDate || ""),
+        start_time: selectedVariation?.start_time || "",
+        end_time: selectedVariation?.end_time || "",
         notes: "",
-        quantity: variationOrNull?.max_participant || 1,
+        quantity: selectedVariation?.max_participant || 1,
         duration: Number.parseInt(
           chosenService.duration_minutes || chosenService.duration || 60,
           10
         ),
         unit_price: Number.parseFloat(
-          (parseFloat(variationOrNull?.base_price) || 0) +
-            (parseFloat(variationOrNull?.pricing_rule_data?.week_day_price) ||
-              0) +
-            (parseFloat(variationOrNull?.pricing_rule_data?.time_price) || 0) +
-            (parseFloat(variationOrNull?.pricing_rule_data?.date_price) || 0)
+          (Number.parseFloat(selectedVariation?.base_price) || 0) +
+            (Number.parseFloat(
+              selectedVariation?.pricing_rule_data?.week_day_price
+            ) || 0) +
+            (Number.parseFloat(
+              selectedVariation?.pricing_rule_data?.time_price
+            ) || 0) +
+            (Number.parseFloat(
+              selectedVariation?.pricing_rule_data?.date_price
+            ) || 0)
         ),
       },
     };
+
     setBookingData(booking);
-    if (!chosenService) return;
-    await loadDisabledDates(chosenService.service_id, variationOrNull);
+    await loadDisabledDates(chosenService.service_id, selectedVariation);
     setShowConfirmation(true);
   };
+
   const loadDisabledDates = async (serviceId, variationOrNull) => {
     const starttime = variationOrNull?.start_time;
     const endtime = variationOrNull?.end_time;
@@ -766,6 +770,7 @@ const ServiceDetails = () => {
       setDisabledDateKeys(new Set());
     }
   };
+
   const fetchServiceDetails = async () => {
     try {
       setLoading(true);
@@ -774,8 +779,6 @@ const ServiceDetails = () => {
       setChosenService(foundService);
       if (foundService) {
         setService(foundService);
-
-        // Filter out null images and set first image as main
         const images = [
           foundService.image,
           foundService.image_1,
@@ -797,7 +800,7 @@ const ServiceDetails = () => {
   };
 
   const handleBookNow = () => {
-    setCalendarOpen(true);
+    setCombinedModalOpen(true);
   };
 
   const getServiceImages = () => {
@@ -865,25 +868,6 @@ const ServiceDetails = () => {
 
             <ServiceTitle>{service.name}</ServiceTitle>
             <TempleName>{service.temple_name}</TempleName>
-
-            {/* <QuickStats>
-              <StatItem>
-                <span className="stat-value">
-                  ₹{parseFloat(service.base_price || 0).toFixed(0)}
-                </span>
-                <span className="stat-label">Starting Price</span>
-              </StatItem>
-              <StatItem>
-                <span className="stat-value">{service.capacity}</span>
-                <span className="stat-label">Max Capacity</span>
-              </StatItem>
-              {service.duration_minutes > 0 && (
-                <StatItem>
-                  <span className="stat-value">{service.duration_minutes}</span>
-                  <span className="stat-label">Minutes</span>
-                </StatItem>
-              )}
-            </QuickStats> */}
           </HeroOverlay>
         </HeroSection>
 
@@ -920,39 +904,16 @@ const ServiceDetails = () => {
                           active={index === selectedImage}
                           onClick={() => setSelectedImage(index)}
                         >
-                          <img src={img} alt={`${service.name} ${index + 1}`} />
+                          <img
+                            src={img || "/placeholder.svg"}
+                            alt={`${service.name} ${index + 1}`}
+                          />
                         </Thumbnail>
                       ))}
                     </ThumbnailGrid>
                   )}
                 </GallerySection>
               )}
-
-              {/* <SectionTitle>Pricing</SectionTitle>
-              <PricingContainer>
-                <PricingGrid>
-                  <PricingCard>
-                    <div className="price">
-                      ₹ {parseFloat(service.base_price || 0).toFixed(2)}
-                    </div>
-                    <div className="details">
-                      <div>
-                        <strong>Base Price</strong>
-                      </div>
-                      <div>
-                        <strong>Capacity:</strong>{" "}
-                        <span>{service.capacity} people</span>
-                      </div>
-                      {service.duration_minutes > 0 && (
-                        <div>
-                          <strong>Duration:</strong>{" "}
-                          <span>{service.duration_minutes} min</span>
-                        </div>
-                      )}
-                    </div>
-                  </PricingCard>
-                </PricingGrid>
-              </PricingContainer> */}
 
               {service.service_variation_list &&
                 service.service_variation_list.length > 0 && (
@@ -969,14 +930,15 @@ const ServiceDetails = () => {
                               <VariationPrice>
                                 ₹
                                 {(
-                                  (parseFloat(variation.base_price) || 0) +
-                                  (parseFloat(
+                                  (Number.parseFloat(variation.base_price) ||
+                                    0) +
+                                  (Number.parseFloat(
                                     variation.pricing_rule_data?.week_day_price
                                   ) || 0) +
-                                  (parseFloat(
+                                  (Number.parseFloat(
                                     variation.pricing_rule_data?.time_price
                                   ) || 0) +
-                                  (parseFloat(
+                                  (Number.parseFloat(
                                     variation.pricing_rule_data?.date_price
                                   ) || 0)
                                 ).toLocaleString()}
@@ -1064,19 +1026,15 @@ const ServiceDetails = () => {
         <FloatingBookButton onClick={handleBookNow}>
           Book Now
         </FloatingBookButton>
-        <VariationModal
-          open={variationOpen}
+
+        <CombinedBookingModal
+          open={combinedModalOpen}
           service={chosenService}
-          onClose={() => setVariationOpen(false)}
-          onSelect={onSelectVariation}
-          selectateddate={selectateddate}
+          onClose={() => setCombinedModalOpen(false)}
+          onConfirm={onCombinedBookingConfirm}
+          preSelectedDate={preSelectedDate}
         />
-        <AvailabilityCalendarModal
-          open={calendarOpen}
-          // disabledDateKeys={disabledDateKeys}
-          onClose={() => setCalendarOpen(false)}
-          onConfirm={onConfirmDate}
-        />
+
         {showConfirmation && (
           <BookingConfirmationPopup
             booking={service}

@@ -1,4 +1,4 @@
-import React from "react";
+"use client";
 import styled from "styled-components";
 
 const Card = styled.div`
@@ -221,17 +221,48 @@ const PolicyText = styled.div`
   font-weight: 500;
 `;
 
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 12px;
+  flex-direction: column;
+`;
+
+const ViewDetailsButton = styled.button`
+  background: white;
+  color: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
+  border: 2px solid linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  width: 100%;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
+  color: white;
+
+  &:hover {
+    background: linear-gradient(
+      145deg,
+      rgba(145, 120, 38, 1),
+      rgba(152, 53, 42, 1)
+    );
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  }
+`;
+
 const ServiceCard = ({ service, onViewDetails }) => {
   // Calculate price display
   const getDisplayPrice = () => {
-    const basePrice = parseFloat(service.base_price || 0);
+    const basePrice = Number.parseFloat(service.base_price || 0);
 
     if (
       service.service_variation_list &&
       service.service_variation_list.length > 0
     ) {
       const prices = service.service_variation_list.map((v) =>
-        parseFloat(v.base_price || 0)
+        Number.parseFloat(v.base_price || 0)
       );
       const minPrice = Math.min(...prices);
       const maxPrice = Math.max(...prices);
@@ -279,7 +310,7 @@ const ServiceCard = ({ service, onViewDetails }) => {
   // Default image if service.image is not present
   const defaultImage =
     "https://garudalife.in/vendor/webkul/customui/assets/images/product/meduim-product-placeholder.webp";
-  return getVariationTypes().length > 0 ? (
+  return (
     <Card>
       <CardContent>
         <ImageSection>
@@ -351,13 +382,20 @@ const ServiceCard = ({ service, onViewDetails }) => {
             )}
           </PriceContainer>
 
-          <ViewButton onClick={() => onViewDetails(service.service_id)}>
-            Book Now
-          </ViewButton>
+          <ActionButtons>
+            <ViewDetailsButton
+              onClick={() => onViewDetails(service.service_id)}
+            >
+              View Details
+            </ViewDetailsButton>
+            <ViewButton onClick={() => onViewDetails(service.service_id)}>
+              Book Now
+            </ViewButton>
+          </ActionButtons>
         </PriceSection>
       </CardContent>
     </Card>
-  ) : null;
+  );
 };
 
 export default ServiceCard;
