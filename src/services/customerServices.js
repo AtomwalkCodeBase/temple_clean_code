@@ -81,18 +81,28 @@ export const processBooking = async (bookingData) => {
 };
 
 // Get Booking List
-export const getBookingList = async () => {
+export const getBookingList = async (startDate = null, endDate = null) => {
   const custRefCode = localStorage.getItem("customerRefCode");
   const token = localStorage.getItem("customerToken");
+  const tokens = localStorage.getItem("userToken");
+
   try {
-    const response = await axios.get(
-      `${BASE_URL}/get_booking_list/?cust_ref_code=${custRefCode}`,
-      {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      }
-    );
+    let url = `${BASE_URL}/get_booking_list/`;
+
+    // Add date parameters if provided
+    if (startDate && endDate) {
+      url += `?from_date=${startDate}&to_date=${endDate}`;
+      // or use whatever parameter names your API expects
+      // url += `&booking_start_date=${startDate}&booking_end_date=${endDate}`;
+    } else {
+      url += `?cust_ref_code=${custRefCode}`;
+    }
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Token ${token ? token : tokens}`,
+      },
+    });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

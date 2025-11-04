@@ -467,8 +467,13 @@ const PolicyContainer = styled.div`
 
 const PolicyGrid = styled.div`
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 25px;
   margin-top: 30px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const PolicyCard = styled.div`
@@ -482,6 +487,10 @@ const PolicyCard = styled.div`
   &:hover {
     transform: translateY(-3px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  }
+
+  &.refund {
+    border-left-color: #10b981;
   }
 
   h3 {
@@ -498,14 +507,108 @@ const PolicyCard = styled.div`
     }
   }
 
-  p {
-    margin-bottom: 12px;
-    color: #555;
-    line-height: 1.6;
+  &.refund h3::before {
+    content: "✓";
+    background: #10b981;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+`;
 
-    strong {
-      color: #2c3e50;
-    }
+const PolicySection = styled.div`
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e9ecef;
+
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+`;
+
+const PolicySectionTitle = styled.h4`
+  color: #1a1a1a;
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const PolicyDetails = styled.div`
+  display: grid;
+  gap: 10px;
+  margin-left: 0;
+`;
+
+const PolicyItem = styled.div`
+  background: #f8f9fa;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border-left: 3px solid #667eea;
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.5;
+
+  strong {
+    color: #2c3e50;
+  }
+
+  &.highlight {
+    background: #e3f2fd;
+    border-left-color: #2196f3;
+  }
+
+  &.warning {
+    background: #fff3e0;
+    border-left-color: #f57c00;
+    color: #e65100;
+  }
+
+  &.success {
+    background: #e8f5e9;
+    border-left-color: #10b981;
+    color: #1b5e20;
+  }
+`;
+
+const RefundRuleItem = styled.div`
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .rule-time {
+    color: #f57c00;
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+  }
+
+  .rule-refund {
+    color: #10b981;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .rule-note {
+    color: #666;
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-top: 8px;
   }
 `;
 
@@ -973,48 +1076,138 @@ const ServiceDetails = () => {
                   {service.adv_policy_data && (
                     <PolicyCard>
                       <h3>Advance Payment Policy</h3>
-                      <p>
-                        <strong>{service.adv_policy_data.name}</strong>
-                      </p>
-                      <p>
-                        Advance payment required:{" "}
-                        <strong>{service.adv_policy_data.percent}%</strong>{" "}
-                        (minimum ₹{service.adv_policy_data.min_amount})
-                      </p>
-                      <p>
-                        Payment due:{" "}
-                        <strong>
-                          {service.adv_policy_data.due_days_before} days
-                        </strong>{" "}
-                        before booking date
-                      </p>
+
+                      <PolicySection>
+                        <PolicySectionTitle>
+                          💰 Payment Requirements
+                        </PolicySectionTitle>
+                        <PolicyDetails>
+                          <PolicyItem highlight>
+                            <strong>Policy Name:</strong>{" "}
+                            {service.adv_policy_data.name}
+                          </PolicyItem>
+                          <PolicyItem highlight>
+                            <strong>Advance Required:</strong>{" "}
+                            {service.adv_policy_data.percent}% of total booking
+                            amount
+                          </PolicyItem>
+                          <PolicyItem warning>
+                            <strong>Minimum Amount:</strong> ₹
+                            {service.adv_policy_data.min_amount}
+                          </PolicyItem>
+                        </PolicyDetails>
+                      </PolicySection>
+
+                      <PolicySection>
+                        <PolicySectionTitle>
+                          📅 Payment Timeline
+                        </PolicySectionTitle>
+                        <PolicyDetails>
+                          <PolicyItem>
+                            <strong>Payment Due:</strong>{" "}
+                            {service.adv_policy_data.due_days_before} days
+                            before your booking date
+                          </PolicyItem>
+                          <PolicyItem>
+                            The advance amount must be received by the deadline
+                            to confirm your booking
+                          </PolicyItem>
+                        </PolicyDetails>
+                      </PolicySection>
+
+                      <PolicySection>
+                        <PolicySectionTitle>ℹ️ How it works</PolicySectionTitle>
+                        <PolicyDetails>
+                          <PolicyItem>
+                            1. Pay{" "}
+                            <strong>{service.adv_policy_data.percent}%</strong>{" "}
+                            advance now
+                          </PolicyItem>
+                          <PolicyItem>
+                            2. Pay remaining balance before your service date
+                          </PolicyItem>
+                          <PolicyItem>
+                            3. Your booking is confirmed once advance is
+                            received
+                          </PolicyItem>
+                        </PolicyDetails>
+                      </PolicySection>
                     </PolicyCard>
                   )}
 
                   {service.refund_policy_data &&
                     service.refund_policy_data.refund_rules && (
-                      <PolicyCard>
+                      <PolicyCard className="refund">
                         <h3>Refund Policy</h3>
-                        <p>
-                          <strong>{service.refund_policy_data.name}</strong>
-                        </p>
-                        {service.refund_policy_data.refund_rules.map(
-                          (rule, index) => (
-                            <div key={rule.id || index}>
-                              <p>
-                                Cancellation{" "}
-                                <strong>{rule.min_hours_before} hours</strong>{" "}
-                                before:{" "}
-                                <strong>{rule.refund_percent}% refund</strong>
-                              </p>
-                              {rule.notes && (
-                                <p>
-                                  <em>Note: {rule.notes}</em>
-                                </p>
-                              )}
-                            </div>
-                          )
-                        )}
+
+                        <PolicySection>
+                          <PolicySectionTitle>
+                            🔄 Policy Overview
+                          </PolicySectionTitle>
+                          <PolicyDetails>
+                            <PolicyItem success>
+                              <strong>Policy Name:</strong>{" "}
+                              {service.refund_policy_data.name}
+                            </PolicyItem>
+                            <PolicyItem>
+                              Refund eligibility depends on when you cancel your
+                              booking. Review the cancellation timeline below.
+                            </PolicyItem>
+                          </PolicyDetails>
+                        </PolicySection>
+
+                        <PolicySection>
+                          <PolicySectionTitle>
+                            📋 Cancellation Refund Rules
+                          </PolicySectionTitle>
+                          <div style={{ display: "grid", gap: "12px" }}>
+                            {service.refund_policy_data.refund_rules.map(
+                              (rule, index) => (
+                                <RefundRuleItem key={rule.id || index}>
+                                  <div className="rule-time">
+                                    ⏱️ Cancel at least{" "}
+                                    <strong>
+                                      {rule.min_hours_before
+                                        ? rule.min_hours_before
+                                        : rule.min_days_before}
+                                      {rule.min_hours_before ? "hours" : "days"}
+                                    </strong>{" "}
+                                    before
+                                  </div>
+                                  <div className="rule-refund">
+                                    💵 Refund:{" "}
+                                    <strong>{rule.refund_percent}%</strong> of
+                                    amount paid
+                                  </div>
+                                  {rule.notes && (
+                                    <div className="rule-note">
+                                      📌 Note: {rule.notes}
+                                    </div>
+                                  )}
+                                </RefundRuleItem>
+                              )
+                            )}
+                          </div>
+                        </PolicySection>
+
+                        <PolicySection>
+                          <PolicySectionTitle>
+                            ⚠️ Important Notes
+                          </PolicySectionTitle>
+                          <PolicyDetails>
+                            <PolicyItem warning>
+                              Cancellations must be done through your account
+                              dashboard
+                            </PolicyItem>
+                            <PolicyItem warning>
+                              Refunds will be processed within 5-7 business days
+                            </PolicyItem>
+                            <PolicyItem>
+                              Advance payment is non-refundable if you don't
+                              meet the cancellation deadline
+                            </PolicyItem>
+                          </PolicyDetails>
+                        </PolicySection>
                       </PolicyCard>
                     )}
                 </PolicyGrid>
@@ -1042,7 +1235,9 @@ const ServiceDetails = () => {
             onCancel={() => setShowConfirmation(false)}
             isLoading={isLoading}
             variationId={chosenVariation?.id || chosenVariation?.variation_id}
-            bookingDate={bookingData.booking_data?.booking_date}
+            bookingDate={
+              bookingData.booking_data && bookingData.booking_data.booking_date
+            }
           />
         )}
       </DetailsContainer>

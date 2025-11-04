@@ -12,11 +12,21 @@ import {
   FiChevronRight,
   FiBell,
 } from "react-icons/fi";
-import { MdTempleHindu, MdMiscellaneousServices } from "react-icons/md";
+import {
+  MdTempleHindu,
+  MdMiscellaneousServices,
+  MdApproval,
+} from "react-icons/md";
 import { GiLotus } from "react-icons/gi";
 import { getStoredFirstName } from "../../../services/authServices";
-import { Plug } from "lucide-react";
-import { FaPlusSquare } from "react-icons/fa";
+import {
+  AppleIcon,
+  Calendar,
+  Calendar1,
+  CalendarArrowDown,
+  Plug,
+} from "lucide-react";
+import { FaPlusSquare, FaSellsy } from "react-icons/fa";
 
 const SidebarContainer = styled(motion.div)`
   position: fixed;
@@ -327,9 +337,21 @@ const AdminSidebar = ({
                 badge: null,
               },
               {
+                path: "/admin-services",
+                icon: CalendarArrowDown,
+                label: "Check Avalability",
+                badge: null,
+              },
+              {
                 path: "/services",
                 icon: MdMiscellaneousServices,
                 label: "Temple Services",
+                badge: "",
+              },
+              {
+                path: "/sellerApproval",
+                icon: MdApproval,
+                label: "Approve Seller",
                 badge: "",
               },
             ]),

@@ -872,9 +872,12 @@ const PackageModal = ({
                         key={id}
                         type="button"
                         $selected={selected}
-                        onClick={() =>
-                          setFormData({ ...formData, pricing_rule_id: id })
-                        }
+                        onClick={() => {
+                          setFormData({
+                            ...formData,
+                            pricing_rule_id: selected ? null : id, // 👈 Toggle selection
+                          });
+                        }}
                         aria-pressed={selected}
                       >
                         <div className="title">

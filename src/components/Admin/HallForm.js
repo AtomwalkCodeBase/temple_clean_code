@@ -997,7 +997,7 @@ export default function HallForm({
             ? "PUJA"
             : serviceType === "EVENT"
             ? "EVENT"
-            : "Hall",
+            : "HALL",
         description: formData.description.trim() || "",
         base_price: 0,
         capacity: Number(formData.capacity),

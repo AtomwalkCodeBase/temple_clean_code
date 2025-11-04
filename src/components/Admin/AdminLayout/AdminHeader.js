@@ -290,6 +290,7 @@ const AdminHeader = ({ onToggleMobileMenu, currentPage }) => {
     if (path.includes("/advance-policies")) return "Advance Policies";
     if (path.includes("/refund-policies")) return "Refund Policies";
     if (path.includes("/pricing-rules")) return "Pricing Rules";
+    if (path.includes("/checkavalability")) return "Check Avalability";
     return currentPage || "Dashboard";
   };
 
@@ -351,6 +352,8 @@ const AdminHeader = ({ onToggleMobileMenu, currentPage }) => {
       return ["Policy Management", "Refund Policies"];
     if (path.includes("/pricing-rules"))
       return ["Policy Management", "Pricing Rules"];
+    if (path.includes("/checkavalability"))
+      return ["Temple Management", "Check Avalability"];
     return ["Dashboard"];
   };
 

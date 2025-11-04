@@ -310,7 +310,7 @@ const ServiceCard = ({ service, onViewDetails }) => {
   // Default image if service.image is not present
   const defaultImage =
     "https://garudalife.in/vendor/webkul/customui/assets/images/product/meduim-product-placeholder.webp";
-  return (
+  return getVariationTypes().length > 0 ? (
     <Card>
       <CardContent>
         <ImageSection>
@@ -388,14 +388,14 @@ const ServiceCard = ({ service, onViewDetails }) => {
             >
               View Details
             </ViewDetailsButton>
-            <ViewButton onClick={() => onViewDetails(service.service_id)}>
+            {/* <ViewButton onClick={() => onViewDetails(service.service_id)}>
               Book Now
-            </ViewButton>
+            </ViewButton> */}
           </ActionButtons>
         </PriceSection>
       </CardContent>
     </Card>
-  );
+  ) : null;
 };
 
 export default ServiceCard;
