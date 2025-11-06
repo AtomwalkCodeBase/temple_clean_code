@@ -64,13 +64,14 @@ export const forgotPin = async (mobileNumber) => {
 // Process Booking
 export const processBooking = async (bookingData) => {
   const token = localStorage.getItem("customerToken");
+  const Admintoken = localStorage.getItem("userToken");
   try {
     const response = await axios.post(
       `${BASE_URL}/process_booking_data/`,
       bookingData,
       {
         headers: {
-          Authorization: `Token ${token}`,
+          Authorization: `Token ${token ? token : Admintoken}`,
         },
       }
     );

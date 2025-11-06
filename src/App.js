@@ -38,6 +38,8 @@ import TempleDetails from "./components/HomePage/TempleDetails";
 import ManageTemple from "./components/Admin/ManageTemple";
 import SellerRegistration from "./components/Seller/SellerRegistartion";
 import TempleGroup from "./components/Admin/TempleGroup";
+import SellerApproval from "./components/Seller/SellerApproval";
+import AdminServices from "./components/Admin/AdminServices";
 
 function AppContent() {
   const location = useLocation();
@@ -54,6 +56,8 @@ function AppContent() {
     "/templeadmin",
     "/addtemple",
     "/add-groups",
+    "/sellerApproval",
+    "/admin-services",
   ].some((route) => location.pathname.startsWith(route));
 
   const isCustomerRoute = [
@@ -149,6 +153,22 @@ function AppContent() {
           element={
             <AdminLayout>
               <HallsManagement />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/sellerApproval"
+          element={
+            <AdminLayout>
+              <SellerApproval />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/admin-services"
+          element={
+            <AdminLayout>
+              <AdminServices />
             </AdminLayout>
           }
         />

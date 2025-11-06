@@ -95,6 +95,19 @@ export const getTempleServicesList = async () => {
     throw error.response?.data || error.message;
   }
 };
+export const getCustomerList = async () => {
+  try {
+    const response = await axios.get(
+      `${CUSTOMER_BASE_URL}/get_customer_list/`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error.message;
+  }
+};
 
 // Process advance policy
 export const processAdvancePolicyData = async (policyData) => {

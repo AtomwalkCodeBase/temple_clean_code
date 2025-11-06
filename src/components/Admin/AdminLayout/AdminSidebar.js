@@ -26,7 +26,7 @@ import {
   CalendarArrowDown,
   Plug,
 } from "lucide-react";
-import { FaPlusSquare, FaSellsy } from "react-icons/fa";
+import { FaPlusSquare, FaRegCalendarPlus, FaSellsy } from "react-icons/fa";
 
 const SidebarContainer = styled(motion.div)`
   position: fixed;
@@ -337,17 +337,18 @@ const AdminSidebar = ({
                 badge: null,
               },
               {
-                path: "/admin-services",
-                icon: CalendarArrowDown,
-                label: "Check Avalability",
-                badge: null,
-              },
-              {
                 path: "/services",
                 icon: MdMiscellaneousServices,
                 label: "Temple Services",
                 badge: "",
               },
+              {
+                path: "/admin-services",
+                icon: FaRegCalendarPlus,
+                label: "New Bookings",
+                badge: null,
+              },
+
               {
                 path: "/sellerApproval",
                 icon: MdApproval,
