@@ -51,7 +51,7 @@ const PopupContent = styled(motion.div)`
 `;
 
 const HeaderSection = styled.div`
-  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
+  background: ${(props) => props.isSeller ? seller_Color_palttels.linear_gradient : `linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54))`};
   padding: 2rem 2rem 1.5rem;
   text-align: center;
   position: relative;
@@ -247,7 +247,7 @@ const SuccessMessage = styled(MessageBase)`
 `;
 
 const SubmitButton = styled.button`
-  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
+  background: ${(props) => props.isSeller ? seller_Color_palttels.linear_gradient : `linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54))`};
   color: white;
   border: none;
   padding: 1.25rem 2rem;
@@ -318,7 +318,27 @@ const StrengthDot = styled.div`
   transition: all 0.3s ease;
 `;
 
+const seller_Color_palttels = {
+  Primary: "#8B5CF6",
+  Accent:	"#FACC15",
+Background:	"#F9FAFB" ,
+ white:	"#FFFFFF",
+Text_Primary:	"#1F2937",
+Text_Secondary:	"#6B7280",
+Success:	"#10B981",
+Warning:	"#F59E0B",
+Error:	"#EF4444",
+blue: "#667EEA",
+purple: "#764BA2",
+linear_gradient: "linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%)",
+backgroung_linear_gradient: "linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.14))",
+menuItems_hover: "linear-gradient(145deg, #764ba2, #7c3aed)",
+GLASS_BG_HOVER : "linear-gradient(135deg, rgb(255 255 255 / 24%), rgb(255 255 255 / 14%))",
+}
+
 const SetNewPinPopup = ({ onClose, customerId }) => {
+    const custmercode = localStorage.getItem("customerRefCode");
+  const isSeller = custmercode?.startsWith("S");
   const [formData, setFormData] = useState({
     u_id: customerId || "",
     o_pin: "",
@@ -396,7 +416,7 @@ const SetNewPinPopup = ({ onClose, customerId }) => {
           <FiX />
         </CloseButton>
 
-        <HeaderSection>
+        <HeaderSection isSeller={isSeller}>
           <IconWrapper>
             <FiShield />
           </IconWrapper>
@@ -516,7 +536,7 @@ const SetNewPinPopup = ({ onClose, customerId }) => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <SubmitButton type="submit" disabled={loading}>
+                  <SubmitButton type="submit" disabled={loading} isSeller={isSeller}>
                     {loading ? (
                       "Updating PIN..."
                     ) : (

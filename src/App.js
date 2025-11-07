@@ -38,8 +38,15 @@ import TempleDetails from "./components/HomePage/TempleDetails";
 import ManageTemple from "./components/Admin/ManageTemple";
 import SellerRegistration from "./components/Seller/SellerRegistartion";
 import TempleGroup from "./components/Admin/TempleGroup";
-import SellerApproval from "./components/Seller/SellerApproval";
+import SellerApproval from "./components/Admin/SellerApproval";
 import AdminServices from "./components/Admin/AdminServices";
+import SellerDashboard from "./components/Seller/SellerDashboard";
+import SellerProduct from "./components/Seller/SellerProduct";
+import SellerOrder from "./components/Seller/SellerOrder";
+import AddProduct from "./components/Seller/AddProduct";
+import OrderDetailsPage from "./components/Seller/OrderDetailsPage";
+import AddVariation from "./components/Seller/AddVariation";
+import CatalogSteup from "./components/Admin/CatalogSteup";
 
 function AppContent() {
   const location = useLocation();
@@ -58,6 +65,7 @@ function AppContent() {
     "/add-groups",
     "/sellerApproval",
     "/admin-services",
+    "/catalog-setup"
   ].some((route) => location.pathname.startsWith(route));
 
   const isCustomerRoute = [
@@ -66,10 +74,18 @@ function AppContent() {
     "/customer-bookings",
     "/customer-dashboard",
     "/halls-management",
-    "/seller-Application",
     "/customer-services",
     "/customer-profile",
-    "/seller-Application",
+    "/sellers/application",
+    "/sellers/dashboard",
+    "/sellers/products",
+    "/sellers/orders",
+    "/sellers/addProduct",
+    "/sellers/editProduct",
+    "/sellers/profile",
+    "/sellers/order-details",
+    "/sellers/addVariation",
+    "/sellers/editVariation",
   ].some((route) => location.pathname.startsWith(route));
 
   const hideNavAndFooter = isAdminRoute || isCustomerRoute;
@@ -105,6 +121,14 @@ function AppContent() {
           element={
             <AdminLayout>
               <TempleGroup />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/catalog-setup"
+          element={
+            <AdminLayout>
+              <CatalogSteup />
             </AdminLayout>
           }
         />
@@ -185,7 +209,17 @@ function AppContent() {
         <Route path="/customer-bookings" element={<CustomerBookings />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
         <Route path="/book-seva/:templeId" element={<BookSeva />} />
-        <Route path="/seller-Application" element={<SellerRegistration />} />
+        {/* <Route path="/seller-Application" element={<SellerRegistration />} /> */}
+        <Route path="/sellers/dashboard" element={<SellerDashboard />} />
+        <Route path="/sellers/application" element={<SellerRegistration />} />
+        <Route path="/sellers/products" element={<SellerProduct />} />
+        <Route path="/sellers/orders" element={<SellerOrder />} />
+        <Route path="/sellers/order-details" element={<OrderDetailsPage />} />
+        <Route path="/sellers/addProduct" element={<AddProduct />} />
+        <Route path="/sellers/editProduct" element={<AddProduct />} />
+        <Route path="/sellers/addVariation" element={<AddVariation />} />
+        <Route path="/sellers/editVariation" element={<AddVariation />} />
+        <Route path="/sellers/profile" element={<CustomerProfile />} />
         <Route
           path="/customer-services/:serviceId"
           element={<ServiceDetails />}

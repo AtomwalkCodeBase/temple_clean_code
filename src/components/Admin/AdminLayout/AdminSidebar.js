@@ -24,6 +24,7 @@ import {
   Calendar,
   Calendar1,
   CalendarArrowDown,
+  Package,
   Plug,
 } from "lucide-react";
 import { FaPlusSquare, FaRegCalendarPlus, FaSellsy } from "react-icons/fa";
@@ -319,6 +320,12 @@ const AdminSidebar = ({
                 path: "/add-groups",
                 icon: FaPlusSquare,
                 label: "Add Groups",
+                badge: null,
+              },
+              {
+                path: "/catalog-setup",
+                icon: Package,
+                label: "Catalog Setup",
                 badge: null,
               },
               {
