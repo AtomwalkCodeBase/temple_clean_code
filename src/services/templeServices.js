@@ -85,11 +85,14 @@ export const getPricingRuleList = async () => {
 };
 
 // Get temple services
-export const getTempleServicesList = async () => {
+export const getTempleServicesList = async (temple_id) => {
   try {
-    const response = await axios.get(`${BASE_URL}/get_temple_services_list/`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await axios.get(
+      `${BASE_URL}/get_temple_services_list/?temple_id=${temple_id || ""}`,
+      {
+        headers: getAuthHeaders(),
+      }
+    );
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

@@ -394,16 +394,47 @@ const DisabledReason = styled.div`
     font-size: 14px;
   }
 `;
+const BookNow = styled.div`
+  font-size: 12px;
+  color: #63dc26ff;
+  font-weight: 700;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #f2fef2ff 0%, #e7fee2ff 100%);
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #2bef69ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  &::before {
+    content: "✅";
+    font-size: 14px;
+  }
+`;
+const CapacityInfo = styled.div`
+  font-size: 11px;
+  color: ${(props) => (props.$isLow ? "#dc2626" : "#059669")};
+  font-weight: 600;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  background: ${(props) => (props.$isLow ? "#fef2f2" : "#f0fdf4")};
+  border-radius: 4px;
+  text-align: center;
+`;
 
 const ServiceCard = ({ service, isSelected, onSelect, onVariationSelect }) => {
   const [showVariations, setShowVariations] = useState(false);
-
+  console.log(service, "service");
   const handleCardClick = () => {
     onSelect();
     setShowVariations(!showVariations);
   };
 
   const handleVariationClick = (variation) => {
+    handleCardClick();
     if (!variation.disabled) {
       onVariationSelect(variation);
       setTimeout(() => {
@@ -457,35 +488,70 @@ const ServiceCard = ({ service, isSelected, onSelect, onVariationSelect }) => {
         </ServiceInfo>
       </ServiceHeader>
 
-      {/* {isSelected && showVariations && ( */}
       <VariationsSection>
         <VariationsTitle>Available Variations</VariationsTitle>
-        <VariationsGrid>
-          {service.availableVariations?.map((variation, idx) => (
-            <VariationCard
-              key={idx}
-              disabled={variation.disabled}
-              isSelected={variation.isSelected}
-              onClick={() => handleVariationClick(variation)}
-            >
-              <VariationHeader>
-                <VariationType>{variation.pricing_type_str}</VariationType>
-                <VariationPrice>{variation.base_price}</VariationPrice>
-              </VariationHeader>
-              <VariationTime>
-                {variation.start_time} - {variation.end_time}
-              </VariationTime>
-              <VariationCapacity>
-                Max {variation.max_participant} participants
-              </VariationCapacity>
-              {variation.disabled && (
-                <DisabledReason>{variation.disabledReason}</DisabledReason>
-              )}
-            </VariationCard>
-          ))}
-        </VariationsGrid>
+        {service.availableVariations?.length === 0 ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "20px",
+              color: "#6b7280",
+              background: "white",
+              borderRadius: "16px",
+              boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+            }}
+          >
+            No variations are available for this service on the selected date.
+            Please choose another day.
+          </div>
+        ) : (
+          <VariationsGrid>
+            {service.availableVariations?.map((variation, idx) => (
+              <VariationCard
+                key={idx}
+                disabled={variation.disabled}
+                isSelected={variation.isSelected}
+                onClick={() => handleVariationClick(variation)}
+              >
+                <VariationHeader>
+                  <VariationType>{variation.pricing_type_str}</VariationType>
+                  <VariationPrice>₹{variation.base_price}</VariationPrice>
+                </VariationHeader>
+                <VariationTime>
+                  {variation.start_time} - {variation.end_time}
+                </VariationTime>
+                <VariationCapacity>
+                  Max {variation.max_participant} participants
+                </VariationCapacity>
+
+                {/* Show capacity info for EVENT and PUJA */}
+                {(service.service_type === "EVENT" ||
+                  service.service_type === "PUJA") && (
+                  <CapacityInfo
+                    $isLow={
+                      variation.availableQuantity <
+                      (variation.max_participant || 1)
+                    }
+                  >
+                    {variation.disabled
+                      ? variation.disabledReason
+                      : variation.availableQuantity <
+                        (variation.max_participant || 1)
+                      ? `Only ${variation.availableQuantity} spots left`
+                      : `${variation.availableQuantity} spots available`}
+                  </CapacityInfo>
+                )}
+
+                {variation.disabled && service.service_type === "HALL" ? (
+                  <DisabledReason>{variation.disabledReason}</DisabledReason>
+                ) : !variation.disabled ? (
+                  <BookNow>Book Now</BookNow>
+                ) : null}
+              </VariationCard>
+            ))}
+          </VariationsGrid>
+        )}
       </VariationsSection>
-      {/* )} */}
     </ServiceCardContainer>
   );
 };

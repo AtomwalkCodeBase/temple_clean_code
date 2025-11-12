@@ -47,6 +47,7 @@ import AddProduct from "./components/Seller/AddProduct";
 import OrderDetailsPage from "./components/Seller/OrderDetailsPage";
 import AddVariation from "./components/Seller/AddVariation";
 import CatalogSteup from "./components/Admin/CatalogSteup";
+import DemoMode from "./components/Admin/DemoMode";
 
 function AppContent() {
   const location = useLocation();
@@ -65,7 +66,7 @@ function AppContent() {
     "/add-groups",
     "/sellerApproval",
     "/admin-services",
-    "/catalog-setup"
+    "/catalog-setup",
   ].some((route) => location.pathname.startsWith(route));
 
   const isCustomerRoute = [
@@ -98,6 +99,7 @@ function AppContent() {
         <Route path="/temples" element={<Temples />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/templeDetails/:templeId" element={<TempleDetails />} />
+        <Route path="/demomode" element={<DemoMode />} />
         {/* Admin routes */}
         <Route path="/login" element={<Login />} />
         <Route

@@ -449,6 +449,7 @@ export default function CloneFromExistingModal({
       onClose?.();
     } catch (e) {
       // basic alert; in production you'd want a nicer error surface
+      onClose?.();
       alert(e?.message || "Failed to clone policies");
     } finally {
       setSubmitting(false);

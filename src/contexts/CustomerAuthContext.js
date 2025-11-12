@@ -27,7 +27,7 @@ export const CustomerAuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [sellerProfile, setSellerProfile] = useState([]);
   const customerCode = localStorage.getItem("customerRefCode");
-  
+
   const [productList, setProductList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -63,14 +63,20 @@ export const CustomerAuthProvider = ({ children }) => {
   };
 
   const getSellerProfile = async () => {
-    try {
-      const response = await getSellerAllList();
-      const filteredData = response.find((seller) => seller.cust_ref_code === customerCode)
-      setSellerProfile(filteredData);
-    } catch (error) {
-      console.error(error)
-    }
-  } 
+    if (
+      window.location.pathname === "/sellers/dashboard" ||
+      window.location.pathname === "/sellers/profile"
+    )
+      try {
+        const response = await getSellerAllList();
+        const filteredData = response.find(
+          (seller) => seller.cust_ref_code === customerCode
+        );
+        setSellerProfile(filteredData);
+      } catch (error) {
+        console.error(error);
+      }
+  };
 
   const getProductDetailsList = async () => {
     const seller_code = localStorage.getItem("customerRefCode");
@@ -97,7 +103,7 @@ export const CustomerAuthProvider = ({ children }) => {
     getProductDetailsList,
     productList,
     isLoading,
-    error
+    error,
   };
 
   return (

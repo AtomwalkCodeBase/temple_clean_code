@@ -12,9 +12,18 @@ import {
   FiLogOut,
   FiMapPin,
 } from "react-icons/fi";
-import { FaHome, FaCalendarAlt, FaBook, FaThList, FaClipboardList } from "react-icons/fa";
+import {
+  FaHome,
+  FaCalendarAlt,
+  FaBook,
+  FaThList,
+  FaClipboardList,
+} from "react-icons/fa";
 import { IoPerson, IoSettingsSharp } from "react-icons/io5";
-import { FaBoxArchive, FaPersonWalkingDashedLineArrowRight } from "react-icons/fa6";
+import {
+  FaBoxArchive,
+  FaPersonWalkingDashedLineArrowRight,
+} from "react-icons/fa6";
 import { MdTempleHindu } from "react-icons/md";
 import { useCustomerAuth } from "../../contexts/CustomerAuthContext";
 import LocationModal from "./CustomerModal/LocationModal";
@@ -53,21 +62,24 @@ const GLASS_SAT = "140%";
 
 const seller_Color_palttels = {
   Primary: "#8B5CF6",
-  Accent:	"#FACC15",
-Background:	"#F9FAFB" ,
- white:	"#FFFFFF",
-Text_Primary:	"#1F2937",
-Text_Secondary:	"#6B7280",
-Success:	"#10B981",
-Warning:	"#F59E0B",
-Error:	"#EF4444",
-blue: "#667EEA",
-purple: "#764BA2",
-linear_gradient: "linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%)",
-backgroung_linear_gradient: "linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.14))",
-menuItems_hover: "linear-gradient(145deg, #764ba2, #7c3aed)",
-GLASS_BG_HOVER : "linear-gradient(135deg, rgb(255 255 255 / 24%), rgb(255 255 255 / 14%))",
-}
+  Accent: "#FACC15",
+  Background: "#F9FAFB",
+  white: "#FFFFFF",
+  Text_Primary: "#1F2937",
+  Text_Secondary: "#6B7280",
+  Success: "#10B981",
+  Warning: "#F59E0B",
+  Error: "#EF4444",
+  blue: "#667EEA",
+  purple: "#764BA2",
+  linear_gradient:
+    "linear-gradient(135deg, rgb(102, 126, 234) 0%, rgb(118, 75, 162) 100%)",
+  backgroung_linear_gradient:
+    "linear-gradient(135deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.14))",
+  menuItems_hover: "linear-gradient(145deg, #764ba2, #7c3aed)",
+  GLASS_BG_HOVER:
+    "linear-gradient(135deg, rgb(255 255 255 / 24%), rgb(255 255 255 / 14%))",
+};
 
 const LayoutContainer = styled.div`
   display: flex;
@@ -82,7 +94,10 @@ const LayoutContainer = styled.div`
       rgba(135, 169, 107, 0.06) 0%,
       transparent 60%
     ),
-    ${(props) => props.isSeller ? "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)" : `linear-gradient(135deg, ${SPIRITUAL_OFFWHITE} 0%, ${SPIRITUAL_CREAM} 100%)`};
+    ${(props) =>
+      props.isSeller
+        ? "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)"
+        : `linear-gradient(135deg, ${SPIRITUAL_OFFWHITE} 0%, ${SPIRITUAL_CREAM} 100%)`};
 `;
 
 const Sidebar = styled(motion.div)`
@@ -97,7 +112,8 @@ const Sidebar = styled(motion.div)`
 
   transition: background ${TRANSITION_CSS}, box-shadow ${TRANSITION_CSS},
     border-color ${TRANSITION_CSS}, transform ${TRANSITION_CSS};
-    background: ${(props) => props.isSeller ? seller_Color_palttels.GLASS_BG_HOVER : GLASS_BG_IDLE};
+  background: ${(props) =>
+    props.isSeller ? seller_Color_palttels.GLASS_BG_HOVER : GLASS_BG_IDLE};
   backdrop-filter: blur(${GLASS_BLUR}) saturate(${GLASS_SAT});
   -webkit-backdrop-filter: blur(${GLASS_BLUR}) saturate(${GLASS_SAT});
 
@@ -117,11 +133,15 @@ const Sidebar = styled(motion.div)`
       rgba(212, 175, 55, 0.08) 0%,
       transparent 38%
     );
-  /*  background: ${(props) => props.isSeller ? seller_Color_palttels.linear_gradient : "linear-gradient(180deg,rgba(212, 175, 55, 0.08) 0%,transparent 38%)"} */
+    /*  background: ${(props) =>
+      props.isSeller
+        ? seller_Color_palttels.linear_gradient
+        : "linear-gradient(180deg,rgba(212, 175, 55, 0.08) 0%,transparent 38%)"} */
   }
 
   &:hover {
-    background: ${(props) => props.isSeller? seller_Color_palttels.GLASS_BG_HOVER : GLASS_BG_HOVER};
+    background: ${(props) =>
+      props.isSeller ? seller_Color_palttels.GLASS_BG_HOVER : GLASS_BG_HOVER};
     box-shadow: 0 22px 60px rgba(44, 62, 80, 0.12),
       0 6px 16px rgba(44, 62, 80, 0.08), inset 0 1px 0 ${GLASS_HILITE};
   }
@@ -157,7 +177,10 @@ const SidebarHeader = styled.div`
     left: 20px;
     right: 20px;
     height: 1px;
-    background: ${props => props.isSeller ? seller_Color_palttels.GLASS_BG_HOVER : "linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent)"};
+    background: ${(props) =>
+      props.isSeller
+        ? seller_Color_palttels.GLASS_BG_HOVER
+        : "linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent)"};
     pointer-events: none;
     border-radius: 1px;
     transition: background ${TRANSITION_CSS};
@@ -191,7 +214,7 @@ const Logo = styled.div`
       font-size: 1.08rem;
       font-weight: 700;
       margin: 0;
-      color: ${(props) => props.isSeller ? "#0f172a" : SPIRITUAL_DEEP_BLUE};
+      color: ${(props) => (props.isSeller ? "#0f172a" : SPIRITUAL_DEEP_BLUE)};
       letter-spacing: 0.2px;
       background: linear-gradient(
         135deg,
@@ -205,7 +228,7 @@ const Logo = styled.div`
 
     .subtitle {
       font-size: 0.78rem;
-      color: ${(props) => props.isSeller ? "#94a3b8" : SPIRITUAL_SAGE};
+      color: ${(props) => (props.isSeller ? "#94a3b8" : SPIRITUAL_SAGE)};
       margin: 0;
       font-weight: 500;
     }
@@ -221,7 +244,10 @@ const CollapseButton = styled.button`
   height: 38px;
   border: 1px solid rgba(212, 175, 55, 0.4);
   border-radius: 20px;
-  background: ${(props) => props.isSeller? seller_Color_palttels.linear_gradient : `linear-gradient(135deg,${SPIRITUAL_GOLD},${SPIRITUAL_GOLD_DARK})`};
+  background: ${(props) =>
+    props.isSeller
+      ? seller_Color_palttels.linear_gradient
+      : `linear-gradient(135deg,${SPIRITUAL_GOLD},${SPIRITUAL_GOLD_DARK})`};
   backdrop-filter: blur(8px) saturate(140%);
   -webkit-backdrop-filter: blur(8px) saturate(140%);
   color: ${SPIRITUAL_OFFWHITE};
@@ -313,12 +339,12 @@ const MenuItem = styled.div`
   color: ${(props) =>
     props.active ? SPIRITUAL_OFFWHITE : SPIRITUAL_DEEP_BLUE};
 
-background: ${(props) =>
-  props.active
-    ? props.isSeller
-      ? seller_Color_palttels.linear_gradient
-      : `linear-gradient(145deg, ${SPIRITUAL_GOLD}, ${SPIRITUAL_TERRACOTTA})`
-    : "transparent"};
+  background: ${(props) =>
+    props.active
+      ? props.isSeller
+        ? seller_Color_palttels.linear_gradient
+        : `linear-gradient(145deg, ${SPIRITUAL_GOLD}, ${SPIRITUAL_TERRACOTTA})`
+      : "transparent"};
 
   /* border: 1px solid
     ${(props) => (props.active ? "transparent" : "rgba(212, 175, 55, 0.2)")}; */
@@ -328,12 +354,14 @@ background: ${(props) =>
       : "inset 0 1px 0 rgba(255, 255, 255, 0.3)"};
 
   &:hover {
-      background: ${(props) =>
-  props.active
-    ? props.isSeller
-      ? seller_Color_palttels.menuItems_hover
-      : `linear-gradient(145deg, ${SPIRITUAL_GOLD_DARK}, ${SPIRITUAL_MAROON})`
-    : props.isSeller? "rgb(255 255 255 / 18%)": "transparent"};
+    background: ${(props) =>
+      props.active
+        ? props.isSeller
+          ? seller_Color_palttels.menuItems_hover
+          : `linear-gradient(145deg, ${SPIRITUAL_GOLD_DARK}, ${SPIRITUAL_MAROON})`
+        : props.isSeller
+        ? "rgb(255 255 255 / 18%)"
+        : "transparent"};
 
     border-color: ${(props) =>
       props.active ? "transparent" : "rgba(212, 175, 55, 0.3)"};
@@ -351,14 +379,14 @@ background: ${(props) =>
     display: flex;
     align-items: center;
     justify-content: center;
-  color: ${({ isSeller, active }) =>
-isSeller
-    ? active
-      ? "#ffffff"
-      : "#6b7280"
-    : active
-    ? SPIRITUAL_OFFWHITE
-    : SPIRITUAL_GOLD};
+    color: ${({ isSeller, active }) =>
+      isSeller
+        ? active
+          ? "#ffffff"
+          : "#6b7280"
+        : active
+        ? SPIRITUAL_OFFWHITE
+        : SPIRITUAL_GOLD};
     transition: color 0.18s ${TRANSITION_EASE};
   }
 
@@ -536,7 +564,8 @@ const UserInfo = styled.div`
 const PageContent = styled.div`
   padding: 2rem;
   min-height: calc(100vh - 80px);
-  background: ${(props) => props.isSeller ? seller_Color_palttels.Background : SPIRITUAL_OFFWHITE};
+  background: ${(props) =>
+    props.isSeller ? seller_Color_palttels.Background : SPIRITUAL_OFFWHITE};
 
   @media (max-width: 768px) {
     padding: 1.5rem;
@@ -658,7 +687,8 @@ const CustomerLayout = ({ children }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { customerData, logout, sellerProfile, getSellerProfile } = useCustomerAuth();
+  const { customerData, logout, sellerProfile, getSellerProfile } =
+    useCustomerAuth();
   const custmercode = localStorage.getItem("customerRefCode");
   const isSeller = custmercode?.startsWith("S");
   let menuItems = [];
@@ -790,7 +820,7 @@ const CustomerLayout = ({ children }) => {
 
   useEffect(() => {
     getSellerProfile();
-  },[])
+  }, []);
   return (
     <LayoutContainer isSeller={isSeller}>
       <Sidebar
@@ -804,7 +834,11 @@ const CustomerLayout = ({ children }) => {
         isSeller={isSeller}
       >
         <SidebarHeader isSeller={isSeller}>
-          <Logo collapsed={sidebarCollapsed} onClick={() => navigate("/")} isSeller={isSeller}>
+          <Logo
+            collapsed={sidebarCollapsed}
+            onClick={() => navigate("/")}
+            isSeller={isSeller}
+          >
             <motion.div
               className="om-symbol"
               animate={{ opacity: [0.9, 1, 0.9] }}
@@ -817,8 +851,12 @@ const CustomerLayout = ({ children }) => {
               🕉️
             </motion.div>
             <div className="brand-text" isSeller={isSeller}>
-              <div className="title" isSeller={isSeller}>Temple Connect</div>
-              <div className="subtitle" isSeller={isSeller}>{customerData?.custRefCode}</div>
+              <div className="title" isSeller={isSeller}>
+                Temple Connect
+              </div>
+              <div className="subtitle" isSeller={isSeller}>
+                {customerData?.custRefCode}
+              </div>
             </div>
           </Logo>
 
@@ -906,7 +944,11 @@ const CustomerLayout = ({ children }) => {
               >
                 <UserAvatar isSeller={isSeller}>{getUserInitials()}</UserAvatar>
                 <UserInfo>
-                  <div className="name">{custmercode?.startsWith("S") ? `${ sellerProfile ? sellerProfile.name : "Seller"}` : "Devotee"}</div>
+                  <div className="name">
+                    {custmercode?.startsWith("S")
+                      ? `${sellerProfile ? sellerProfile.name : "Seller"}`
+                      : "Devotee"}
+                  </div>
                   <div className="role">{customerData?.custRefCode}</div>
                 </UserInfo>
                 <FiChevronDown
@@ -928,7 +970,9 @@ const CustomerLayout = ({ children }) => {
                     <DropdownItem
                       onClick={() => {
                         setDropdownOpen(false);
-                        navigate(isSeller ? "/seller-Profile" : "/customer-profile");
+                        navigate(
+                          isSeller ? "/sellers/profile" : "/customer-profile"
+                        );
                       }}
                     >
                       <span className="icon">

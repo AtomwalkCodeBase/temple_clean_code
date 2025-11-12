@@ -462,6 +462,7 @@ const BookingSummary = ({
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const basePrice = parseFloat(variation.base_price) || 0;
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -490,7 +491,6 @@ const BookingSummary = ({
   }, [searchQuery, customers]);
 
   const calculateTotalPrice = () => {
-    const basePrice = parseFloat(variation.base_price) || 0;
     const weekDayPrice =
       parseFloat(variation.pricing_rule_data?.week_day_price) || 0;
     const timePrice = parseFloat(variation.pricing_rule_data?.time_price) || 0;
@@ -583,9 +583,7 @@ const BookingSummary = ({
           <DetailRow>
             <DetailLabel $icon="⏱️">Duration</DetailLabel>
             <DetailValue>
-              {service.duration_minutes
-                ? `${service.duration_minutes} minutes`
-                : "Flexible"}
+              {variation.start_time} - {variation.end_time}
             </DetailValue>
           </DetailRow>
         </SummarySection>
@@ -607,16 +605,14 @@ const BookingSummary = ({
               })}
             </DetailValue>
           </DetailRow>
-          <DetailRow>
-            <DetailLabel $icon="🕐">Time</DetailLabel>
-            <DetailValue>
-              {variation.start_time} - {variation.end_time}
-            </DetailValue>
-          </DetailRow>
-          <DetailRow>
-            <DetailLabel $icon="👤">Participants</DetailLabel>
-            <DetailValue>{variation.max_participant || 1}</DetailValue>
-          </DetailRow>
+          {calculateTotalPrice() > basePrice && (
+            <DetailRow>
+              <DetailLabel $icon="💵">
+                Additional price / pricing rule
+              </DetailLabel>
+              <DetailValue>{calculateTotalPrice() - basePrice}</DetailValue>
+            </DetailRow>
+          )}
           <DetailRow>
             <DetailLabel $icon="💰">Total Price</DetailLabel>
             <PriceValue>{calculateTotalPrice()}</PriceValue>
