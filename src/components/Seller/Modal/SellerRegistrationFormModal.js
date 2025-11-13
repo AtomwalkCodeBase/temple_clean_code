@@ -607,18 +607,23 @@ const handleSubmitApplication = async (e, mode) => {
         )}
       </ModalBody>
 
-      {(selectedTemple?.SellerApplication?.cancel_remarks ||
-        selectedTemple?.SellerApplication?.approval_remarks) && (
+      {selectedTemple?.SellerApplication?.status === "C" && (
         <ModalBody>
-          <SectionTitle>
-            {selectedTemple?.SellerApplication?.cancel_remarks
-              ? "Cancel Remark"
-              : "Approval Remark"}
-          </SectionTitle>
-          <DetailValue>
-            {selectedTemple?.SellerApplication?.cancel_remarks ||
-              selectedTemple?.SellerApplication?.approval_remarks}
-          </DetailValue>
+          {selectedTemple?.SellerApplication?.cancel_remarks ? (
+            <>
+              <SectionTitle>Cancel Remark</SectionTitle>
+              <DetailValue>
+                {selectedTemple?.SellerApplication?.cancel_remarks}
+              </DetailValue>
+            </>
+          ) : (
+            <>
+              <SectionTitle>Approval Remark</SectionTitle>
+              <DetailValue>
+                {selectedTemple?.SellerApplication?.approval_remarks}
+              </DetailValue>
+            </>
+          )}
         </ModalBody>
       )}
 

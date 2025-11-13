@@ -1,10 +1,105 @@
 import React from 'react'
 import CustomerLayout from '../Customer/CustomerLayout'
 import DataTable from '../Admin/AdminLayout/DataTable'
+import SellerDataTable from './ReusableComponents/SellerDataTable';
+import styled from 'styled-components';
+
+const PageContainer = styled.div`
+  background: #f8fafc;
+  min-height: 100vh;
+`;
+
+const PageHeader = styled.h2`
+  color: #1e293b;
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  &::before {
+    content: '';
+    width: 4px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
+  }
+`;
 
 const SellerOrder = () => {
 
-      const orderColumns = [
+  // const orderColumns = [
+  //   {
+  //     key: "order_id",
+  //     title: "Order ID",
+  //     render: (value) => <strong>{value}</strong>,
+  //   },
+  //   {
+  //     key: "customer_name",
+  //     title: "Customer",
+  //   },
+  //   {
+  //     key: "product_name",
+  //     title: "Product",
+  //   },
+  //   {
+  //     key: "total_amount",
+  //     title: "Total Amount",
+  //   },
+  //   {
+  //     key: "status",
+  //     title: "Status",
+  //     render: (value) => {
+  //       const statusStyles = {
+  //         Delivered: {
+  //           color: "#059669",
+  //           background: "#d1fae5",
+  //         },
+  //         Pending: {
+  //           color: "#b45309",
+  //           background: "#fef3c7",
+  //         },
+  //         Cancelled: {
+  //           color: "#dc2626",
+  //           background: "#fee2e2",
+  //         },
+  //         Processing: {
+  //           color: "#2563eb",
+  //           background: "#dbeafe",
+  //         },
+  //       };
+
+  //       const { color, background } = statusStyles[value] || {
+  //         color: "#374151",
+  //         background: "#f3f4f6",
+  //       };
+
+  //       return (
+  //         <span
+  //           style={{
+  //             fontSize: "0.75rem",
+  //             color,
+  //             background,
+  //             padding: "0.125rem 0.5rem",
+  //             borderRadius: "9999px",
+  //             marginTop: "0.25rem",
+  //             display: "inline-block",
+  //             fontWeight: "600",
+  //           }}
+  //         >
+  //           {value}
+  //         </span>
+  //       );
+  //     },
+  //   },
+  //   {
+  //     key: "date",
+  //     title: "Order Date",
+  //   },
+  // ];
+
+  const orderColumns = [
   {
     key: "order_id",
     title: "Order ID",
@@ -25,57 +120,74 @@ const SellerOrder = () => {
   {
     key: "status",
     title: "Status",
-    render: (value) => {
-      const statusStyles = {
-        Delivered: {
-          color: "#059669",
-          background: "#d1fae5",
-        },
-        Pending: {
-          color: "#b45309",
-          background: "#fef3c7",
-        },
-        Cancelled: {
-          color: "#dc2626",
-          background: "#fee2e2",
-        },
-        Processing: {
-          color: "#2563eb",
-          background: "#dbeafe",
-        },
-      };
+    type: "status",
+    // render: (value) => {
+    //   const statusStyles = {
+    //     Delivered: {
+    //       color: "#059669",
+    //       background: "#d1fae5",
+    //     },
+    //     Pending: {
+    //       color: "#b45309",
+    //       background: "#fef3c7",
+    //     },
+    //     Cancelled: {
+    //       color: "#dc2626",
+    //       background: "#fee2e2",
+    //     },
+    //     Processing: {
+    //       color: "#2563eb",
+    //       background: "#dbeafe",
+    //     },
+    //   };
 
-      const { color, background } = statusStyles[value] || {
-        color: "#374151",
-        background: "#f3f4f6",
-      };
+    //   const { color, background } = statusStyles[value] || {
+    //     color: "#374151",
+    //     background: "#f3f4f6",
+    //   };
 
-      return (
-        <span
-          style={{
-            fontSize: "0.75rem",
-            color,
-            background,
-            padding: "0.125rem 0.5rem",
-            borderRadius: "9999px",
-            marginTop: "0.25rem",
-            display: "inline-block",
-            fontWeight: "600",
-          }}
-        >
-          {value}
-        </span>
-      );
-    },
+    //   return (
+    //     <span
+    //       style={{
+    //         fontSize: "0.75rem",
+    //         color,
+    //         background,
+    //         padding: "0.125rem 0.5rem",
+    //         borderRadius: "9999px",
+    //         marginTop: "0.25rem",
+    //         display: "inline-block",
+    //         fontWeight: "600",
+    //       }}
+    //     >
+    //       {value}
+    //     </span>
+    //   );
+    // },
   },
   {
     key: "date",
     title: "Order Date",
   },
 ];
+
   return (
     <CustomerLayout>
-        <DataTable
+       <PageContainer>
+      
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
+      
+                  <PageHeader>Order List</PageHeader>
+      
+                  {/* <AddButton
+                    onClick={() => navigate("/sellers/addProduct")}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <FiPlus />
+                    Add New Product
+                  </AddButton> */}
+                </div>
+        {/* <DataTable
        spiritual={true}
             data={orders}
             columns={orderColumns}
@@ -86,7 +198,28 @@ const SellerOrder = () => {
             emptyIcon="📦"
             emptyTitle="No Orders Found"
             emptyDescription="Once customers start ordering, you’ll see them listed here."
-            />
+            /> */}
+             <SellerDataTable
+            columns={orderColumns}
+            data={[]}
+            EmptyMessage="No Orders Found"
+            filters={{
+              search: { placeholder: 'Search by name or SKU...', keys: ['product_name', 'sku'] },
+              selects: [
+                {
+                  id: 'status', label: 'Status', key: 'status', options: [
+                    { label: 'Active', value: 'active' },
+                    { label: 'Inactive', value: 'inactive' },
+                    { label: 'Pending', value: 'pending' }
+                  ]
+                }
+              ],
+            }}
+            pagination={{ pageSize: 10, pageSizeOptions: [10, 20, 50] }}
+          />
+
+          </PageContainer>
+
 
     </CustomerLayout>
   )

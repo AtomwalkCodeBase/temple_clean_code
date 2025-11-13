@@ -1,12 +1,25 @@
 // ReusableComponents/Modals.jsx
 import { motion } from "framer-motion";
 
-export const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message }) => {
+export const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, ShowWarning=false, warningMessage="" }) => {
   if (!isOpen) return null;
   return (
     <motion.div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={onClose}>
       <motion.div style={{ background: 'white', padding: 24, borderRadius: 16, maxWidth: 400, width: '100%' }} onClick={e => e.stopPropagation()}>
         <h3 style={{ margin: '0 0 16px' }}>{title}</h3>
+        {ShowWarning && (
+          <div style={{
+            background: '#fff3cd',
+            border: '1px solid #ffeaa7',
+            padding: '12px',
+            borderRadius: '8px',
+            marginBottom: '16px',
+            fontSize: '14px',
+            color: '#856404'
+          }}>
+            ⚠️ {warningMessage}
+          </div>
+        )}
         <p>{message}</p>
         <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
           <button onClick={onClose} style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #ccc' }}>Cancel</button>

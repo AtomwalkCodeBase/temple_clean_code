@@ -6,6 +6,7 @@ import DataTable from "../Admin/AdminLayout/DataTable";
 import { motion } from "framer-motion";
 import { FiPlus } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import SellerDataTable from "./ReusableComponents/SellerDataTable";
 
 const Card = styled.div`
   background: #fff;
@@ -129,11 +130,11 @@ export const orders = [
 const SellerDashboard = () => {
   const navigate = useNavigate()
     // const [showAddModal, setShowAddModal] = useState(false);
-  const { customerData } = useCustomerAuth();
+  const { customerData, productList, getProductDetailsList } = useCustomerAuth();
   const statsData = [
-    { title: "Total Earnings", value: "₹12,500", change: 15 },
-    { title: "Orders Received", value: "345", change: 10 },
-    { title: "Products Listed", value: "78", change: 5 },
+    { title: "Total Earnings", value: "₹0", change: 15 },
+    { title: "Orders Received", value: "0", change: 10 },
+    { title: "Products Listed", value: `${productList.length}`, change: 5 },
   ];
 
   const orderColumns = [
@@ -157,48 +158,49 @@ const SellerDashboard = () => {
   {
     key: "status",
     title: "Status",
-    render: (value) => {
-      const statusStyles = {
-        Delivered: {
-          color: "#059669",
-          background: "#d1fae5",
-        },
-        Pending: {
-          color: "#b45309",
-          background: "#fef3c7",
-        },
-        Cancelled: {
-          color: "#dc2626",
-          background: "#fee2e2",
-        },
-        Processing: {
-          color: "#2563eb",
-          background: "#dbeafe",
-        },
-      };
+    type: "status",
+    // render: (value) => {
+    //   const statusStyles = {
+    //     Delivered: {
+    //       color: "#059669",
+    //       background: "#d1fae5",
+    //     },
+    //     Pending: {
+    //       color: "#b45309",
+    //       background: "#fef3c7",
+    //     },
+    //     Cancelled: {
+    //       color: "#dc2626",
+    //       background: "#fee2e2",
+    //     },
+    //     Processing: {
+    //       color: "#2563eb",
+    //       background: "#dbeafe",
+    //     },
+    //   };
 
-      const { color, background } = statusStyles[value] || {
-        color: "#374151",
-        background: "#f3f4f6",
-      };
+    //   const { color, background } = statusStyles[value] || {
+    //     color: "#374151",
+    //     background: "#f3f4f6",
+    //   };
 
-      return (
-        <span
-          style={{
-            fontSize: "0.75rem",
-            color,
-            background,
-            padding: "0.125rem 0.5rem",
-            borderRadius: "9999px",
-            marginTop: "0.25rem",
-            display: "inline-block",
-            fontWeight: "600",
-          }}
-        >
-          {value}
-        </span>
-      );
-    },
+    //   return (
+    //     <span
+    //       style={{
+    //         fontSize: "0.75rem",
+    //         color,
+    //         background,
+    //         padding: "0.125rem 0.5rem",
+    //         borderRadius: "9999px",
+    //         marginTop: "0.25rem",
+    //         display: "inline-block",
+    //         fontWeight: "600",
+    //       }}
+    //     >
+    //       {value}
+    //     </span>
+    //   );
+    // },
   },
   {
     key: "date",
@@ -239,6 +241,7 @@ const SellerDashboard = () => {
     useEffect(() => {
         // fetchData();
         // fetchCategoryData();
+        getProductDetailsList()
       }, []);
 
 
@@ -269,7 +272,7 @@ const SellerDashboard = () => {
             Add Product
           </AddButton>
         </div>
-       <DataTable
+       {/* <DataTable
        spiritual={true}
             data={orders}
             columns={orderColumns}
@@ -280,7 +283,25 @@ const SellerDashboard = () => {
             emptyIcon="📦"
             emptyTitle="No Orders Found"
             emptyDescription="Once customers start ordering, you’ll see them listed here."
-            />
+            /> */}
+            <SellerDataTable
+            columns={orderColumns}
+            data={[]}
+            EmptyMessage="No Orders Found"
+            filters={{
+              search: { placeholder: 'Search by name or SKU...', keys: ['product_name', 'sku'] },
+              selects: [
+                {
+                  id: 'status', label: 'Status', key: 'status', options: [
+                    { label: 'Active', value: 'active' },
+                    { label: 'Inactive', value: 'inactive' },
+                    { label: 'Pending', value: 'pending' }
+                  ]
+                }
+              ],
+            }}
+            pagination={{ pageSize: 10, pageSizeOptions: [10, 20, 50] }}
+          />
 
       </div>
 

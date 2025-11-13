@@ -32,10 +32,19 @@ const PriceInputGroup = styled.div`
 `;
 
 export const AttributeEditor = ({
-  attr, idx, updateAttribute, variationList, toggleValue,
-  togglePriceSettings, toggleDiscountSettings,
-  updateValuePrice, updateValueDiscount,
-  attributes, isPrimary, onPrimaryChange
+  attr,
+  idx,
+  updateAttribute,
+  variationList,
+  toggleValue,
+  togglePriceSettings,
+  toggleDiscountSettings,
+  updateValuePrice,
+  updateValueDiscount,
+  attributes,
+  isPrimary,
+  onPrimaryChange,
+  prioritizeSelectedValues = false
 }) => {
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customValue, setCustomValue] = useState("");
@@ -47,22 +56,11 @@ export const AttributeEditor = ({
     updateAttribute(idx, "allValues", selected ? selected.v_list.map(v => v[1]).filter(v => v && v !== "Not Selected") : []);
   };
 
-  /**
-   * Normalize string for comparison (trim, lowercase, remove spaces)
-   * @param {string} str - String to normalize
-   * @returns {string} Normalized string
-   */
   const normalizeString = (str) => {
     if (!str) return '';
     return str.trim().toLowerCase().replace(/\s+/g, '');
   };
 
-  /**
-   * Check if a value already exists (case-insensitive, space-insensitive)
-   * @param {string} value - Value to check
-   * @param {string[]} existingValues - Array of existing values
-   * @returns {boolean} True if duplicate exists
-   */
   const isDuplicateValue = (value, existingValues) => {
     if (!value || !existingValues || existingValues.length === 0) return false;
     const normalizedNew = normalizeString(value);
@@ -118,7 +116,15 @@ export const AttributeEditor = ({
         <>
           <strong>Select values for {attr.name.toLowerCase()}</strong>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: 8, marginTop: 8 }}>
-            {attr.allValues.map(val => (
+            {([...attr.allValues].sort((a, b) => {
+              if (!prioritizeSelectedValues) return 0;
+              const aSelected = attr.selectedValues.includes(a);
+              const bSelected = attr.selectedValues.includes(b);
+              if (aSelected === bSelected) {
+                return attr.allValues.indexOf(a) - attr.allValues.indexOf(b);
+              }
+              return aSelected ? -1 : 1;
+            })).map(val => (
               <ValueCheckbox key={val} $checked={attr.selectedValues.includes(val)}>
                 <input type="checkbox" checked={attr.selectedValues.includes(val)} onChange={() => toggleValue(idx, val)} />
                 {val}

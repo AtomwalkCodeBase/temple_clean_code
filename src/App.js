@@ -41,12 +41,13 @@ import TempleGroup from "./components/Admin/TempleGroup";
 import SellerApproval from "./components/Admin/SellerApproval";
 import AdminServices from "./components/Admin/AdminServices";
 import SellerDashboard from "./components/Seller/SellerDashboard";
-import SellerProduct from "./components/Seller/SellerProduct";
+import SellerProductList from "./components/Seller/SellerProductList";
 import SellerOrder from "./components/Seller/SellerOrder";
 import AddProduct from "./components/Seller/AddProduct";
 import OrderDetailsPage from "./components/Seller/OrderDetailsPage";
 import AddVariation from "./components/Seller/AddVariation";
 import CatalogSteup from "./components/Admin/CatalogSteup";
+import ProductVariationManager from "./components/Seller/ProductVariationManager";
 import DemoMode from "./components/Admin/DemoMode";
 
 function AppContent() {
@@ -66,7 +67,7 @@ function AppContent() {
     "/add-groups",
     "/sellerApproval",
     "/admin-services",
-    "/catalog-setup",
+    "/catalog-setup"
   ].some((route) => location.pathname.startsWith(route));
 
   const isCustomerRoute = [
@@ -87,6 +88,7 @@ function AppContent() {
     "/sellers/order-details",
     "/sellers/addVariation",
     "/sellers/editVariation",
+    "/sellers/ProductVariationManager"
   ].some((route) => location.pathname.startsWith(route));
 
   const hideNavAndFooter = isAdminRoute || isCustomerRoute;
@@ -214,7 +216,7 @@ function AppContent() {
         {/* <Route path="/seller-Application" element={<SellerRegistration />} /> */}
         <Route path="/sellers/dashboard" element={<SellerDashboard />} />
         <Route path="/sellers/application" element={<SellerRegistration />} />
-        <Route path="/sellers/products" element={<SellerProduct />} />
+        <Route path="/sellers/products" element={<SellerProductList />} />
         <Route path="/sellers/orders" element={<SellerOrder />} />
         <Route path="/sellers/order-details" element={<OrderDetailsPage />} />
         <Route path="/sellers/addProduct" element={<AddProduct />} />
@@ -222,6 +224,7 @@ function AppContent() {
         <Route path="/sellers/addVariation" element={<AddVariation />} />
         <Route path="/sellers/editVariation" element={<AddVariation />} />
         <Route path="/sellers/profile" element={<CustomerProfile />} />
+        <Route path="/sellers/ProductVariationManager" element={<ProductVariationManager />} />
         <Route
           path="/customer-services/:serviceId"
           element={<ServiceDetails />}

@@ -209,7 +209,7 @@ const SellerRegistration = () => {
       setTemples(is_document_required_temple);
       setAllTemples(templeData.data)
       setMyApplications(applicationData || []);
-      console.log(applicationData)
+      // console.log(applicationData)
     } catch (err) {
       setError("Failed to fetch data. Please try again.");
       console.error(err);
@@ -249,11 +249,6 @@ const SellerRegistration = () => {
       title: 'Status',
       type: 'status'
     },
-    {
-      key: 'approved_by',
-      title: 'Approved By',
-      type: 'text'
-    },
     // {
     //   key: 'document_file_1',
     //   title: 'Document',
@@ -270,20 +265,20 @@ const SellerRegistration = () => {
           hidden: (row) => row.is_approve === true
         }
       ],
-      menuItems: [
-        {
-          label: 'View Details',
-          onClick: (row) => console.log('View:', row)
-        },
-        {
-          label: 'Duplicate',
-          onClick: (row) => console.log('Duplicate:', row)
-        },
-        {
-          label: 'Delete',
-          onClick: (row) => console.log('Delete:', row)
-        }
-      ]
+      // menuItems: [
+      //   {
+      //     label: 'View Details',
+      //     onClick: (row) => console.log('View:', row)
+      //   },
+      //   {
+      //     label: 'Duplicate',
+      //     onClick: (row) => console.log('Duplicate:', row)
+      //   },
+      //   {
+      //     label: 'Delete',
+      //     onClick: (row) => console.log('Delete:', row)
+      //   }
+      // ]
     }
   ];
 
@@ -316,7 +311,15 @@ const SellerRegistration = () => {
         {activeTab === "temples" && (
           <TempleGrid>
             {temples.length > 0 ? (
-              temples.map((temple, index) => (
+              temples.map((temple, index) => {
+                // hide Apply button when there's an application for this temple
+                // with any of these statuses: A, X, C, S, R
+                const blockedStatuses = new Set(['A','X','C','S','R']);
+                const hasBlockedApplication = myApplications.some(
+                  (app) => app.temple_id === temple.temple_id && blockedStatuses.has(app.status)
+                );
+
+                return (
                 <TempleCard key={index}>
                   <TempleImage src={temple.image}>
                     {!temple.image && "🛕"}
@@ -332,13 +335,15 @@ const SellerRegistration = () => {
                         View Details
                       </ViewButton>
 
-                      <ApplyButton onClick={() => handleApplyClick(temple.temple_id, "apply")}>
-                        Apply
-                      </ApplyButton>
+                      {!hasBlockedApplication && (
+                          <ApplyButton onClick={() => handleApplyClick(temple.temple_id, "apply")}>
+                            Apply
+                          </ApplyButton>
+                        )}
                     </ButtonGroup>
                   </TempleContent>
                 </TempleCard>
-              ))
+              );})
             ) : (
               <EmptyState>No temples available</EmptyState>
             )}

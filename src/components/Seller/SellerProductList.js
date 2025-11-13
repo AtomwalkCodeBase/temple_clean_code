@@ -57,7 +57,7 @@ const AddButton = styled(motion.button)`
   }
 `;
 
-const SellerProduct = () => {
+const SellerProductList = () => {
   const { productList: product, getProductDetailsList } = useCustomerAuth();
   const [selectedProductData, setSelectedProductData] = useState(null);
   // const [showDiscountModal, setShowDiscountModal] = useState(false)
@@ -72,6 +72,11 @@ const SellerProduct = () => {
     { key: 'image', title: 'Product', type: 'image', accessor: r => r.image },
     { key: 'product_name', title: 'Product Name', type: 'text' },
     { key: 'selling_price', title: 'Price', type: 'text', accessor: r => `₹${r.selling_price}` },
+    { key: 'variation', title: 'Variation', type: 'status', accessor: r => r.variations.length > 0 ,   customLabels: {
+    true: 'Yes',
+    false: 'No'
+  }
+ },
     {
       key: 'actions',
       title: 'Actions',
@@ -92,7 +97,7 @@ const SellerProduct = () => {
           onClick: (row) => handleEditProduct(row)
         },
         {
-          label: (row) => (row.variations?.length ?? 0) === 0 ? 'Add Variation' : 'Edit Variation',
+          label: (row) => (row.variations?.length ?? 0) === 0 ? 'Add Variation' : 'Manage Product Variations',
           icon: ListPlus,
           onClick: (row) => handleVariationNavigation(row)
         },
@@ -131,7 +136,13 @@ const SellerProduct = () => {
 
   const handleVariationNavigation = (product) => {
     const hasVariations = product.variations && product.variations.length > 0;
-    navigate(`${hasVariations ? "/sellers/editVariation" : "/sellers/addVariation"}`, { state: { productData: product } })
+    if (hasVariations) {
+      // Navigate to ProductVariationManager with product_code in URL
+      navigate(`/sellers/ProductVariationManager?product_code=${product.product_code}`, { state: { productData: product } });
+    } else {
+      // Navigate to AddVariation for products without variations
+      navigate("/sellers/addVariation", { state: { productData: product } });
+    }
   };
 
   useEffect(() => {
@@ -161,15 +172,18 @@ const SellerProduct = () => {
           <SellerDataTable
             columns={columns}
             data={product}
+            EmptyMessage="No Product Found"
             filters={{
               search: { placeholder: 'Search by name or SKU...', keys: ['product_name', 'sku'] },
               selects: [
                 {
-                  id: 'status', label: 'Status', key: 'status', options: [
-                    { label: 'Active', value: 'active' },
-                    { label: 'Inactive', value: 'inactive' },
-                    { label: 'Pending', value: 'pending' }
-                  ]
+                  id: 'status', label: 'Category', key: 'category',
+                  options: Array.from(
+                      new Set((product || []).map((p) => p.category)) // Extract unique category names
+                    ).map((category) => ({
+                      label: category,
+                      value: category,
+                    })),
                 }
               ],
             }}
@@ -213,4 +227,4 @@ const SellerProduct = () => {
   )
 }
 
-export default SellerProduct
+export default SellerProductList

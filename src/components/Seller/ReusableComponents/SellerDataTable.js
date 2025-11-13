@@ -3,6 +3,8 @@ import styled, { css } from "styled-components";
 import { motion } from "framer-motion";
 import { CiMenuKebab } from "react-icons/ci";
 import StatusBadge from '../../Admin/AdminLayout/StatusBadges'
+import { FiMoreVertical } from "react-icons/fi";
+import { IoEllipsisVertical } from "react-icons/io5";
 
 /**
  * SellerDataTable – dynamic, themed, filterable, and paginated
@@ -148,7 +150,7 @@ const Td = styled.td(({ $c }) => `
 `);
 
 const Image = styled.img(({ $c }) => `
-  width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid ${$c.border};
+  width: 40px; height: 40px; object-fit: contain; aspect-ration: 3/4;border-radius: 6px; border: 1px solid ${$c.border};
 `);
 
 // const StatusBadge = styled.span(({ $c, $status }) => {
@@ -179,12 +181,12 @@ const MenuContainer = styled.div`
 `;
 
 const MenuButton = styled.button(({ $c }) => `
-  background: transparent; border: 1px solid ${$c.border}; color: ${$c.textSecondary}; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  background: transparent; border: 1px solid ${$c.border}; color: ${$c.textPrimary}; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 16px;
   &:hover{ background: ${$c.hover}; border-color: ${$c.primary}; }
 `);
 
 const DropdownMenu = styled(motion.div)(({ $c }) => `
-  position: absolute; right: 0; top: calc(100% + 6px); background: ${$c.background}; border: 1px solid ${$c.border}; border-radius: 8px; padding: 6px 0; min-width: 200px; z-index: 6000;
+  position: absolute; right: 0; top: calc(100% + 6px); background: ${$c.background}; border: 1px solid ${$c.border}; border-radius: 8px; padding: 6px 0; min-width: 200px; z-index: 1000;
   box-shadow: 0 8px 20px rgba(0,0,0,.15);
 `);
 
@@ -221,7 +223,9 @@ const SellerDataTable = ({
   className,
   theme,
   filters,
-  pagination
+  pagination,
+  EmptyMessage="No Data",
+  loading = false
 }) => {
   const $c = useTheme(theme);
 
@@ -468,7 +472,9 @@ const SellerDataTable = ({
             {menuItems.length > 0 && (
               <MenuContainer>
                 <MenuButton $c={$c} onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === row._tableId ? null : row._tableId); }}>
-                  <CiMenuKebab />
+                  {/* <CiMenuKebab /> */}
+                  {/* <FiMoreVertical /> */}
+                  <IoEllipsisVertical />
                 </MenuButton>
                 {openMenu === row._tableId && (
                   <DropdownMenu
@@ -477,6 +483,7 @@ const SellerDataTable = ({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: .2 }}
+                    onClick={(e) => { e.stopPropagation(); setOpenMenu(openMenu === row._tableId ? null : row._tableId); }}
                   >
                     {menuItems.map((mi, idx) => (
                       <MenuItem
@@ -521,7 +528,7 @@ const SellerDataTable = ({
 
           {filters?.selects?.map(sel => (
             <Select key={sel.id} $c={$c} value={selectValues[sel.id] ?? ''} onChange={(e) => setSelectValues(v => ({ ...v, [sel.id]: e.target.value }))}>
-              <option value="">{sel.label}</option>
+              <option value="" disabled selected>{sel.label}</option>
               <option value="ALL">All</option>
               {sel.options.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -568,39 +575,59 @@ const SellerDataTable = ({
         </Toolbar>
       )}
 
-      {/* TABLE */}
-      <Table>
-        <Thead $c={$c}>
+  
+        <Table>
+          <Thead $c={$c}>
+            <tr>
+          {selectable && (
+            <Th $c={$c}>
+              <input type="checkbox" checked={processed.length>0 && selectedRows.size===processed.length} onChange={toggleAll} />
+            </Th>
+          )}
+          {columns.map(col => (
+            <Th key={col.key} $c={$c}>{col.title}</Th>
+          ))}
+            </tr>
+          </Thead>
+          <tbody>
+            {loading ? (
           <tr>
+            <Td $c={$c} colSpan={columns.length + (selectable?1:0)} style={{ textAlign:'center', padding:'28px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                border: `3px solid ${$c.primary}`,
+                borderTopColor: 'transparent',
+                boxSizing: 'border-box'
+              }}
+            />
+            <span style={{ color: $c.textSecondary, fontSize: 14 }}>Loading...</span>
+              </div>
+            </Td>
+          </tr>
+            ) : pageData.length === 0 ? (
+          <tr><Td $c={$c} colSpan={columns.length + (selectable?1:0)} style={{ textAlign:'center', padding:'28px' }}>{EmptyMessage}</Td></tr>
+            ) : pageData.map((row, rIdx) => (
+          <Tr key={row._tableId} $c={$c} $selected={selectedRows.has(row._tableId)} onClick={() => selectable && toggleRowSelection(row._tableId)} style={{ cursor: selectable? 'pointer':'default' }}>
             {selectable && (
-              <Th $c={$c}>
-                <input type="checkbox" checked={processed.length>0 && selectedRows.size===processed.length} onChange={toggleAll} />
-              </Th>
+              <Td $c={$c}>
+            <input type="checkbox" checked={selectedRows.has(row._tableId)} onChange={(e)=>{ e.stopPropagation(); toggleRowSelection(row._tableId); }} onClick={(e)=> e.stopPropagation()} />
+              </Td>
             )}
             {columns.map(col => (
-              <Th key={col.key} $c={$c}>{col.title}</Th>
+              <Td key={col.key} $c={$c}>{renderCell(row, col)}</Td>
             ))}
-          </tr>
-        </Thead>
-        <tbody>
-          {pageData.length === 0 ? (
-            <tr><Td $c={$c} colSpan={columns.length + (selectable?1:0)} style={{ textAlign:'center', padding:'28px' }}>No data</Td></tr>
-          ) : pageData.map((row, rIdx) => (
-            <Tr key={row._tableId} $c={$c} $selected={selectedRows.has(row._tableId)} onClick={() => selectable && toggleRowSelection(row._tableId)} style={{ cursor: selectable? 'pointer':'default' }}>
-              {selectable && (
-                <Td $c={$c}>
-                  <input type="checkbox" checked={selectedRows.has(row._tableId)} onChange={(e)=>{ e.stopPropagation(); toggleRowSelection(row._tableId); }} onClick={(e)=> e.stopPropagation()} />
-                </Td>
-              )}
-              {columns.map(col => (
-                <Td key={col.key} $c={$c}>{renderCell(row, col)}</Td>
-              ))}
-            </Tr>
-          ))}
-        </tbody>
-      </Table>
+          </Tr>
+            ))}
+          </tbody>
+        </Table>
 
-      {/* FOOTER / PAGINATION */}
+        
       <Footer $c={$c}>
         <div style={{ color: $c.textSecondary, fontSize: 12 }}>
           Showing {(page-1)*pageSize + 1}-{Math.min(page*pageSize, filtered.length)} of {filtered.length}

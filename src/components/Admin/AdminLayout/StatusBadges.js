@@ -19,6 +19,7 @@ const Badge = styled.span`
       case 'completed':
       case 'success':
       case 'in stock':
+      case 'delivered':
       case 'Y':
       case true:
         return `
@@ -41,15 +42,15 @@ const Badge = styled.span`
         `;
       
       case 'pending':
-      case 'processing':
-      case 'waiting':
-        return `
+        case 'waiting':
+          return `
           color: #d97706;
           background: #fffbeb;
           border: 1px solid #fed7aa;
-        `;
-      
-      case 'submitted':
+          `;
+          
+          case 'submitted':
+        case 'processing':
       case 'under review':
       case 'in progress':
         return `
@@ -85,6 +86,9 @@ const Badge = styled.span`
 `;
 
 const StatusBadges = ({ value, customLabels = {} }) => {
+  // console.log(value)
+  // console.log(customLabels)
+  //  if (!value) return null
   // Normalize the value to lowercase string for consistent matching
   const normalizedValue = typeof value === 'string' ? value.toLowerCase() : value;
   
@@ -98,6 +102,7 @@ const StatusBadges = ({ value, customLabels = {} }) => {
     'in stock': 'In Stock',
     'Y': 'Yes',
     'true': 'Active',
+    'delivered': 'Delivered',
     
     // Inactive states
     'inactive': 'Inactive',
@@ -110,10 +115,10 @@ const StatusBadges = ({ value, customLabels = {} }) => {
     
     // Pending states
     'pending': 'Pending',
-    'processing': 'Processing',
     'waiting': 'Waiting',
     
     // Review states
+    'processing': 'Processing',
     'submitted': 'Submitted',
     'under review': 'Under Review',
     'in progress': 'In Progress',
