@@ -8,6 +8,7 @@ import {
   Edit3,
   ChevronUp,
 } from "lucide-react";
+import { FaCalendarTimes } from "react-icons/fa";
 
 import AdvancePanel from "./AdvancePanel";
 import RefundPanel from "./RefundPanel";
@@ -24,6 +25,7 @@ import {
 } from "../../services/templeServices";
 import PackagesPanel from "./PackagesPanel";
 import PackageModal from "./Modals/PackageModal";
+import { useNavigate } from "react-router-dom";
 
 const ContentCard = styled.div`
   background: #ffffff;
@@ -659,7 +661,7 @@ const HallsOverview = ({
   const lastPackageSubmitRef = useRef({ key: null, at: 0 });
   const [imageLoadStates, setImageLoadStates] = useState({});
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
   const dedupePackages = (packages) => {
     const seen = new Set();
     const result = [];
@@ -1010,7 +1012,9 @@ const HallsOverview = ({
       refundPolicies,
     ]
   );
-
+  const handleblock = (id) => {
+    navigate(`/service-block-list?serviceid=${id}`);
+  };
   const handleExpand = (hallId, tab) => {
     if (expandedHallId === hallId && expandedTab === tab) {
       setExpandedHallId(null);
@@ -1751,6 +1755,13 @@ const HallsOverview = ({
                           <Users size={10} />
                           {serviceType === "EVENT" ? "Seats" : "Capacity"}:{" "}
                           {hall.capacity || "—"}
+                        </FeatureTag>
+                        <FeatureTag
+                          onClick={() => handleblock(hall.service_id)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <FaCalendarTimes size={12} />
+                          Block Dates
                         </FeatureTag>
                       </HallFeatures>
 

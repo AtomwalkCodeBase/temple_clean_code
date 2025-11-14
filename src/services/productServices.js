@@ -5,6 +5,8 @@ import {
   AddTempleGroupData,
   getTempleGroupData,
   getduelists,
+  getblockedservicedates,
+  blockservicedates,
 } from "../services/ConstantServies";
 import {
   authAxios,
@@ -19,6 +21,13 @@ export function addupdatetempale(tempale_data) {
 
 export function gettemplist() {
   return authAxiosget(getTempleList);
+}
+export function getserviceblocklist(templeId) {
+  const data = { temple_id: templeId };
+  return authAxios(getblockedservicedates, data);
+}
+export function proceesblockdate(tempale_data) {
+  return authAxiosPost(blockservicedates, tempale_data);
 }
 
 export function uploadTempleImages(templeId, formData) {

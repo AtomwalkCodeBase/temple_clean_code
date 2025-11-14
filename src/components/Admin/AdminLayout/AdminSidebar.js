@@ -27,7 +27,12 @@ import {
   Package,
   Plug,
 } from "lucide-react";
-import { FaPlusSquare, FaRegCalendarPlus, FaSellsy } from "react-icons/fa";
+import {
+  FaCalendarTimes,
+  FaPlusSquare,
+  FaRegCalendarPlus,
+  FaSellsy,
+} from "react-icons/fa";
 
 const SidebarContainer = styled(motion.div)`
   position: fixed;
@@ -360,6 +365,12 @@ const AdminSidebar = ({
                 path: "/sellerApproval",
                 icon: MdApproval,
                 label: "Approve Seller",
+                badge: "",
+              },
+              {
+                path: "/service-block-list",
+                icon: FaCalendarTimes,
+                label: "Block Service Dates",
                 badge: "",
               },
             ]),

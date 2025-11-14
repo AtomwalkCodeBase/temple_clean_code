@@ -6,6 +6,7 @@ import ServicesGrid from "../Adminbooking/ServicesGrid";
 import BookingSummary from "../Adminbooking/BookingSummary";
 import ServiceFilters from "../Adminbooking/ServiceFilters";
 import { getBookingList } from "../../services/customerServices";
+import { useLocation } from "react-router-dom";
 
 const ServicesContainer = styled.div`
   padding: 24px;
@@ -20,6 +21,8 @@ const LoadingState = styled.div`
 `;
 
 const AdminServices = () => {
+  const routerLocation = useLocation();
+  const params = new URLSearchParams(routerLocation.search);
   const [services, setServices] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -27,13 +30,36 @@ const AdminServices = () => {
     serviceType: "",
     date: "",
     capacity: "",
+    state_code: "",
   });
+  console.log(filters, "filters");
   const [selectedService, setSelectedService] = useState(null);
   const [selectedVariation, setSelectedVariation] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
   const [currentMonthData, setCurrentMonthData] = useState(null);
-  const templeId = localStorage.getItem("templeId");
-
+  const templeId = localStorage.getItem("templeId") || params.get("templeId");
+  const urllocation = params.get("location");
+  const urldate = params.get("date");
+  const urlservice = params.get("id");
+  console.log(urllocation, "urllocation");
+  useEffect(() => {
+    // debugger;
+    if (urllocation) {
+      setFilters((prev) => ({
+        ...prev,
+        state_code: urllocation,
+      }));
+    }
+    if (urldate) {
+      setFilters((prev) => ({ ...prev, date: urldate }));
+    }
+    if (urlservice) {
+      setFilters((prev) => ({
+        ...prev,
+        serviceType: urlservice.toUpperCase(),
+      }));
+    }
+  }, []);
   // Format date to DD-MMM-YYYY format for API
   const formatDateForAPI = (date) => {
     const day = date.getDate().toString().padStart(2, "0");
@@ -63,7 +89,7 @@ const AdminServices = () => {
         const filteredServices = servicesData.filter(
           (temple) => temple.temple_id === templeId
         );
-        setServices(filteredServices);
+        setServices(templeId ? filteredServices : servicesData);
       } catch (error) {
         console.error("Error fetching services:", error);
       } finally {
@@ -104,7 +130,7 @@ const AdminServices = () => {
           (data) => data.service_data?.temple_id === templeId
         );
 
-        setBookings(filteredBookings);
+        setBookings(templeId ? filteredBookings : bookingsData);
         setCurrentMonthData(monthRange);
         console.log("Bookings fetched successfully:", filteredBookings.length);
       } catch (error) {
@@ -130,6 +156,11 @@ const AdminServices = () => {
     if (filters.capacity) {
       filtered = filtered.filter(
         (service) => service.capacity >= parseInt(filters.capacity)
+      );
+    }
+    if (filters.state_code) {
+      filtered = filtered.filter(
+        (service) => service.state_code === filters.state_code
       );
     }
 

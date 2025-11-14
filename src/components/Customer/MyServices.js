@@ -276,7 +276,7 @@ const MyServices = ({ servicesdata }) => {
   });
   const urllocation = params.get("location");
   const navigate = useNavigate();
-
+  const demomode = localStorage.getItem("demoMode");
   useEffect(() => {
     fetchServices();
   }, []);
@@ -345,7 +345,8 @@ const MyServices = ({ servicesdata }) => {
         setLoading(true);
         const isLocal =
           window.location.hostname === "localhost" ||
-          window.location.hostname === "127.0.0.1";
+          window.location.hostname === "127.0.0.1" ||
+          demomode === "true";
         const serviceList = await getTempleServicesList();
 
         // Normalize category names in services

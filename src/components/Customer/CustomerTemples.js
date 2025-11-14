@@ -701,7 +701,7 @@ const CustomerTemples = () => {
   const navigate = useNavigate();
   const { customerData } = useCustomerAuth();
   const scrollRef = useRef(null);
-
+  const demomode = localStorage.getItem("demoMode");
   const scrollStates = (direction) => {
     if (!scrollRef.current) return;
     const scrollAmount = 300;
@@ -733,7 +733,8 @@ const CustomerTemples = () => {
       // Determine environment
       const isLocal =
         window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1";
+        window.location.hostname === "127.0.0.1" ||
+        demomode === "true";
 
       // Filter based on environment
       const filteredTemples = templesData.filter((temple) =>
@@ -939,7 +940,7 @@ const CustomerTemples = () => {
                 onChange={(e) => handleFilterChange("location", e.target.value)}
               />
             </div>
-            <div className="filter-item">
+            {/* <div className="filter-item">
               <label>Rating</label>
               <select
                 value={filters.rating}
@@ -950,7 +951,7 @@ const CustomerTemples = () => {
                 <option value="4">4+ Stars</option>
                 <option value="3">3+ Stars</option>
               </select>
-            </div>
+            </div> */}
           </div>
           {/* Horizontal Scroll of Indian States */}
           <LocationScrollContainer>
@@ -1097,10 +1098,10 @@ const CustomerTemples = () => {
                   <TempleContent>
                     <TempleHeader>
                       <TempleName>{temple.name}</TempleName>
-                      <TempleRating>
+                      {/* <TempleRating>
                         <FiStar className="star" />
                         4.8
-                      </TempleRating>
+                      </TempleRating> */}
                     </TempleHeader>
 
                     <TempleDetails>

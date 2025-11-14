@@ -201,14 +201,15 @@ const BookSevaButton = styled(motion.button)`
 const FeaturedTemples = () => {
   const navigate = useNavigate();
   const [templeList, setTempleList] = useState([]);
-
+  const demomode = localStorage.getItem("demoMode");
   useEffect(() => {
     gettemplist().then((data) => {
       const temples = data.data;
       // Determine environment
       const isLocal =
         window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1";
+        window.location.hostname === "127.0.0.1" ||
+        demomode === "true";
 
       // Filter based on environment
       const filteredTemples = temples.filter((temple) =>

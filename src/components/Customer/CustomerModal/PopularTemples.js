@@ -209,6 +209,7 @@ const PopularTemples = () => {
   const [temples, setTemples] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const demomode = localStorage.getItem("demoMode");
   console.log(temples, "temples");
   const DEFAULT_IMAGE =
     "https://www.poojn.in/wp-content/uploads/2025/02/Govindaraja-Temple-History-Architecture-and-Significance.jpeg.jpg";
@@ -221,7 +222,8 @@ const PopularTemples = () => {
         // Determine environment
         const isLocal =
           window.location.hostname === "localhost" ||
-          window.location.hostname === "127.0.0.1";
+          window.location.hostname === "127.0.0.1" ||
+          demomode === "true";
 
         // Filter based on environment
         const filteredTemples = response.data?.filter((temple) =>

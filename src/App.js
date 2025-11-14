@@ -49,6 +49,8 @@ import AddVariation from "./components/Seller/AddVariation";
 import CatalogSteup from "./components/Admin/CatalogSteup";
 import ProductVariationManager from "./components/Seller/ProductVariationManager";
 import DemoMode from "./components/Admin/DemoMode";
+import CustomerLayout from "./components/Customer/CustomerLayout";
+import ServiceBlockList from "./components/Admin/ServiceBlockList.js";
 
 function AppContent() {
   const location = useLocation();
@@ -67,7 +69,8 @@ function AppContent() {
     "/add-groups",
     "/sellerApproval",
     "/admin-services",
-    "/catalog-setup"
+    "/catalog-setup",
+    "/service-block-list",
   ].some((route) => location.pathname.startsWith(route));
 
   const isCustomerRoute = [
@@ -88,7 +91,7 @@ function AppContent() {
     "/sellers/order-details",
     "/sellers/addVariation",
     "/sellers/editVariation",
-    "/sellers/ProductVariationManager"
+    "/sellers/ProductVariationManager",
   ].some((route) => location.pathname.startsWith(route));
 
   const hideNavAndFooter = isAdminRoute || isCustomerRoute;
@@ -200,7 +203,15 @@ function AppContent() {
             </AdminLayout>
           }
         />
-        {/* Customer routes */}
+        <Route
+          path="/service-block-list"
+          element={
+            <AdminLayout>
+              <ServiceBlockList />
+            </AdminLayout>
+          }
+        />
+        {/* Customer routesfgtrg */}
         <Route path="/customer-register" element={<CustomerRegistration />} />
         <Route path="/customer-login" element={<CustomerLogin />} />
         <Route path="/seller-register" element={<CustomerRegistration />} />
@@ -208,7 +219,14 @@ function AppContent() {
         <Route path="/forgot-pin" element={<ForgotPin />} />
         <Route path="/sellerforgot-pin" element={<ForgotPin />} />
         <Route path="/customer-dashboard" element={<CustomerDashboard />} />
-        <Route path="/customer-services" element={<MyServices />} />
+        <Route
+          path="/customer-services"
+          element={
+            <CustomerLayout>
+              <AdminServices />
+            </CustomerLayout>
+          }
+        />
         <Route path="/customer-temples" element={<CustomerTemples />} />
         <Route path="/customer-bookings" element={<CustomerBookings />} />
         <Route path="/customer-profile" element={<CustomerProfile />} />
@@ -224,7 +242,10 @@ function AppContent() {
         <Route path="/sellers/addVariation" element={<AddVariation />} />
         <Route path="/sellers/editVariation" element={<AddVariation />} />
         <Route path="/sellers/profile" element={<CustomerProfile />} />
-        <Route path="/sellers/ProductVariationManager" element={<ProductVariationManager />} />
+        <Route
+          path="/sellers/ProductVariationManager"
+          element={<ProductVariationManager />}
+        />
         <Route
           path="/customer-services/:serviceId"
           element={<ServiceDetails />}

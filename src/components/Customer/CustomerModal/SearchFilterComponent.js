@@ -179,6 +179,9 @@ const SearchFilterComponent = ({ onSearch, currentLocation }) => {
     });
   };
 
+  // ✅ Disable search button until both fields are filled
+  const isSearchDisabled = !filters.serviceType || !filters.date;
+
   return (
     <SearchContainer>
       <Title>
@@ -206,15 +209,14 @@ const SearchFilterComponent = ({ onSearch, currentLocation }) => {
 
         <FilterGroup>
           <Label>
-            {" "}
-            <GrServices /> Service Type
+            <GrServices /> Service Type <span style={{ color: "red" }}>*</span>
           </Label>
           <Select
             name="serviceType"
             value={filters.serviceType}
             onChange={handleFilterChange}
           >
-            <option value="">All Services</option>
+            <option value="">Select Service Type</option>
             <option value="Puja">Puja</option>
             <option value="Event">Event</option>
             <option value="Hall">Hall</option>
@@ -224,7 +226,7 @@ const SearchFilterComponent = ({ onSearch, currentLocation }) => {
 
         <FilterGroup>
           <Label>
-            <FiCalendar /> Date
+            <FiCalendar /> Date <span style={{ color: "red" }}>*</span>
           </Label>
           <DateInput
             type="date"
@@ -239,7 +241,16 @@ const SearchFilterComponent = ({ onSearch, currentLocation }) => {
         <Button onClick={handleReset} whileHover={{ scale: 1.02 }}>
           Reset
         </Button>
-        <Button primary onClick={handleSearch} whileHover={{ scale: 1.02 }}>
+        <Button
+          primary
+          onClick={handleSearch}
+          whileHover={{ scale: 1.02 }}
+          disabled={isSearchDisabled} // ✅ disable logic
+          style={{
+            opacity: isSearchDisabled ? 0.6 : 1,
+            cursor: isSearchDisabled ? "not-allowed" : "pointer",
+          }}
+        >
           Search
         </Button>
       </ButtonGroup>
