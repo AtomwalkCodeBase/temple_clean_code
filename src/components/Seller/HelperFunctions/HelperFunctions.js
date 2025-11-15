@@ -92,11 +92,7 @@ export const buildFormDataForProductImages = ({
   return fd;
 };
 
-export const useInitializeProductEdit = (
-  productData,
-  setAdditionalImages,
-  setOriginalAdditionalImages
-) => {
+export const useInitializeProductEdit = ( productData, setAdditionalImages, setOriginalAdditionalImages) => {
   useEffect(() => {
     if (!productData?.c_images) return;
 
@@ -115,12 +111,7 @@ export const useInitializeProductEdit = (
   }, [productData, setAdditionalImages, setOriginalAdditionalImages]);
 };
 
-export const useFetchCategoryAndAssign = (
-  productData,
-  setCategory,
-  setFormData,
-  setLoading
-) => {
+export const useFetchCategoryAndAssign = ( productData, setCategory, setFormData, setLoading) => {
   useEffect(() => {
     const loadCategoryData = async () => {
       try {
