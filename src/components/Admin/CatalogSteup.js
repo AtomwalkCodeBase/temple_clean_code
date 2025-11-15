@@ -317,6 +317,14 @@ const CatalogSetup = () => {
 
   const [valueInput, setValueInput] = useState('');
 
+  // Helper function to filter out "Not Selected" values
+  const filterNotSelected = (values) => {
+    return values.filter(([k, l]) => {
+      const val = (l || k || '').trim();
+      return val && val !== 'Not Selected';
+    });
+  };
+
   // Fetch Data
   const fetchData = async () => {
     setLoading(true);
@@ -334,6 +342,18 @@ const CatalogSetup = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+  if (varState.id && varState.v_list?.length > 0) {
+    const filtered = filterNotSelected(varState.v_list);
+    const pipeString = filtered
+      .map(([k, l]) => l || k)
+      .join('|');
+    setValueInput(pipeString);
+  } else if (!varState.id) {
+    setValueInput('');
+  }
+}, [varState.id, varState.v_list]);
 
   // Save Category
   const saveCategory = async () => {
@@ -368,19 +388,49 @@ const CatalogSetup = () => {
 
   // Save Variation
   const saveVariation = async () => {
-    console.log(varState)
-    if (!varState.name.trim() || varState.v_list.length === 0) return;
+    if (!varState.name.trim()) {
+      toast.error('Variation name is required');
+      return;
+    }
+
+    // Process values from input field (pipe-separated)
+    let finalValues = [];
+    if (valueInput.trim()) {
+      const inputValues = valueInput
+        .split('|')
+        .map(v => v.trim())
+        .filter(v => v && v !== 'Not Selected')
+        .map(v => [v, v]);
+      finalValues = [...inputValues];
+    }
+
+    // Also include any values from v_list that are not "Not Selected"
+    const filteredVList = filterNotSelected(varState.v_list);
+    finalValues = [...finalValues, ...filteredVList];
+
+    // Remove duplicates
+    const uniqueValues = Array.from(
+      new Map(finalValues.map(([k, l]) => [l || k, [k, l]])).values()
+    );
+
+    if (uniqueValues.length === 0) {
+      toast.error('At least one variation value is required');
+      return;
+    }
+
+    // Map to clean string values for API
+    const cleanValues = uniqueValues.map(([k, l]) => l || k);
 
     const formData = new FormData();
     formData.append('name', varState.name);
     formData.append('call_mode', varState.id ? 'UPDATE' : 'ADD');
     formData.append('description', varState.description);
-    formData.append("v_list_data",varState.v_list.map(([key, label]) => label || key).join("|"));
+    formData.append("v_list_data",cleanValues.join('|'));
 
    if (varState.image && varState.image instanceof File) {
   formData.append("image", varState.image);
 }
-    if (varState.id) formData.append('variation_id', varState.id);
+    if (varState.id) formData.append('v_name_id', varState.id);
 
     try {
       await processVariationName(formData);
@@ -394,22 +444,24 @@ const CatalogSetup = () => {
     }
   };
 
-  // Handle variation input
-  const handleValueEnter = (e) => {
-    if (e.key === 'Enter' && valueInput.trim()) {
-      const values = valueInput.split('|').map(v => v.trim()).filter(Boolean);
-      const tags = values.map(v => [v, v]);
-      varDispatch({ type: 'SET', field: 'v_list', value: [...varState.v_list, ...tags] });
-      setValueInput('');
-    }
-  };
-
-  const removeTag = (idx) => {
+  const removeTag = (valueToRemove) => {
     varDispatch({
       type: 'SET',
       field: 'v_list',
-      value: varState.v_list.filter((_, i) => i !== idx),
+      value: varState.v_list.filter(([k, l]) => {
+        const val = (l || k || '').trim();
+        return val !== valueToRemove;
+      }),
     });
+    // Also remove from input if it exists there
+    if (valueInput.includes(valueToRemove)) {
+      const updatedInput = valueInput
+        .split('|')
+        .map(v => v.trim())
+        .filter(v => v !== valueToRemove && v !== 'Not Selected')
+        .join('|');
+      setValueInput(updatedInput);
+    }
   };
 
   const cancelEdit = () => {
@@ -477,20 +529,31 @@ const CatalogSetup = () => {
         {
       label: "edit",
       icon: SquarePen,
-      onClick: (row) => varDispatch({
-        type: 'RESET',
-      payload: {
-        id: row.id ?? null,
-        name: row.name ?? '',
-        description: row.description ?? '',
-        // ----> SAFE DEFAULTS <----
-        status: row.is_active === 'Y' || row.is_active === true,   // boolean
-        image: row.image ?? '',
-        // any extra fields you may have (gst, tax_rate, …)
-        gst_applicable: row.gst_applicable ?? 'N',
-        tax_rate: row.tax_rate ?? '',
+        onClick: (row) => {
+        // Filter out "Not Selected" values
+        const cleanVList = (row.v_list || []).filter(([k, l]) => {
+          const val = (l || k || '').trim();
+          return val && val !== 'Not Selected';
+        });
+
+        const pipeString = cleanVList
+          .map(([k, l]) => l || k)
+          .join('|');
+
+        varDispatch({
+          type: 'RESET',
+          payload: {
+            id: row.id ?? null,
+            name: row.name ?? '',
+            description: row.description ?? '',
+            image: row.image ?? '',
+            v_list: cleanVList, // Store only filtered values
+          },
+        });
+
+        // Set input field to show "Red|Blue|Green"
+        setValueInput(pipeString);
       },
-      }),
       size: "md",
       onlyIcon: true
     }
@@ -723,26 +786,28 @@ const CatalogSetup = () => {
                 <FormGroup style={{ marginTop: '1rem' }}>
                   <label>Variation Values *</label>
                   <VariationInput
-                    placeholder="Type S|M|L and press Enter"
+                    placeholder="Type S|M|L (separated by |)"
                     value={valueInput}
                     onChange={e => setValueInput(e.target.value)}
-                    onKeyUp={handleValueEnter}
                   />
                   <VariationTags>
-                    {varState.v_list.map(([k, l],i ) => (
-                      <Tag key={i}>
-                        {l || k}
-                        <button onClick={() => removeTag(i)}>
-                          <X size={14} />
-                        </button>
-                      </Tag>
-                    ))}
+                    {filterNotSelected(varState.v_list).map(([k, l], i) => {
+                      const value = (l || k || '').trim();
+                      return (
+                        <Tag key={i}>
+                          {value}
+                          <button onClick={() => removeTag(value)}>
+                            <X size={14} />
+                          </button>
+                        </Tag>
+                      );
+                    })}
                   </VariationTags>
                   <InfoBox>
                     <Info size={18} />
                     <div>
                       <strong>Tip:</strong> Use <code>|</code> to separate values. Example:{' '}
-                      <code>Red|Blue|Green</code> and press enter
+                      <code>Red|Blue|Green</code>. Values will be saved when you click Save.
                     </div>
                   </InfoBox>
                 </FormGroup>

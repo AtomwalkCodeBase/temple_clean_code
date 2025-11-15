@@ -85,8 +85,11 @@ export const buildFormDataForProductImages = ({
     const isNewFile = img?.file instanceof File;
     const isUnchanged = currentUrl && currentUrl === originalUrl;
 
-    if (isNewFile) fd.append(key, img.file);
-    else fd.append(key, currentUrl);
+     if (isNewFile) {
+        fd.append(key, img.file);     // Send File when updated
+      } else if (isUnchanged || currentUrl) {
+        fd.append(key, currentUrl);   // Send URL when unchanged or new URL
+      }
   });
 
   return fd;
