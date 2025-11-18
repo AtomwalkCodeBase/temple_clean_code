@@ -5,6 +5,7 @@ import { processBooking } from "../../services/customerServices";
 import { toAPIDate } from "../Customer/BookSeva";
 import { getCustomerList } from "../../services/templeServices";
 import { toast } from "react-toastify";
+import { getserviceblocklist } from "../../services/productServices";
 
 const fadeIn = keyframes`
   from {
@@ -364,40 +365,40 @@ const ActionButtons = styled.div`
   justify-content: flex-end;
 `;
 
-const ConfirmButton = styled.button`
-  padding: 16px 40px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border: none;
-  border-radius: 14px;
-  font-weight: 700;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 10px;
+// const ConfirmButton = styled.button`
+//   padding: 16px 40px;
+//   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+//   color: white;
+//   border: none;
+//   border-radius: 14px;
+//   font-weight: 700;
+//   font-size: 16px;
+//   cursor: pointer;
+//   transition: all 0.3s ease;
+//   box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+//   display: flex;
+//   align-items: center;
+//   gap: 10px;
 
-  &::before {
-    content: "✓";
-    font-size: 20px;
-  }
+//   &::before {
+//     content: "✓";
+//     font-size: 20px;
+//   }
 
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
-    animation: ${pulse} 1s ease-in-out infinite;
-  }
+//   &:hover {
+//     transform: translateY(-3px);
+//     box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
+//     animation: ${pulse} 1s ease-in-out infinite;
+//   }
 
-  &:disabled {
-    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-    animation: none;
-  }
-`;
+//   &:disabled {
+//     background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+//     cursor: not-allowed;
+//     transform: none;
+//     box-shadow: none;
+//     animation: none;
+//   }
+// `;
 
 const CancelButton = styled.button`
   padding: 16px 40px;
@@ -447,6 +448,70 @@ const ErrorText = styled.div`
     font-size: 18px;
   }
 `;
+// Add these styled components to your existing styles
+
+const BlockedWarning = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  margin-bottom: 24px;
+`;
+
+const WarningIcon = styled.div`
+  font-size: 20px;
+  flex-shrink: 0;
+`;
+
+const BlockedMessage = styled.div`
+  flex: 1;
+
+  strong {
+    color: #dc2626;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  p {
+    color: #7f1d1d;
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+`;
+
+// Update ConfirmButton to handle blocked state
+const ConfirmButton = styled.button`
+  padding: 12px 24px;
+  background: ${(props) =>
+    props.$isBlocked
+      ? "#9ca3af"
+      : "linear-gradient(135deg, #10b981 0%, #059669 100%)"};
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: ${(props) => (props.$isBlocked ? "not-allowed" : "pointer")};
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &:hover:not(:disabled) {
+    transform: ${(props) => (props.$isBlocked ? "none" : "translateY(-2px)")};
+    box-shadow: ${(props) =>
+      props.$isBlocked ? "none" : "0 6px 20px rgba(16, 185, 129, 0.3)"};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+`;
 
 const BookingSummary = ({
   service,
@@ -462,6 +527,9 @@ const BookingSummary = ({
   const [showDropdown, setShowDropdown] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [blockedDates, setBlockedDates] = useState([]);
+  const [isServiceBlocked, setIsServiceBlocked] = useState(false);
+  const [blockMessage, setBlockMessage] = useState("");
   const basePrice = parseFloat(variation.base_price) || 0;
 
   useEffect(() => {
@@ -478,6 +546,30 @@ const BookingSummary = ({
     fetchCustomers();
   }, []);
 
+  // Fetch service block list and check if selected date is blocked
+  useEffect(() => {
+    const checkServiceAvailability = async () => {
+      try {
+        const blockList = await getserviceblocklist("", service.service_id);
+        setBlockedDates(blockList.data || []);
+
+        // Check if selected date falls within any blocked period
+        const isBlocked = checkIfDateIsBlocked(
+          selectedDate,
+          blockList.data || []
+        );
+        setIsServiceBlocked(isBlocked.blocked);
+        setBlockMessage(isBlocked.message);
+      } catch (error) {
+        console.error("Error fetching service block list:", error);
+      }
+    };
+
+    if (service?.service_id && selectedDate) {
+      checkServiceAvailability();
+    }
+  }, [service, selectedDate]);
+
   useEffect(() => {
     const filtered = customers.filter((customer) => {
       const searchLower = searchQuery.toLowerCase();
@@ -489,6 +581,43 @@ const BookingSummary = ({
     });
     setFilteredCustomers(filtered);
   }, [searchQuery, customers]);
+
+  // Function to check if selected date is blocked
+  const checkIfDateIsBlocked = (selectedDate, blockList) => {
+    if (!blockList || blockList.length === 0) {
+      return { blocked: false, message: "" };
+    }
+
+    const selected = new Date(selectedDate);
+
+    for (const block of blockList) {
+      if (!block.is_active || block.is_completed) continue;
+
+      const fromDate = new Date(block.from_date);
+      const toDate = new Date(block.to_date);
+
+      // Check if selected date falls within the blocked range
+      if (selected >= fromDate && selected <= toDate) {
+        const message = `This service is not available from ${formatDisplayDate(
+          block.from_date
+        )} to ${formatDisplayDate(
+          block.to_date
+        )}. Please select a different date.`;
+        return { blocked: true, message };
+      }
+    }
+
+    return { blocked: false, message: "" };
+  };
+
+  // Format date for display
+  const formatDisplayDate = (dateStr) => {
+    return new Date(dateStr).toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
 
   const calculateTotalPrice = () => {
     const weekDayPrice =
@@ -518,6 +647,11 @@ const BookingSummary = ({
   const handleConfirmBooking = async () => {
     if (!selectedCustomer) {
       setError("Please select a customer");
+      return;
+    }
+
+    if (isServiceBlocked) {
+      setError("Cannot book - service is blocked for the selected date");
       return;
     }
 
@@ -562,6 +696,17 @@ const BookingSummary = ({
         <SummaryTitle> Complete Your Booking</SummaryTitle>
         <Subtitle>Review your booking details and select a customer</Subtitle>
       </Header>
+
+      {/* Service Block Warning */}
+      {isServiceBlocked && (
+        <BlockedWarning>
+          <WarningIcon>⚠️</WarningIcon>
+          <BlockedMessage>
+            <strong>Service Not Available</strong>
+            <p>{blockMessage}</p>
+          </BlockedMessage>
+        </BlockedWarning>
+      )}
 
       <SummaryGrid>
         <SummarySection $gradient="linear-gradient(90deg, #3b82f6, #8b5cf6)">
@@ -630,6 +775,7 @@ const BookingSummary = ({
             value={searchQuery}
             onChange={handleSearchChange}
             onFocus={() => setShowDropdown(true)}
+            disabled={isServiceBlocked}
           />
           {showDropdown && filteredCustomers.length > 0 && (
             <CustomerList>
@@ -684,10 +830,15 @@ const BookingSummary = ({
         </CancelButton>
         <ConfirmButton
           onClick={handleConfirmBooking}
-          disabled={loading || !selectedCustomer}
+          disabled={loading || !selectedCustomer || isServiceBlocked}
+          $isBlocked={isServiceBlocked}
         >
           {loading && <LoadingSpinner />}
-          {loading ? "Processing..." : "Confirm Booking"}
+          {isServiceBlocked
+            ? "Service Not Available"
+            : loading
+            ? "Processing..."
+            : "Confirm Booking"}
         </ConfirmButton>
       </ActionButtons>
     </SummaryContainer>

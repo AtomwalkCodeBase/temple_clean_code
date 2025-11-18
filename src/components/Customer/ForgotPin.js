@@ -306,7 +306,7 @@ const ForgotPin = () => {
               <strong>PIN Reset Successful!</strong>
             </div>
             <div>{success.message}</div>
-            <div className="new-pin">New PIN: {success.e_pin}</div>
+            {/* <div className="new-pin">New PIN: {success.e_pin}</div> */}
             <div className="instructions">
               Please save your new PIN securely and use it to login to your
               account.

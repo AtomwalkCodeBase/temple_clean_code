@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import styled from "styled-components";
-import { getServiceBookings } from "../../services/customerServices";
+import {
+  getServiceBookings,
+  processBooking,
+} from "../../services/customerServices";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import ConfirmationModal from "../Customer/CustomerModal/ConfirmationModal";
 
 // Styled Components
 const DashboardContainer = styled.div`
@@ -344,7 +349,59 @@ const LoadingState = styled.div`
   padding: 60px 20px;
   color: #6b7280;
 `;
+// Add these styled components to your existing styles
 
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+`;
+
+const CancelButton = styled.button`
+  padding: 6px 12px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const CompleteButton = styled.button`
+  padding: 6px 12px;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #059669;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("today");
   const [bookings, setBookings] = useState([]);
@@ -353,6 +410,7 @@ const AdminDashboard = () => {
     serviceType: "",
     date: "",
     serviceName: "",
+    search: "", // Added search filter
   });
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -362,7 +420,20 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const id = localStorage.getItem("templeId");
   const name = "admin";
+  const [confirmationModal, setConfirmationModal] = useState({
+    isOpen: false,
+    refCode: null,
+    action: null,
+  });
 
+  // Function to open confirmation modal
+  const openConfirmationModal = (refCode, action) => {
+    setConfirmationModal({
+      isOpen: true,
+      refCode,
+      action,
+    });
+  };
   // Fetch bookings
   useEffect(() => {
     const fetchBookings = async () => {
@@ -463,6 +534,18 @@ const AdminDashboard = () => {
       );
     }
 
+    // Search filter - search by ref_code, customer name, mobile, email
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(
+        (booking) =>
+          booking.ref_code?.toLowerCase().includes(searchLower) ||
+          booking.customer_data?.name?.toLowerCase().includes(searchLower) ||
+          booking.customer_data?.mobile_number?.includes(filters.search) ||
+          booking.customer_data?.email_id?.toLowerCase().includes(searchLower)
+      );
+    }
+
     return filtered;
   }, [bookings, activeTab, filters]);
 
@@ -502,10 +585,61 @@ const AdminDashboard = () => {
     navigate("/admin-services");
   };
 
-  const handleRowBook = (booking) => {
-    // Implement book functionality for specific booking
-    console.log("Booking for:", booking);
-    alert(`Booking ${booking.ref_code} selected for customer`);
+  const handleCancelBooking = async (booking) => {
+    if (
+      window.confirm(
+        `Are you sure you want to cancel booking ${booking.ref_code}?`
+      )
+    ) {
+      try {
+        const cancelData = {
+          booking_data: {
+            cust_ref_code: booking.customer_data?.cust_ref_code,
+            call_mode: "CANCEL",
+            booking_ref_code: booking.ref_code,
+            remarks: "Cancelled by admin",
+          },
+        };
+
+        await processBooking(cancelData);
+
+        // Refresh bookings after cancellation
+        const updatedBookings = await getServiceBookings(id, name);
+        setBookings(updatedBookings);
+
+        toast.success("Booking cancelled successfully!");
+      } catch (error) {
+        console.error("Error cancelling booking:", error);
+        toast.error("Failed to cancel booking");
+      }
+    }
+  };
+
+  const handleCompleteBooking = async (booking) => {
+    console.log(booking, "booking");
+    if (window.confirm(`Mark booking ${booking.ref_code} as completed?`)) {
+      try {
+        const completeData = {
+          booking_data: {
+            cust_ref_code: booking.customer_data?.cust_ref_code,
+            call_mode: "COMPLETE",
+            booking_ref_code: booking.ref_code,
+            remarks: "Completed by admin",
+          },
+        };
+
+        await processBooking(completeData);
+
+        // Refresh bookings after completion
+        const updatedBookings = await getServiceBookings(id, name);
+        setBookings(updatedBookings);
+
+        toast.success("Booking marked as completed!");
+      } catch (error) {
+        console.error("Error completing booking:", error);
+        toast.error("Failed to complete booking");
+      }
+    }
   };
 
   const handleCardClick = (cardType) => {
@@ -518,6 +652,7 @@ const AdminDashboard = () => {
       serviceType: "",
       date: "",
       serviceName: "",
+      search: "",
     });
     setPagination((prev) => ({ ...prev, currentPage: 1 }));
   };
@@ -528,12 +663,17 @@ const AdminDashboard = () => {
 
   // Check if any filter is active
   const isAnyFilterActive =
-    filters.serviceType || filters.date || filters.serviceName;
+    filters.serviceType ||
+    filters.date ||
+    filters.serviceName ||
+    filters.search;
 
   return (
     <DashboardContainer>
       <HeaderSection>
-        <h1 style={{ margin: 0, color: "#1f2937", fontSize: "28px" }}></h1>
+        <h1 style={{ margin: 0, color: "#1f2937", fontSize: "28px" }}>
+          Admin Dashboard
+        </h1>
         <BookButton onClick={handleBookForCustomer}>
           <span>📅</span>
           Book for Customer
@@ -597,6 +737,16 @@ const AdminDashboard = () => {
       <FiltersContainer>
         <FilterRow>
           <FilterGroup>
+            <FilterLabel>Search</FilterLabel>
+            <Input
+              type="text"
+              placeholder="Search by ref code, name, mobile..."
+              value={filters.search}
+              onChange={(e) => handleFilterChange("search", e.target.value)}
+            />
+          </FilterGroup>
+
+          <FilterGroup>
             <FilterLabel>Service Type</FilterLabel>
             <Select
               value={filters.serviceType}
@@ -644,7 +794,7 @@ const AdminDashboard = () => {
               onClick={handleClearFilters}
               disabled={!isAnyFilterActive}
             >
-              Clear Filters
+              Clear
             </ClearFiltersButton>
           </FilterGroup>
         </FilterRow>
@@ -671,17 +821,24 @@ const AdminDashboard = () => {
                 <tr>
                   <TableHeaderCell>Service Name</TableHeaderCell>
                   <TableHeaderCell>Customer</TableHeaderCell>
-                  <TableHeaderCell>Type</TableHeaderCell>
+                  {/* <TableHeaderCell>Type</TableHeaderCell> */}
                   <TableHeaderCell>Date</TableHeaderCell>
                   <TableHeaderCell>Time</TableHeaderCell>
                   <TableHeaderCell>Status</TableHeaderCell>
                   <TableHeaderCell>Amount</TableHeaderCell>
+                  <TableHeaderCell>Actions</TableHeaderCell>
                 </tr>
               </TableHeader>
               <tbody>
                 {paginatedBookings.map((booking, index) => (
                   <TableRow key={index}>
-                    <TableCell>{booking.service_data?.name || "N/A"}</TableCell>
+                    <TableCell>
+                      <div>
+                        {booking.service_data?.name || "N/A"} (
+                        {booking.service_data?.service_type})
+                      </div>
+                      <div>{booking.ref_code}</div>
+                    </TableCell>
                     <TableCell>
                       <div>
                         <strong>{booking.customer_data?.name || "N/A"}</strong>
@@ -691,9 +848,9 @@ const AdminDashboard = () => {
                         <div>{booking.customer_data?.email_id || "N/A"}</div>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    {/* <TableCell>
                       {booking.service_data?.service_type || "N/A"}
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell>{booking.booking_date}</TableCell>
                     <TableCell>
                       {booking.start_time} - {booking.end_time}
@@ -704,6 +861,33 @@ const AdminDashboard = () => {
                       </StatusBadge>
                     </TableCell>
                     <TableCell>₹{booking.unit_price || "0.00"}</TableCell>
+                    <TableCell>
+                      <ActionButtons>
+                        {booking.status_display !== "CANCELLED" &&
+                          booking.status_display !== "COMPLETED" && (
+                            <>
+                              <CancelButton
+                                onClick={() => handleCancelBooking(booking)}
+                                title="Cancel Booking"
+                              >
+                                Cancel
+                              </CancelButton>
+                              <CompleteButton
+                                onClick={() => handleCompleteBooking(booking)}
+                                title="Mark as Completed"
+                              >
+                                Complete
+                              </CompleteButton>
+                            </>
+                          )}
+                        {(booking.status_display === "CANCELLED" ||
+                          booking.status_display === "COMPLETED") && (
+                          <span style={{ color: "#6b7280", fontSize: "12px" }}>
+                            {booking.status_display}
+                          </span>
+                        )}
+                      </ActionButtons>
+                    </TableCell>
                   </TableRow>
                 ))}
               </tbody>
@@ -763,6 +947,15 @@ const AdminDashboard = () => {
           </>
         )}
       </TableContainer>
+      <ConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        onClose={confirmationModal}
+        onConfirm={() => handleCompleteBooking(confirmationModal.booking)}
+        title="Cancel Booking"
+        message="Are you sure you want to cancel this booking? This action cannot be undone."
+        confirmText="Yes, Cancel Booking"
+        cancelText="No, Keep Booking"
+      />
     </DashboardContainer>
   );
 };

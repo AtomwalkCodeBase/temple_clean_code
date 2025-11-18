@@ -662,7 +662,9 @@ const PackageModal = ({
       resetForm();
       // keep button disabled until parent closes or saving prop toggles
       setTimeout(() => setLocalSubmitting(false), 1200);
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     }
   };
 

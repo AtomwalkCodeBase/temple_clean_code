@@ -214,7 +214,7 @@ const ServiceBlockList = () => {
     <Container>
       <PageContainer
         title="Service Block Dates"
-        description="Manage advance booking policies for your temple services"
+        description="Block your service for temple events, maintenance, or any kind of emergency."
         icon={<FaCalendarTimes />}
         gradient="linear-gradient(135deg, #0056d6 0%, #0a4db4 100%)"
         actions={

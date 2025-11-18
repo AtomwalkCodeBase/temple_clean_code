@@ -22,8 +22,15 @@ export function addupdatetempale(tempale_data) {
 export function gettemplist() {
   return authAxiosget(getTempleList);
 }
-export function getserviceblocklist(templeId) {
-  const data = { temple_id: templeId };
+export function getserviceblocklist(templeId, serviceId) {
+  let data = {};
+  if (templeId) {
+    data = { temple_id: templeId };
+  }
+  if (serviceId) {
+    data = { service_id: serviceId };
+  }
+
   return authAxios(getblockedservicedates, data);
 }
 export function proceesblockdate(tempale_data) {

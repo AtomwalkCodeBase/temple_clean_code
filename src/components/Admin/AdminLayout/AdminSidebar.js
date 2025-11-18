@@ -139,7 +139,8 @@ const CollapseButton = styled.button`
 
 const SidebarContent = styled.div`
   flex: 1;
-  overflow-y: auto;
+  overflow-y: scroll;
+  max-height: 600px;
   padding: 1rem 0;
 
   &::-webkit-scrollbar {

@@ -274,7 +274,7 @@ const TempleServices = () => {
       try {
         setLoading(true);
         // Fetch services and count totals per type for this temple
-        const svcResp = await getTempleServicesList();
+        const svcResp = await getTempleServicesList(templeId);
         const svcList = Array.isArray(svcResp)
           ? svcResp
           : Array.isArray(svcResp?.data)
