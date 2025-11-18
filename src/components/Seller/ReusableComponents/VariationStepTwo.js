@@ -99,13 +99,12 @@ export const VariationStepTwo = ({
       </Card>
     );
   }
-
   
   return (
     <Card>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <FormHeader>Upload Variation Images</FormHeader>
-        <Button onClick={onBack}>← Back</Button>
+        {variationMode !== "edit" && <Button onClick={onBack}>← Back</Button>}
       </div>
       <p style={{ color: '#64748b', marginBottom: 20 }}>
         Upload images for each <strong>{primaryAttribute.name}</strong> variation.

@@ -156,8 +156,8 @@ const SellerManagementScreen = () => {
     setData((s) => ({ ...s, loading: true }));
     try {
       const list = await getSellerTempleList();
-      const raw = Array.isArray(list)
-        ? list
+      const raw = Array.isArray(list.data)
+        ? list.data
         : list?.results || list?.data || [];
 
       const filtered = raw.filter(

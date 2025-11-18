@@ -121,11 +121,12 @@ export const useFetchCategoryAndAssign = ( productData, setCategory, setFormData
         setLoading(true);
 
         const response = await getSellerCategory();
-        setCategory(response);
+        setCategory(response.data);
 
+        
         // Auto-select category in edit mode
-        if (productData?.category && response.length > 0) {
-          const match = response.find(
+        if (productData?.category && response.data.length > 0) {
+          const match = response.data.find(
             (cat) => cat.name.toLowerCase() === productData.category.toLowerCase()
           );
 

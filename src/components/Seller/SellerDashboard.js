@@ -134,7 +134,7 @@ const SellerDashboard = () => {
   const statsData = [
     { title: "Total Earnings", value: "₹0", change: 15 },
     { title: "Orders Received", value: "0", change: 10 },
-    { title: "Products Listed", value: `${productList.length}`, change: 5 },
+    { title: "Products Listed", value: `${productList.length ? productList.length : 0}`, change: 5 },
   ];
 
   const orderColumns = [

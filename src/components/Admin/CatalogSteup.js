@@ -330,8 +330,8 @@ const CatalogSetup = () => {
     setLoading(true);
     try {
       const [cats, vars] = await Promise.all([getSellerCategory(), getVariationList()]);
-      setCategories(cats);
-      setVariations(vars);
+      setCategories(cats.data);
+      setVariations(vars.data);
     } catch {
       toast.error('Failed to load data');
     } finally {
@@ -377,7 +377,7 @@ const CatalogSetup = () => {
 
     try {
       // await processCategoryData(formData);
-      console.log('API Payload:', Object.fromEntries(formData));
+      // console.log('API Payload:', Object.fromEntries(formData));
       toast.success(catState.id ? 'Updated!' : 'Added!');
       fetchData();
       catDispatch({ type: 'RESET', payload: {  id: null, name: '', description: '', status: true, image: '', gst_applicable: 'N', discount_applicable: 'N', HSN_SAC_code: '', tax_rate: '', category_alias: '', } });
@@ -434,7 +434,7 @@ const CatalogSetup = () => {
 
     try {
       await processVariationName(formData);
-      console.log('API Payload:', Object.fromEntries(formData));
+      // console.log('API Payload:', Object.fromEntries(formData));
       toast.success('Variation saved!');
       fetchData();
       varDispatch({ type: 'RESET', payload: { id: null, name: '', description: '', image: '', v_list: [] } });
@@ -504,7 +504,7 @@ const CatalogSetup = () => {
         accessor: r => r.v_list || [],
         render: (row) => (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-                {(row.v_list || []).map(([k, l], i) => (
+                {filterNotSelected(row.v_list || []).map(([k, l], i) => (
                     <span
                         key={i}
                         style={{
@@ -689,8 +689,8 @@ const CatalogSetup = () => {
                 </FormGroup>
 
                 <ImageUploaderWrapper
-                  label="Variation Image"
-                  image={varState.image}
+                  label="Category Image"
+                  image={catState.image}
                   onChange={file => varDispatch({ type: 'SET_IMAGE', value: file })}
                 />
 

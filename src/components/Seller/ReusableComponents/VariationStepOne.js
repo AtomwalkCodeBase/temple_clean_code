@@ -92,6 +92,7 @@ export const VariationStepOne = ({
   onSetPrimaryAttribute,
   onProceed
 }) => {
+  // console.log(attributes)
   return (
     <Card>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -108,11 +109,11 @@ export const VariationStepOne = ({
           <Info size={20} />
         </InfoIconWrapper>
         <InfoContent>
-          <strong>Configuration Guidelines</strong>
+          <strong style={{fontSize: "16px"}}>Configuration Guidelines</strong>
           <br />
-          • Pricing and discount settings are optional for each variation.
+          • <strong>Pricing and discount</strong> settings are <strong>optional</strong> for each variation.
           <br />
-          • Please check the primary variation, if you want to add variation-specific images.
+          • Please <strong>check the primary variation</strong>, if you want to <strong>add variation-specific images</strong>.
           <br />
           • Image assignment functionality becomes available after primary variation selection.
         </InfoContent>

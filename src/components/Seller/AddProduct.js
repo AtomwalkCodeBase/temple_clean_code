@@ -6,7 +6,7 @@ import { ImageUploader } from './ReusableComponents/ImageUploader';
 import { toast } from 'react-toastify';
 import { processProductData, ProcessProductImages } from '../../services/customerServices';
 import { Edit2, Info, Plus, Upload } from 'lucide-react';
-import { detectAdditionalImageChanges, useCategoryName, useFetchCategoryAndAssign, useImagePreview, useInitializeProductEdit, useProductInfoNotes } from './HelperFunctions/HelperFunctions';
+import { buildFormDataForProductImages, detectAdditionalImageChanges, useCategoryName, useFetchCategoryAndAssign, useImagePreview, useInitializeProductEdit, useProductInfoNotes } from './HelperFunctions/HelperFunctions';
 
 const ResponsiveGrid = styled.div`
   display: grid;
@@ -208,7 +208,6 @@ const AddProduct = () => {
     price_inclusive_tax: productData?.price_inclusive_tax ?? false,
     activeImage: productData?.image || null,
   });
-  console.log(productData)
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState([]);
 
@@ -236,36 +235,6 @@ const AddProduct = () => {
     return hasAnyChanges;
 
   }, [additionalImages, originalAdditionalImages, formData.product_id,]);
-
-  // helper function for build the api for Additional images
-  const buildFormDataForProductImages = ({ call_mode, image_id, images = [], originalImages = [], }) => {
-    const fd = new FormData();
-
-    fd.append("call_mode", call_mode);
-    if (image_id) fd.append("image_id", image_id);
-
-    const getUrl = (img) =>
-      typeof img === "string" ? img : img?.url || null;
-
-    images.slice(0, 10).forEach((img, index) => {
-      if (!img) return;
-
-      const key = index === 0 ? "image_file" : `image_file_${index}`;
-      const currentUrl = getUrl(img);
-      const originalUrl = getUrl(originalImages[index]);
-
-      const isNewFile = img?.file instanceof File;
-      const isUnchanged = currentUrl && currentUrl === originalUrl;
-
-      if (isNewFile) {
-        fd.append(key, img.file);     // Send File when updated
-      } else if (isUnchanged || currentUrl) {
-        fd.append(key, currentUrl);   // Send URL when unchanged or new URL
-      }
-    });
-
-    return fd;
-  };
 
   // Add Additional Images Api
   const handleSaveAdditionalImages = async () => {
@@ -327,12 +296,6 @@ const AddProduct = () => {
     return !isMissingRequiredField && !isPrimaryImageMissing;
   }, [formData]);
 
-  const fileFromUrl = (url) => {
-    if (!url) return null;
-    const name = url.split("/").pop().split("?")[0];
-    return { uri: url, name };
-  };
-
   //  handle Submit for Add product
   const handleSubmit = async (e) => {
     // Granular required-field validation with specific toast
@@ -377,29 +340,14 @@ const AddProduct = () => {
       if (formData.activeImage.file instanceof File) {
         formDatas.append("primary_image", formData.activeImage.file);
       }else if(formData.activeImage && typeof formData.activeImage === 'string'){
-      
           // formDatas.append("primary_image", fileFromUrl(formData.activeImage));
           formDatas.append("primary_image", null);
         
       }
-
-      // if (formData.activeImage) {
-      //       if (formData.activeImage.file instanceof File) {
-      //         // If it's a new file upload
-      //         formDatas.append("primary_image", formData.activeImage.file);
-      //       } else if (typeof formData.activeImage === 'string') {
-      //         // If it's a URL string (existing image)
-      //         formDatas.append("primary_image", null);
-      //       } else if (formData.activeImage.url && typeof formData.activeImage.url === 'string') {
-      //         // If it's an object with url property
-      //         formDatas.append("primary_image", formData.activeImage.url);
-      //       }
+      // console.log("FormData contents:");
+      //     for (let [key, value] of formDatas.entries()) {
+      //       console.log(`${key}:`, value);
       //     }
-
-      console.log("FormData contents:");
-          for (let [key, value] of formDatas.entries()) {
-            console.log(`${key}:`, value);
-          }
       await processProductData(formDatas);
           
       toast.success(isEditMode ? "Product Updated Successfully!" : "Product Added Successfully!");
@@ -414,32 +362,11 @@ const AddProduct = () => {
     }
   };
 
-  // ----- Notes display logic -----
-  // const shouldShowInfoBox = useMemo(() => {
-  //   if (!isEditMode) return true; // Always true in add mode
-
-  //   const noVariations = !productData?.variations?.length;
-  //   const noImages = !productData?.c_images?.length;
-
-  //   return noVariations || noImages; // Show only if either one is missing
-  // }, [isEditMode, productData]);
-
-  // const showVariationNote = shouldShowInfoBox && (!productData?.variations?.length);
-  // const showImageNote = shouldShowInfoBox && (!productData?.c_images?.length);
-
   // ----- Image URL resolver -----
   const getImageUrl = (image) =>
     typeof image === "string"
       ? image
       : image?.url || (image?.file ? URL.createObjectURL(image.file) : "");
-
-  // const currentPreview = previewImage || getImageUrl(formData.activeImage);
-
-  // Category name match and show in the product preview
-  // const selectedCategoryName = useMemo(
-  //   () => category.find((c) => c.id == formData.category_id)?.name ?? "Category",
-  //   [category, formData.category_id]
-  // );
 
   return (
     <CustomerLayout>

@@ -69,7 +69,7 @@ export const CustomerAuthProvider = ({ children }) => {
     )
       try {
         const response = await getSellerAllList();
-        const filteredData = response.find(
+        const filteredData = response.data.find(
           (seller) => seller.cust_ref_code === customerCode
         );
         setSellerProfile(filteredData);
@@ -83,7 +83,7 @@ export const CustomerAuthProvider = ({ children }) => {
     try {
       setIsLoading(true);
       const response = await getProductDetailList("seller_code", seller_code);
-      setProductList(response);
+      setProductList(response.data);
     } catch (err) {
       setError("Failed to fetch data. Please try again.");
       console.error(err);

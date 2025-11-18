@@ -1,4 +1,6 @@
 import axios from "axios";
+import { GetAllSellerList, GetProductCategoryList, GetProductDetailList, GetProductList, GetSellerApplicationList, GetSellerTempleList, GetVariationList, ProcessProductCategory, ProcessProductData, ProcessProductVariationImages, ProcessProductVariations, ProcessVariationName, UpdateSellerApplicationStatus } from "./ConstantServies";
+import { authAxios, authAxiosFilePost, authAxiosPost } from "./HttpMethod";
 
 const BASE_URL = "https://agamandira.com/customer/api";
 const PRODUCT_BASE_URL = "https://agamandira.com/product/api"
@@ -139,21 +141,25 @@ export const getServiceBookings = async (id, name) => {
 };
 
 // Seller Temple List (for approvals)
-export const getSellerTempleList = async () => {
-  const token =
-    localStorage.getItem("userToken") || localStorage.getItem("customerToken");
-  try {
-    const url = `${BASE_URL}/get_seller_temple_list/`;
-    const config = {};
-    if (token) {
-      config.headers = { Authorization: `Token ${token}` };
-    }
-    const response = await axios.get(url, config);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+// export const getSellerTempleList = async () => {
+//   const token =
+//     localStorage.getItem("userToken") || localStorage.getItem("customerToken");
+//   try {
+//     const url = `${BASE_URL}/get_seller_temple_list/`;
+//     const config = {};
+//     if (token) {
+//       config.headers = { Authorization: `Token ${token}` };
+//     }
+//     const response = await axios.get(url, config);
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
+
+export function getSellerTempleList() {
+  return authAxios(GetSellerTempleList);
+}
 
 // Update seller status (APPROVE | INACTIVE)
 export const updateSellerStatus = async ({
@@ -304,42 +310,50 @@ export const extractDisabledDatesFromBookings = (
 
 // Helper function to convert Date object to YYYY-MM-DD format
 
-export const getmyApplication = async () => {
-  const custRefCode = localStorage.getItem("customerRefCode");
-  const token = localStorage.getItem("customerToken");
-  try {
-    const response = await axios.get(
-      `${BASE_URL}/get_seller_temple_list/?seller_ref_code=${custRefCode}`,
-      {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+// export const getmyApplication = async () => {
+//   const custRefCode = localStorage.getItem("customerRefCode");
+//   const token = localStorage.getItem("customerToken");
+//   try {
+//     const response = await axios.get(
+//       `${BASE_URL}/get_seller_temple_list/?seller_ref_code=${custRefCode}`,
+//       {
+//         headers: {
+//           Authorization: `Token ${token}`,
+//         },
+//       }
+//     );
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
 
-export const processSellerApplication = async (bookingData) => {
-  const token = localStorage.getItem("customerToken");
-  try {
-    const response = await axios.post(
-      `${BASE_URL}/seller_update/`,
-      bookingData,
-      {
-        headers: {
-          Authorization: `Token ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return response;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+export function getmyApplication(custRefCode) {
+  return authAxios(GetSellerApplicationList, { seller_ref_code: custRefCode });
+}
+
+// export const processSellerApplication = async (bookingData) => {
+//   const token = localStorage.getItem("customerToken");
+//   try {
+//     const response = await axios.post(
+//       `${BASE_URL}/seller_update/`,
+//       bookingData,
+//       {
+//         headers: {
+//           Authorization: `Token ${token}`,
+//           "Content-Type": "multipart/form-data",
+//         },
+//       }
+//     );
+//     return response;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
+export function processSellerApplication(bookingData) {
+  return authAxiosFilePost(UpdateSellerApplicationStatus, bookingData);
+}
+
 export const processpayment = async (bookingData) => {
   const token = localStorage.getItem("customerToken");
   try {
@@ -359,176 +373,216 @@ export const processpayment = async (bookingData) => {
   }
 };
 
-export const processProductData = async (Product_Data) => {
-  const token = localStorage.getItem("customerToken");
-  try {
-    const response = await axios.post(
-      `${PRODUCT_BASE_URL}/process_product_data/`,
-      Product_Data,
-      {
-        headers: {
-          Authorization: `Token ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+// export const processProductData = async (Product_Data) => {
+//   const token = localStorage.getItem("customerToken");
+//   try {
+//     const response = await axios.post(
+//       `${PRODUCT_BASE_URL}/process_product_data/`,
+//       Product_Data,
+//       {
+//         headers: {
+//           Authorization: `Token ${token}`,
+//           "Content-Type": "multipart/form-data",
+//         },
+//       }
+//     );
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
 
-export const getSellerProductList = async () => {
-  const token =
-    localStorage.getItem("userToken") || localStorage.getItem("customerToken");
-  try {
-    const url = `${PRODUCT_BASE_URL}/get_product_list/`;
-    const config = {};
-    if (token) {
-      config.headers = { Authorization: `Token ${token}` };
-    }
-    const response = await axios.get(url, config);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+export function processProductData(formData) {
+  return authAxiosFilePost(ProcessProductData, formData);
+}
 
-export const getProductDetailList = async (key, value) => {
-  const token =
-    localStorage.getItem("userToken") || localStorage.getItem("customerToken");
-  try {
-    const url = `${PRODUCT_BASE_URL}/get_product_detail_list/?${key}=${value}`;
-    const config = {};;
-    if (token) {
-      config.headers = { Authorization: `Token ${token}` };
-    }
-    const response = await axios.get(url, config);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+// export const getSellerProductList = async () => {
+//   const token =
+//     localStorage.getItem("userToken") || localStorage.getItem("customerToken");
+//   try {
+//     const url = `${PRODUCT_BASE_URL}/get_product_list/`;
+//     const config = {};
+//     if (token) {
+//       config.headers = { Authorization: `Token ${token}` };
+//     }
+//     const response = await axios.get(url, config);
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
 
-export const processCategoryData = async (Category_Data) => {
-  const token = localStorage.getItem("customerToken");
-  try {
-    const response = await axios.post(
-      `${PRODUCT_BASE_URL}/process_product_category_data/`,
-      Category_Data,
-      {
-        headers: {
-          Authorization: `Token ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+export function getSellerProductList() {
+  return authAxios(GetProductList);
+}
 
-export const processVariationName = async (VariationData) => {
-  const token = localStorage.getItem("userToken") || localStorage.getItem("customerToken");;
-  try {
-    const response = await axios.post(
-      `${PRODUCT_BASE_URL}/process_variation_name/`,
-      VariationData,
-      {
-        headers: {
-          Authorization: `Token ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+// export const getProductDetailList = async (key, value) => {
+//   const token =
+//     localStorage.getItem("userToken") || localStorage.getItem("customerToken");
+//   try {
+//     const url = `${PRODUCT_BASE_URL}/get_product_detail_list/?${key}=${value}`;
+//     const config = {};
+//     if (token) {
+//       config.headers = { Authorization: `Token ${token}` };
+//     }
+//     const response = await axios.get(url, config);
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
 
-export const getSellerCategory = async () => {
-  const token =
-    localStorage.getItem("userToken") || localStorage.getItem("customerToken");
-  try {
-    const url = `${PRODUCT_BASE_URL}/get_product_category_list/`;
-    const config = {};
-    if (token) {
-      config.headers = { Authorization: `Token ${token}` };
-    }
-    const response = await axios.get(url, config);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+export function getProductDetailList(key, value) {
+  return authAxios(GetProductDetailList, { [key]: value });
+}
 
-export const getSellerAllList = async () => {
-  const token =
-    localStorage.getItem("userToken") || localStorage.getItem("customerToken");
-  try {
-    const url = `${BASE_URL}/get_seller_list/`;
-    const config = {};
-    if (token) {
-      config.headers = { Authorization: `Token ${token}` };
-    }
-    const response = await axios.get(url, config);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+// export const processCategoryData = async (Category_Data) => {
+//   const token = localStorage.getItem("customerToken");
+//   try {
+//     const response = await axios.post(
+//       `${PRODUCT_BASE_URL}/process_product_category_data/`,
+//       Category_Data,
+//       {
+//         headers: {
+//           Authorization: `Token ${token}`,
+//           "Content-Type": "multipart/form-data",
+//         },
+//       }
+//     );
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
 
-export const getVariationList = async () => {
-  const token =
-    localStorage.getItem("userToken") || localStorage.getItem("customerToken");
-  try {
-    const url = `${PRODUCT_BASE_URL}/variation_name_list/`;
-    const config = {};
-    if (token) {
-      config.headers = { Authorization: `Token ${token}` };
-    }
-    const response = await axios.get(url, config);
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+export function processCategoryData(formData) {
+  return authAxiosFilePost(ProcessProductCategory, formData);
+}
 
-export const processProductVariations = async (payload) => {
-  const token = localStorage.getItem("customerToken");
-  try {
-    const response = await axios.post(
-      `${PRODUCT_BASE_URL}/process_product_variations/`,
-      payload,
-      {
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+// export const processVariationName = async (VariationData) => {
+//   const token = localStorage.getItem("userToken") || localStorage.getItem("customerToken");;
+//   try {
+//     const response = await axios.post(
+//       `${PRODUCT_BASE_URL}/process_variation_name/`,
+//       VariationData,
+//       {
+//         headers: {
+//           Authorization: `Token ${token}`,
+//           "Content-Type": "multipart/form-data",
+//         },
+//       }
+//     );
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
 
-export const ProcessProductImages = async (imageFile) => {
-  const token = localStorage.getItem("customerToken");
-  try {
-    const response = await axios.post(
-      `${PRODUCT_BASE_URL}/process_product_variation_images/`,
-      imageFile,
-      {
-        headers: {
-          Authorization: `Token ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error.response?.data || error.message;
-  }
-};
+export function processVariationName(formData) {
+  return authAxiosFilePost(ProcessVariationName, formData);
+}
+
+// export const getSellerCategory = async () => {
+//   const token =
+//     localStorage.getItem("userToken") || localStorage.getItem("customerToken");
+//   try {
+//     const url = `${PRODUCT_BASE_URL}/get_product_category_list/`;
+//     const config = {};
+//     if (token) {
+//       config.headers = { Authorization: `Token ${token}` };
+//     }
+//     const response = await axios.get(url, config);
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
+
+export function getSellerCategory() {
+  return authAxios(GetProductCategoryList);
+}
+
+// export const getSellerAllList = async () => {
+//   const token =
+//     localStorage.getItem("userToken") || localStorage.getItem("customerToken");
+//   try {
+//     const url = `${BASE_URL}/get_seller_list/`;
+//     const config = {};
+//     if (token) {
+//       config.headers = { Authorization: `Token ${token}` };
+//     }
+//     const response = await axios.get(url, config);
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
+
+export function getSellerAllList() {
+  return authAxios(GetAllSellerList);
+}
+
+// export const getVariationList = async () => {
+//   const token =
+//     localStorage.getItem("userToken") || localStorage.getItem("customerToken");
+//   try {
+//     const url = `${PRODUCT_BASE_URL}/variation_name_list/`;
+//     const config = {};
+//     if (token) {
+//       config.headers = { Authorization: `Token ${token}` };
+//     }
+//     const response = await axios.get(url, config);
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
+
+export function getVariationList() {
+  return authAxios(GetVariationList);
+}
+
+// export const processProductVariations = async (payload) => {
+//   const token = localStorage.getItem("customerToken");
+//   try {
+//     const response = await axios.post(
+//       `${PRODUCT_BASE_URL}/process_product_variations/`,
+//       payload,
+//       {
+//         headers: {
+//           Authorization: `Token ${token}`,
+//         },
+//       }
+//     );
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
+
+export function processProductVariations(payload) {
+  return authAxiosPost(ProcessProductVariations, payload);
+}
+
+// export const ProcessProductImages = async (imageFile) => {
+//   const token = localStorage.getItem("customerToken");
+//   try {
+//     const response = await axios.post(
+//       `${PRODUCT_BASE_URL}/process_product_variation_images/`,
+//       imageFile,
+//       {
+//         headers: {
+//           Authorization: `Token ${token}`,
+//           "Content-Type": "multipart/form-data",
+//         },
+//       }
+//     );
+//     return response.data;
+//   } catch (error) {
+//     throw error.response?.data || error.message;
+//   }
+// };
+
+export function ProcessProductImages(formData) {
+  return authAxiosFilePost(ProcessProductVariationImages, formData);
+}

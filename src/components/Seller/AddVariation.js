@@ -47,7 +47,7 @@ const AddVariation = () => {
     const fetchVariations = async () => {
       try {
         const response = await getVariationList();
-        setVariationList(response || []);
+        setVariationList(response.data || []);
       } catch (error) {
         console.error(error.message)
       }
@@ -289,10 +289,10 @@ const AddVariation = () => {
           await ProcessProductImages(formData);
 
           // Console log formData entries
-          console.log("FormData contents:");
-          for (let [key, value] of formData.entries()) {
-            console.log(`${key}:`, value);
-          }
+          // console.log("FormData contents:");
+          // for (let [key, value] of formData.entries()) {
+          //   console.log(`${key}:`, value);
+          // }
           
           successCount++;
         } catch (error) {

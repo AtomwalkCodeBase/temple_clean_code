@@ -208,7 +208,7 @@ const SellerRegistration = () => {
       );
       setTemples(is_document_required_temple);
       setAllTemples(templeData.data)
-      setMyApplications(applicationData || []);
+      setMyApplications(applicationData.data || []);
       // console.log(applicationData)
     } catch (err) {
       setError("Failed to fetch data. Please try again.");
@@ -262,7 +262,12 @@ const SellerRegistration = () => {
         {
           label: 'Edit',
           onClick:  (temple) => handleApplyClick( temple.temple_id, "update", temple),
-          hidden: (row) => row.is_approve === true
+          hidden: (row) => row.status === "A" 
+        },
+        {
+          label: 'Submit Request',
+          onClick:  (temple) => handleApplyClick( temple.temple_id, "update", temple),
+          hidden: (row) => row.status === "A" 
         }
       ],
       // menuItems: [
@@ -370,6 +375,7 @@ const SellerRegistration = () => {
         {templeDetailViewModal && 
         <TempleDetailsModal temple={selectedTemple} isOpen={templeDetailViewModal} onClose={() => setTempleDetailViewModal(false)} />
         }
+        
       </PageContainer>
     </CustomerLayout>
   );

@@ -276,7 +276,7 @@ export default function ProductVariationManager() {
                 setLoading(true);
                 const productData = await getProductDetailList('product_code', productCode);
                 // API might return array or single object
-                const product = Array.isArray(productData) ? productData[0] : productData;
+                const product = Array.isArray(productData.data) ? productData.data[0] : productData.data;
                 if (product) {
                     setProduct(product);
                 } else {
