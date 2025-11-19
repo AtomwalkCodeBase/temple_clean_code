@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Eye, Download } from 'lucide-react';
+import { Eye, Download, Image, File } from 'lucide-react';
 import { ActionButton } from './ActionButton';
 import { getActionsByStatus } from './utils';
 import StatusBadges from '../AdminLayout/StatusBadges';
@@ -173,6 +173,16 @@ const EmptySubText = styled.p`
   margin: 0;
 `;
 
+const RemarkText = styled.div`
+ position: relative;
+ top: 0;
+ min-width: 800px;
+ color: #6b7280;
+ font-size: 0.9rem;
+ padding: 8px 10px;
+ border-radius: 10px
+`;
+
 export const SellerTable = ({ data, onAction, onDocumentView, onViewAllDocuments, loading, error }) => {
   const renderActions = (seller) => {
     const actions = getActionsByStatus(seller.status_code);
@@ -237,11 +247,13 @@ export const SellerTable = ({ data, onAction, onDocumentView, onViewAllDocuments
             </tr>
           ) : (
             data.map((seller) => (
+              <React.Fragment key={seller.id}>
               <motion.tr
                 key={seller.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
+                style={{borderBottom: "none", }}
               >
                 <td style={{ fontWeight: 600 }}>{seller.seller_ref_code}</td>
                 <td>{seller.name}</td>
@@ -260,7 +272,7 @@ export const SellerTable = ({ data, onAction, onDocumentView, onViewAllDocuments
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                         >
-                          {doc.type === 'image' ? <Eye size={18} /> : <Download size={18} />}
+                          {doc.type === 'image' ? <Image size={18} /> : <File size={18} />}
                         </DocumentButton>
                       ))
                     ) : (
@@ -270,7 +282,7 @@ export const SellerTable = ({ data, onAction, onDocumentView, onViewAllDocuments
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                         >
-                          {seller.documents[0].type === 'image' ? <Eye size={18} /> : <Download size={18} />}
+                          {seller.documents[0].type === 'image' ? <Eye size={18} /> : <File size={18} />}
                         </DocumentButton>
                         <DocumentCount onClick={() => onViewAllDocuments(seller)}>
                           +{seller.documents.length - 1} more
@@ -285,6 +297,18 @@ export const SellerTable = ({ data, onAction, onDocumentView, onViewAllDocuments
                   </ActionButtons>
                 </td>
               </motion.tr>
+               <motion.tr
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                transition={{ duration: 0.2 }}
+              >
+                <td colSpan="5" style={{ padding: '0.5rem 0.5rem ',  background: '#fbfbfd' }}>
+                  <RemarkText>
+                    {seller.remarks ? seller.remarks : <em style={{ color: '#9ca3af' }}>No remarks</em>}
+                  </RemarkText>
+                </td>
+              </motion.tr>
+            </React.Fragment>
             ))
           )}
         </Tbody>

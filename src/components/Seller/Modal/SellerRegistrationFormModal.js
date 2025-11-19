@@ -266,6 +266,23 @@ const DocumentCard = styled.div`
   text-align: center;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 `;
+const RemarkBox = styled.textarea`
+ width: 100%;
+ padding: 0.75rem;
+ border: 2px solid #cbd5e1;
+ border-radius: 6px;
+ font-size: 0.875rem;
+ font-family: inherit;
+ resize: vertical;
+ min-height: 100px;
+ outline: none;
+ transition: all 0.2s ease;
+
+ &:focus {
+   border-color: #667eea;
+   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+ }
+`;
 
 const SellerRegistrationFormModal = ({
   selectedTemple,
@@ -275,6 +292,7 @@ const SellerRegistrationFormModal = ({
 }) => {
   const [uploads, setUploads] = useState({});
   const [loading, setLoading] = useState(false);
+  const [remark, setRemark] = useState("");
   const [error, setError] = useState("");
 
   // const handleFileChange = (e, idx) => {
@@ -376,11 +394,14 @@ const handleSubmitApplication = async (e, mode) => {
         }
       }
     });
+     if (mode !== "edit" && remark.trim()) {
+      formData.append("remarks", remark);
+     }
 
     // Debug: check what’s being sent
-    for (const [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
+    // for (const [key, value] of formData.entries()) {
+    //   console.log(key, value);
+    // }
 
     // --- API CALL ---
     const response = await processSellerApplication(formData);
@@ -395,9 +416,10 @@ const handleSubmitApplication = async (e, mode) => {
     fetchData();
     setSelectedTemple(null);
     setUploads({});
+    setRemark("");
   } catch (err) {
     setError(err.message);
-    toast.error(err.message);
+    toast.error(err.response?.data?.message);
   } finally {
     setLoading(false);
   }
@@ -605,6 +627,18 @@ const handleSubmitApplication = async (e, mode) => {
             )}
           </DocumentSection>
         )}
+
+       {selectedTemple.mode !== "update" && (
+         <DocumentSection>
+           <SectionTitle>Additional Remarks (Optional)</SectionTitle>
+           <Label>Remarks</Label>
+           <RemarkBox
+             placeholder="Add any additional information or remarks..."
+             value={remark}
+             onChange={(e) => setRemark(e.target.value)}
+           />
+         </DocumentSection>
+       )}
       </ModalBody>
 
       {selectedTemple?.SellerApplication?.status === "C" && (

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Check, X, AlertCircle, Ban } from 'lucide-react';
+import { Check, X, AlertCircle, Ban, UserCheck } from 'lucide-react';
 
 const Button = styled(motion.button)`
   padding: 0.5rem 1rem;
@@ -23,6 +23,12 @@ export const ActionButton = ({ action, seller, onClick }) => {
     approve: {
       text: 'Approve',
       icon: Check,
+      bg: '#10b981',
+      hoverBg: '#059669'
+    },
+    active: {
+      text: 'Active',
+      icon: UserCheck,
       bg: '#10b981',
       hoverBg: '#059669'
     },

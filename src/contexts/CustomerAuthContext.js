@@ -83,7 +83,7 @@ export const CustomerAuthProvider = ({ children }) => {
     try {
       setIsLoading(true);
       const response = await getProductDetailList("seller_code", seller_code);
-      setProductList(response.data);
+      setProductList(response.data.reverse());
     } catch (err) {
       setError("Failed to fetch data. Please try again.");
       console.error(err);

@@ -240,6 +240,11 @@ const SellerRegistration = () => {
 
   const columns = [
     {
+      key: 'temple_id',
+      title: 'Temple Id',
+      type: 'text'
+    },
+    {
       key: 'temple_name',
       title: 'Temple Name',
       type: 'text'
@@ -264,11 +269,11 @@ const SellerRegistration = () => {
           onClick:  (temple) => handleApplyClick( temple.temple_id, "update", temple),
           hidden: (row) => row.status === "A" 
         },
-        {
-          label: 'Submit Request',
-          onClick:  (temple) => handleApplyClick( temple.temple_id, "update", temple),
-          hidden: (row) => row.status === "A" 
-        }
+        // {
+        //   label: 'Submit Request',
+        //   onClick:  (temple) => handleApplyClick( temple.temple_id, "update", temple),
+        //   hidden: (row) => row.status === "A" 
+        // }
       ],
       // menuItems: [
       //   {

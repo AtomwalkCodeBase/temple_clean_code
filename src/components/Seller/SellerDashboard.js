@@ -289,7 +289,7 @@ const SellerDashboard = () => {
             data={[]}
             EmptyMessage="No Orders Found"
             filters={{
-              search: { placeholder: 'Search by name or SKU...', keys: ['product_name', 'sku'] },
+              search: { placeholder: 'Search by name ...', keys: ['product_name'] },
               selects: [
                 {
                   id: 'status', label: 'Status', key: 'status', options: [
