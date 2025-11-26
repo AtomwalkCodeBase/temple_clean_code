@@ -6,36 +6,36 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiMapPin, FiCheck, FiX } from "react-icons/fi";
 
 const INDIAN_STATES = [
-  { name: "Andhra Pradesh", image: "🏛️" },
-  { name: "Arunachal Pradesh", image: "⛰️" },
-  { name: "Assam", image: "🦏" },
-  { name: "Bihar", image: "🕉️" },
-  { name: "Chhattisgarh", image: "🌳" },
-  { name: "Goa", image: "🏖️" },
-  { name: "Gujarat", image: "🦁" },
-  { name: "Haryana", image: "🌾" },
-  { name: "Himachal Pradesh", image: "🏔️" },
-  { name: "Jharkhand", image: "⛰️" },
-  { name: "Karnataka", image: "🏛️" },
-  { name: "Kerala", image: "🌴" },
-  { name: "Madhya Pradesh", image: "🐅" },
-  { name: "Maharashtra", image: "🏰" },
-  { name: "Manipur", image: "🎭" },
-  { name: "Meghalaya", image: "☔" },
-  { name: "Mizoram", image: "🌄" },
-  { name: "Nagaland", image: "🎪" },
-  { name: "Odisha", image: "🏛️" },
-  { name: "Punjab", image: "🌾" },
-  { name: "Rajasthan", image: "🐪" },
-  { name: "Sikkim", image: "🏔️" },
-  { name: "Tamil Nadu", image: "🕉️" },
-  { name: "Telangana", image: "💎" },
-  { name: "Tripura", image: "🎋" },
-  { name: "Uttar Pradesh", image: "🕌" },
-  { name: "Uttarakhand", image: "🏔️" },
-  { name: "West Bengal", image: "🐯" },
-  { name: "Ladakh", image: "❄️" },
-  { name: "Jammu and Kashmir", image: "🌸" },
+  { name: "Andhra Pradesh", code: "AP", image: "🏛️" },
+  { name: "Arunachal Pradesh", code: "AR", image: "⛰️" },
+  { name: "Assam", code: "AS", image: "🦏" },
+  { name: "Bihar", code: "BR", image: "🕉️" },
+  { name: "Chhattisgarh", code: "CG", image: "🌳" },
+  { name: "Goa", code: "GA", image: "🏖️" },
+  { name: "Gujarat", code: "GJ", image: "🦁" },
+  { name: "Haryana", code: "HR", image: "🌾" },
+  { name: "Himachal Pradesh", code: "HP", image: "🏔️" },
+  { name: "Jharkhand", code: "JH", image: "⛰️" },
+  { name: "Karnataka", code: "KA", image: "🏛️" },
+  { name: "Kerala", code: "KL", image: "🌴" },
+  { name: "Madhya Pradesh", code: "MP", image: "🐅" },
+  { name: "Maharashtra", code: "MH", image: "🏰" },
+  { name: "Manipur", code: "MN", image: "🎭" },
+  { name: "Meghalaya", code: "ML", image: "☔" },
+  { name: "Mizoram", code: "MZ", image: "🌄" },
+  { name: "Nagaland", code: "NL", image: "🎪" },
+  { name: "Odisha", code: "OD", image: "🏛️" },
+  { name: "Punjab", code: "PB", image: "🌾" },
+  { name: "Rajasthan", code: "RJ", image: "🐪" },
+  { name: "Sikkim", code: "SK", image: "🏔️" },
+  { name: "Tamil Nadu", code: "TN", image: "🕉️" },
+  { name: "Telangana", code: "TG", image: "💎" },
+  { name: "Tripura", code: "TR", image: "🎋" },
+  { name: "Uttar Pradesh", code: "UP", image: "🕌" },
+  { name: "Uttarakhand", code: "UT", image: "🏔️" },
+  { name: "West Bengal", code: "WB", image: "🐯" },
+  { name: "Ladakh", code: "LA", image: "❄️" },
+  { name: "Jammu and Kashmir", code: "JK", image: "🌸" },
 ];
 
 const Overlay = styled(motion.div)`
@@ -300,7 +300,8 @@ const LocationModal = ({ isOpen, onClose, onSelectLocation }) => {
 
   const handleConfirm = () => {
     if (selectedState) {
-      localStorage.setItem("selectedState", selectedState);
+      localStorage.setItem("selectedState", selectedState.name);
+      localStorage.setItem("selectedStatecode", selectedState.code);
       if (onSelectLocation) {
         onSelectLocation(selectedState);
       }
@@ -345,8 +346,8 @@ const LocationModal = ({ isOpen, onClose, onSelectLocation }) => {
                 {INDIAN_STATES.map((state) => (
                   <StateCard
                     key={state.name}
-                    selected={selectedState === state.name}
-                    onClick={() => setSelectedState(state.name)}
+                    selected={selectedState.name === state.name}
+                    onClick={() => setSelectedState(state)}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                   >

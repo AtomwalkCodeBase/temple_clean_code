@@ -24,6 +24,7 @@ import {
   Calendar,
   Calendar1,
   CalendarArrowDown,
+  ChartBar,
   Package,
   Plug,
 } from "lucide-react";
@@ -306,6 +307,12 @@ const AdminSidebar = ({
           path: "/dashboard",
           icon: FiHome,
           label: "Dashboard",
+          badge: null,
+        },
+        {
+          path: "/analytics-dashboard",
+          icon: ChartBar,
+          label: "Analytics Dashboard",
           badge: null,
         },
       ],

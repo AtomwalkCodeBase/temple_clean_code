@@ -28,7 +28,6 @@ import RefundPolicies from "./components/Admin/RefundPolicies";
 import PricingRules from "./components/Admin/PricingRules";
 import HallsManagement from "./components/Admin/HallsManagement";
 import CustomerDashboard from "./components/Customer/CustomerDashboard";
-import MyServices from "./components/Customer/MyServices";
 import CustomerTemples from "./components/Customer/CustomerTemples";
 import CustomerBookings from "./components/Customer/CustomerBookings";
 import CustomerProfile from "./components/Customer/CustomerProfile";
@@ -51,6 +50,7 @@ import ProductVariationManager from "./components/Seller/ProductVariationManager
 import DemoMode from "./components/Admin/DemoMode";
 import CustomerLayout from "./components/Customer/CustomerLayout";
 import ServiceBlockList from "./components/Admin/ServiceBlockList.js";
+import AnalyticsDashboard from "./components/Admin/AnalyticsDashboard.js";
 
 function AppContent() {
   const location = useLocation();
@@ -71,6 +71,7 @@ function AppContent() {
     "/admin-services",
     "/catalog-setup",
     "/service-block-list",
+    "/analytics-dashboard",
   ].some((route) => location.pathname.startsWith(route));
 
   const isCustomerRoute = [
@@ -112,6 +113,14 @@ function AppContent() {
           element={
             <AdminLayout>
               <AdminDashboard />
+            </AdminLayout>
+          }
+        />
+        <Route
+          path="/analytics-dashboard"
+          element={
+            <AdminLayout>
+              <AnalyticsDashboard />
             </AdminLayout>
           }
         />

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
+import { indianStates } from "../../services/serviceUtils";
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -35,11 +36,11 @@ const Header = styled.div`
 const Title = styled.h2`
   font-size: 24px;
   font-weight: 700;
-  color: #1e293b;
+  color: ${(props) => (props.location ? "#e07b28ff" : "#1b5bdbff")};
   margin: 0;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  /* background: #d85b1dff;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  -webkit-text-fill-color: transparent; */
 `;
 
 const ClearButton = styled.button`
@@ -69,6 +70,10 @@ const ServiceGrid = styled.div`
 `;
 
 const ServiceCard = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   background: ${({ selected, bgImage }) =>
     selected
       ? `linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(29, 78, 216, 0.9)), url(${bgImage})`
@@ -132,9 +137,9 @@ const ServiceCard = styled.div`
 `;
 
 const ServiceIcon = styled.div`
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 16px;
+  width: 50px;
+  height: 55px;
+  /* margin: 0 auto 16px; */
   background: ${({ selected }) =>
     selected
       ? "rgba(255, 255, 255, 0.25)"
@@ -409,7 +414,28 @@ const TodayIndicator = styled.span`
   border-radius: 4px;
   line-height: 1;
 `;
+const Select = styled.select`
+  padding: 0.8rem 1rem;
+  border: 2px solid #d4af374d;
+  border-radius: 10px;
+  background: white;
+  color: #2c3e50;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 
+  &:hover {
+    border-color: rgba(212, 175, 55, 0.5);
+    background: rgba(212, 175, 55, 0.05);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #d4af37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+  }
+`;
 // Update the Day component to handle different states
 const Day = styled.button`
   background: ${({ selected, today, past }) =>
@@ -451,7 +477,7 @@ const Day = styled.button`
   }
 `;
 
-const ServiceFilters = ({ filters, onFilterChange, services }) => {
+const ServiceFilters = ({ filters, onFilterChange, services, location }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [showCustomCapacity, setShowCustomCapacity] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -531,6 +557,7 @@ const ServiceFilters = ({ filters, onFilterChange, services }) => {
       serviceType: "",
       date: "",
       capacity: "",
+      state_code: "",
     });
     setShowCustomCapacity(false);
   };
@@ -575,7 +602,23 @@ const ServiceFilters = ({ filters, onFilterChange, services }) => {
   return (
     <FiltersContainer>
       <Header>
-        <Title>Find Your Perfect Service</Title>
+        <Title location={location === "/customer-services"}>
+          Find Your Perfect Service
+        </Title>
+        {location == "/customer-services" && (
+          <Select
+            name="state_code"
+            value={filters.state_code}
+            onChange={(e) => handleChange("state_code", e.target.value)}
+          >
+            <option value="">All Location</option>
+            {indianStates.map((type) => (
+              <option key={type.number} value={type.code}>
+                {type.name}
+              </option>
+            ))}
+          </Select>
+        )}
         <ClearButton onClick={handleClearFilters}>
           Clear All Filters
         </ClearButton>
@@ -597,11 +640,6 @@ const ServiceFilters = ({ filters, onFilterChange, services }) => {
                 <ServiceName selected={filters.serviceType === service.id}>
                   {service.name}
                 </ServiceName>
-                <ServiceDescription
-                  selected={filters.serviceType === service.id}
-                >
-                  {service.description}
-                </ServiceDescription>
               </ServiceCard>
             ))}
           </ServiceGrid>

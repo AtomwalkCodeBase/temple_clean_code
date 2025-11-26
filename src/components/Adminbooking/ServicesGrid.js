@@ -1,7 +1,8 @@
 // components/AdminServices/ServicesGrid.js
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import styled from "styled-components";
 import ServiceCard from "./ServiceCard";
+import ServiceDetailsView from "../Customer/ServiceDetails";
 
 const ServicesGridContainer = styled.div`
   display: grid;
@@ -139,7 +140,9 @@ const ServicesGrid = ({
       };
     });
   }, [services, bookings]);
-
+  const [open, setOpen] = useState(false);
+  const [data, setData] = useState({});
+  console.log(data, "data");
   return (
     <ServicesGridContainer>
       <SectionTitle>
@@ -153,8 +156,16 @@ const ServicesGrid = ({
           isSelected={selectedService?.service_id === service.service_id}
           onSelect={() => onServiceSelect(service)}
           onVariationSelect={onVariationSelect}
+          setOpen={setOpen}
+          setData={setData}
         />
       ))}
+      {open && (
+        <ServiceDetailsView
+          service={data}
+          onClose={() => setOpen(false)}
+        ></ServiceDetailsView>
+      )}
     </ServicesGridContainer>
   );
 };

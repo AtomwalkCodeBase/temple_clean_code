@@ -13,7 +13,7 @@ import {
   FiEye,
   FiXCircle,
 } from "react-icons/fi";
-import { MdQrCode2, MdTempleHindu } from "react-icons/md";
+import { MdQrCode2, MdTempleHindu, MdUpdate } from "react-icons/md";
 import {
   getBookingList,
   processBooking,
@@ -23,6 +23,8 @@ import CustomerLayout from "../../components/Customer/CustomerLayout";
 
 import { toast } from "react-toastify";
 import ConfirmationModal from "./CustomerModal/ConfirmationModal";
+import { date } from "zod";
+import { formatDateForInputs } from "../../services/serviceUtils";
 
 // Styled Components
 const BookingsContainer = styled.div`
@@ -680,14 +682,29 @@ const CustomerBookings = () => {
     isOpen: false,
     refCode: null,
     action: null,
+    rendpolices: [],
+    price: null,
+    date: null,
+    time: null,
   });
 
   // Function to open confirmation modal
-  const openConfirmationModal = (refCode, action) => {
+  const openConfirmationModal = (
+    refCode,
+    action,
+    rendpolices,
+    price,
+    date,
+    time
+  ) => {
     setConfirmationModal({
       isOpen: true,
       refCode,
       action,
+      rendpolices,
+      price,
+      date,
+      time,
     });
   };
 
@@ -697,6 +714,10 @@ const CustomerBookings = () => {
       isOpen: false,
       refCode: null,
       action: null,
+      rendpolices: null,
+      price: null,
+      date: null,
+      time: null,
     });
   };
 
@@ -816,6 +837,23 @@ const CustomerBookings = () => {
     setIsModalOpen(false);
     setSelectedBooking(null);
   };
+  function parseDDMMYYYY(dateStr) {
+    if (!dateStr) return null;
+    const [dd, mm, yyyy] = dateStr.split("-");
+    // Create date in LOCAL timezone (important)
+    return new Date(yyyy, mm - 1, dd);
+  }
+
+  function isFutureOrToday(bookingDateStr) {
+    const bookingDate = parseDDMMYYYY(bookingDateStr);
+    if (!bookingDate) return false;
+    const today = new Date();
+    // Normalize both to 00:00:00 for correct comparison
+    bookingDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    return bookingDate >= today;
+  }
 
   const getStatusText = (status) => {
     switch (status?.toUpperCase()) {
@@ -1057,22 +1095,38 @@ const CustomerBookings = () => {
                     {visibleQRCode === booking.ref_code ? "Hide" : "View"} QR
                     Code
                   </ViewDetailsButton>
-                  {booking.status?.toUpperCase() === "B" && (
-                    <BookingActions>
-                      <ActionButton
-                        className="cancel"
-                        onClick={() =>
-                          openConfirmationModal(booking.ref_code, "cancel")
-                        }
-                        disabled={actionLoading === booking.ref_code}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <FiX />
-                        {actionLoading === booking.ref_code ? "..." : "Cancel"}
-                      </ActionButton>
-                    </BookingActions>
-                  )}
+                  {/* <BookingActions>
+                    <ActionButton className="complete">
+                      <MdUpdate />
+                      Update{" "}
+                    </ActionButton>
+                  </BookingActions> */}
+                  {booking.status?.toUpperCase() === "B" &&
+                    isFutureOrToday(booking.booking_date) && (
+                      <BookingActions>
+                        <ActionButton
+                          className="cancel"
+                          onClick={() =>
+                            openConfirmationModal(
+                              booking.ref_code,
+                              "cancel",
+                              booking.service_data?.refund_policy_data,
+                              booking.unit_price,
+                              booking.booking_date,
+                              booking.start_time
+                            )
+                          }
+                          disabled={actionLoading === booking.ref_code}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <FiX />
+                          {actionLoading === booking.ref_code
+                            ? "..."
+                            : "Cancel"}
+                        </ActionButton>
+                      </BookingActions>
+                    )}
                 </CardActions>
               </BookingCard>
             ))}
@@ -1290,6 +1344,10 @@ const CustomerBookings = () => {
         message="Are you sure you want to cancel this booking? This action cannot be undone."
         confirmText="Yes, Cancel Booking"
         cancelText="No, Keep Booking"
+        refunddata={confirmationModal.rendpolices}
+        price={confirmationModal.price}
+        bookingDate={formatDateForInputs(confirmationModal.date)}
+        bookingtime={confirmationModal.time}
       />
     </CustomerLayout>
   );

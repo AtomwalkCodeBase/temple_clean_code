@@ -38,13 +38,13 @@ const AdminServices = () => {
   const [showSummary, setShowSummary] = useState(false);
   const [currentMonthData, setCurrentMonthData] = useState(null);
   const templeId = localStorage.getItem("templeId") || params.get("templeId");
-  const urllocation = params.get("location");
+  const urllocation =
+    params.get("location") || localStorage.getItem("selectedStatecode");
   const urldate = params.get("date");
   const urlservice = params.get("id");
-  console.log(urllocation, "urllocation");
+  const location = window.location.pathname;
   useEffect(() => {
-    // debugger;
-    if (urllocation) {
+    if (urllocation && location === "/customer-services") {
       setFilters((prev) => ({
         ...prev,
         state_code: urllocation,
@@ -228,6 +228,7 @@ const AdminServices = () => {
         filters={filters}
         onFilterChange={handleFilterChange}
         services={services}
+        location={location}
       />
 
       {loading ? (

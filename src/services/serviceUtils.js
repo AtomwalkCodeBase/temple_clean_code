@@ -203,6 +203,17 @@ export function toAPIDate(dateKey) {
   const day = String(dt.getDate()).padStart(2, "0");
   return `${day}-${months[dt.getMonth()]}-${dt.getFullYear()}`;
 }
+export const formatDateForInputs = (dateStr) => {
+  if (!dateStr) return;
+  const parts = dateStr?.split("-");
+  if (parts.length !== 3) return null;
+
+  const [dd, mm, yyyy] = parts;
+
+  if (dd?.length !== 2 || mm?.length !== 2 || yyyy?.length !== 4) return null;
+
+  return `${yyyy}-${mm}-${dd}`;
+};
 export const formatDateForInput = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);

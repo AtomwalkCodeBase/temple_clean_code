@@ -7,6 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../Customer/CustomerModal/ConfirmationModal";
+import { formatDateForInputs } from "../../services/serviceUtils";
 
 // Styled Components
 const DashboardContainer = styled.div`
@@ -424,14 +425,37 @@ const AdminDashboard = () => {
     isOpen: false,
     refCode: null,
     action: null,
+    rendpolices: [],
+    price: null,
+    date: null,
+    time: null,
+    custcode: null,
   });
-
+  // Function to close confirmation modal
+  const closeConfirmationModal = () => {
+    setConfirmationModal({
+      isOpen: false,
+      refCode: null,
+      action: null,
+      rendpolices: null,
+      price: null,
+      date: null,
+      time: null,
+      custcode: null,
+    });
+  };
   // Function to open confirmation modal
-  const openConfirmationModal = (refCode, action) => {
+  const openConfirmationModal = (booking) => {
+    console.log(booking, "booking");
     setConfirmationModal({
       isOpen: true,
-      refCode,
-      action,
+      refCode: booking.ref_code,
+      action: "CANCEL",
+      rendpolices: booking.service_data?.refund_policy_data,
+      price: booking.unit_price,
+      date: booking.booking_date,
+      time: booking.start_time,
+      custcode: booking.customer_data?.cust_ref_code,
     });
   };
   // Fetch bookings
@@ -588,15 +612,15 @@ const AdminDashboard = () => {
   const handleCancelBooking = async (booking) => {
     if (
       window.confirm(
-        `Are you sure you want to cancel booking ${booking.ref_code}?`
+        `Are you sure you want to cancel booking ${booking.refCode}?`
       )
     ) {
       try {
         const cancelData = {
           booking_data: {
-            cust_ref_code: booking.customer_data?.cust_ref_code,
+            cust_ref_code: booking.custcode,
             call_mode: "CANCEL",
-            booking_ref_code: booking.ref_code,
+            booking_ref_code: booking.refCode,
             remarks: "Cancelled by admin",
           },
         };
@@ -616,7 +640,6 @@ const AdminDashboard = () => {
   };
 
   const handleCompleteBooking = async (booking) => {
-    console.log(booking, "booking");
     if (window.confirm(`Mark booking ${booking.ref_code} as completed?`)) {
       try {
         const completeData = {
@@ -867,7 +890,7 @@ const AdminDashboard = () => {
                           booking.status_display !== "COMPLETED" && (
                             <>
                               <CancelButton
-                                onClick={() => handleCancelBooking(booking)}
+                                onClick={() => openConfirmationModal(booking)}
                                 title="Cancel Booking"
                               >
                                 Cancel
@@ -949,12 +972,16 @@ const AdminDashboard = () => {
       </TableContainer>
       <ConfirmationModal
         isOpen={confirmationModal.isOpen}
-        onClose={confirmationModal}
-        onConfirm={() => handleCompleteBooking(confirmationModal.booking)}
+        onClose={closeConfirmationModal}
+        onConfirm={() => handleCancelBooking(confirmationModal)}
         title="Cancel Booking"
         message="Are you sure you want to cancel this booking? This action cannot be undone."
         confirmText="Yes, Cancel Booking"
         cancelText="No, Keep Booking"
+        refunddata={confirmationModal.rendpolices}
+        price={confirmationModal.price}
+        bookingDate={formatDateForInputs(confirmationModal.date)}
+        bookingtime={confirmationModal.time}
       />
     </DashboardContainer>
   );

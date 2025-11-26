@@ -171,6 +171,7 @@ const ExpandIcon = styled.div`
 
 const ServiceType = styled.span`
   display: inline-block;
+  margin: 5px;
   padding: 8px 16px;
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
@@ -186,12 +187,12 @@ const ServiceType = styled.span`
   gap: 6px;
 
   &::before {
-    content: "⚡";
+    content: "${(props) => (props.eye ? "⚡" : "👁️")}";
     font-size: 14px;
   }
 `;
 
-const ServiceDetails = styled.div`
+const ServiceDetailsa = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
@@ -425,9 +426,15 @@ const CapacityInfo = styled.div`
   text-align: center;
 `;
 
-const ServiceCard = ({ service, isSelected, onSelect, onVariationSelect }) => {
+const ServiceCard = ({
+  service,
+  isSelected,
+  onSelect,
+  onVariationSelect,
+  setOpen,
+  setData,
+}) => {
   const [showVariations, setShowVariations] = useState(false);
-  console.log(service, "service");
   const handleCardClick = () => {
     onSelect();
     setShowVariations(!showVariations);
@@ -445,7 +452,10 @@ const ServiceCard = ({ service, isSelected, onSelect, onVariationSelect }) => {
       }, 100);
     }
   };
-
+  const opendetailsView = (data) => {
+    setData(data);
+    setOpen(true);
+  };
   return (
     <ServiceCardContainer isSelected={isSelected}>
       <ServiceHeader isSelected={isSelected} onClick={handleCardClick}>
@@ -461,12 +471,13 @@ const ServiceCard = ({ service, isSelected, onSelect, onVariationSelect }) => {
             <ServiceName>{service.name}</ServiceName>
             <ExpandIcon isExpanded={showVariations}>↓</ExpandIcon>
           </ServiceNameRow>
-
-          <ServiceType>
+          <ServiceType eye={true}>
             {service.service_type_str || service.service_type}
           </ServiceType>
-
-          <ServiceDetails>
+          <ServiceType onClick={() => opendetailsView(service)}>
+            View details
+          </ServiceType>
+          <ServiceDetailsa>
             <DetailItem>
               <DetailIcon>👥</DetailIcon>
               <DetailLabel>Capacity</DetailLabel>
@@ -484,7 +495,7 @@ const ServiceCard = ({ service, isSelected, onSelect, onVariationSelect }) => {
               <DetailLabel>Bookings</DetailLabel>
               <DetailValue>{service.totalBookings}</DetailValue>
             </DetailItem>
-          </ServiceDetails>
+          </ServiceDetailsa>
         </ServiceInfo>
       </ServiceHeader>
 

@@ -1,20 +1,5 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
 import styled, { keyframes } from "styled-components";
-import {
-  extractDisabledDatesFromBookings,
-  getServiceBookings,
-  processBooking,
-  processpayment,
-} from "../../services/customerServices";
-import CustomerLayout from "./CustomerLayout";
-import CombinedBookingModal from "./CustomerModal/CombinedBookingModal";
-import BookingConfirmationPopup from "./CustomerModal/BookingConfirmationPopup";
-import { useCustomerAuth } from "../../contexts/CustomerAuthContext";
-import { getTempleServicesList } from "../../services/templeServices";
-import { toAPIDate } from "../../services/serviceUtils";
 
 // Animations
 const fadeInUp = keyframes`
@@ -33,50 +18,89 @@ const fadeIn = keyframes`
   to { opacity: 1; }
 `;
 
-const slideInLeft = keyframes`
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-`;
-
-const pulse = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-`;
-
 const shimmer = keyframes`
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 `;
 
-// Main Container
-const DetailsContainer = styled.div`
-  min-height: 100vh;
-  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
-  position: relative;
-  padding-bottom: 120px;
+// Modal Container
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+  overflow-y: auto;
+
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 `;
 
-const ContentWrapper = styled.div`
+const ModalContainer = styled.div`
+  width: 95vw;
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+  max-height: 95vh;
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  animation: ${fadeInUp} 0.3s ease;
+  overflow-y: scroll;
+  @media (max-width: 768px) {
+    width: 100%;
+    max-height: 90vh;
+  }
+`;
+
+const CloseButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  color: #333;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    background: #fff;
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  }
+`;
+
+// Main Content Styles
+const DetailsContainer = styled.div`
+  min-height: 400px;
+  position: relative;
 `;
 
 const HeroSection = styled.div`
   position: relative;
-  height: 70vh;
-  min-height: 500px;
-  border-radius: 50px 50px 50px 50px;
+  height: 50vh;
+  min-height: 400px;
+  border-radius: 0;
   overflow: hidden;
-  margin-bottom: 40px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  margin-bottom: 0;
 `;
 
 const HeroBackground = styled.div`
@@ -87,7 +111,6 @@ const HeroBackground = styled.div`
   bottom: 0;
   background: url(${(props) => props.bgImage}) center/cover;
   filter: brightness(0.4);
-  transition: all 0.8s ease;
 `;
 
 const HeroOverlay = styled.div`
@@ -96,11 +119,6 @@ const HeroOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  /* background: linear-gradient(
-    45deg,
-    rgba(234, 164, 102, 0.8) 0%,
-    rgba(162, 88, 75, 0.6) 100%
-  ); */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -110,46 +128,20 @@ const HeroOverlay = styled.div`
   padding: 40px;
 `;
 
-const BackButton = styled.button`
-  position: absolute;
-  top: 30px;
-  left: 30px;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 12px 24px;
-  border-radius: 50px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  animation: ${slideInLeft} 0.6s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  }
-`;
-
 const ServiceTitle = styled.h1`
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   background: linear-gradient(45deg, #fff, #f8f9fa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: ${fadeInUp} 0.8s ease 0.2s both;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 `;
 
 const TempleName = styled.p`
-  font-size: 1.4rem;
-  margin-bottom: 30px;
+  font-size: 1.2rem;
+  margin-bottom: 20px;
   opacity: 0.9;
   font-weight: 300;
   animation: ${fadeInUp} 0.8s ease 0.4s both;
@@ -157,13 +149,13 @@ const TempleName = styled.p`
 
 const QuickStats = styled.div`
   display: flex;
-  gap: 30px;
-  margin-top: 30px;
+  gap: 20px;
+  margin-top: 20px;
   animation: ${fadeInUp} 0.8s ease 0.6s both;
 
   @media (max-width: 768px) {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
   }
 `;
 
@@ -171,126 +163,117 @@ const StatItem = styled.div`
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 15px 25px;
-  border-radius: 20px;
+  padding: 12px 20px;
+  border-radius: 15px;
   text-align: center;
 
   .stat-value {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 700;
     display: block;
     margin-bottom: 5px;
   }
 
   .stat-label {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     opacity: 0.8;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
   }
 `;
 
-// Main Content
 const MainContent = styled.div`
-  /* background: white; */
+  background: white;
   border-radius: 30px 30px 0 0;
   margin-top: -30px;
   position: relative;
   z-index: 2;
-  /* box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1); */
-  overflow: hidden;
+`;
+
+const ContentWrapper = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
 `;
 
 const ContentSection = styled.section`
-  padding: 50px 40px;
+  padding: 40px;
   animation: ${fadeInUp} 0.6s ease;
 
   @media (max-width: 768px) {
-    padding: 30px 20px;
+    padding: 20px;
   }
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   color: #2c3e50;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   position: relative;
   display: inline-block;
 
   &::after {
     content: "";
     position: absolute;
-    bottom: -10px;
+    bottom: -8px;
     left: 0;
-    width: 60px;
-    height: 4px;
+    width: 50px;
+    height: 3px;
     background: linear-gradient(45deg, #667eea, #764ba2);
     border-radius: 2px;
   }
 `;
 
 const Description = styled.p`
-  font-size: 1.1rem;
-  line-height: 1.8;
+  font-size: 1rem;
+  line-height: 1.7;
   color: #555;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   text-align: justify;
 `;
 
 // Image Gallery
 const GallerySection = styled.div`
-  margin-bottom: 50px;
+  margin-bottom: 40px;
 `;
 
 const MainImageContainer = styled.div`
   position: relative;
-  height: 400px;
-  border-radius: 20px;
+  height: 300px;
+  border-radius: 15px;
   overflow: hidden;
-  margin-bottom: 20px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-  }
+  margin-bottom: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 `;
 
 const MainImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
-
-  ${MainImageContainer}:hover & {
-    transform: scale(1.05);
-  }
 `;
 
 const ImageCounter = styled.div`
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 15px;
+  right: 15px;
   background: rgba(0, 0, 0, 0.7);
   color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.9rem;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 0.8rem;
   backdrop-filter: blur(10px);
 `;
 
 const ThumbnailGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 15px;
-  max-width: 600px;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 10px;
+  max-width: 500px;
 `;
 
 const Thumbnail = styled.div`
-  height: 80px;
-  border-radius: 12px;
+  height: 60px;
+  border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -299,7 +282,6 @@ const Thumbnail = styled.div`
 
   &:hover {
     transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
   }
 
   img {
@@ -309,112 +291,24 @@ const Thumbnail = styled.div`
   }
 `;
 
-// Pricing Section
-const PricingContainer = styled.div`
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 20px;
-  padding: 40px;
-  margin-bottom: 40px;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(45deg, #667eea, #764ba2);
-  }
-`;
-
-const PricingGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 25px;
-  margin-top: 30px;
-`;
-
-const PricingCard = styled.div`
-  background: white;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-    border-color: #667eea;
-  }
-
-  .price {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #667eea;
-    margin-bottom: 15px;
-  }
-
-  .details {
-    color: #666;
-    line-height: 1.6;
-
-    div {
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    strong {
-      color: #2c3e50;
-      font-weight: 600;
-    }
-  }
-`;
-
 // Variations Section
 const VariationsGrid = styled.div`
   display: grid;
-  gap: 20px;
-  margin-top: 30px;
+  gap: 15px;
+  margin-top: 20px;
 `;
 
 const VariationCard = styled.div`
   background: white;
-  border-radius: 15px;
-  padding: 25px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   border: 1px solid #e9ecef;
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 100%;
-    background: linear-gradient(
-      45deg,
-      rgba(102, 126, 234, 0.05),
-      rgba(118, 75, 162, 0.05)
-    );
-    transition: width 0.3s ease;
-  }
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-    border-color: #667eea;
-
-    &::before {
-      width: 100%;
-    }
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -422,31 +316,27 @@ const VariationHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
-  position: relative;
-  z-index: 1;
+  margin-bottom: 12px;
 `;
 
 const VariationType = styled.span`
   font-weight: 700;
   color: #2c3e50;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 `;
 
 const VariationPrice = styled.span`
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: #667eea;
   font-weight: 700;
 `;
 
 const VariationDetails = styled.div`
   color: #666;
-  position: relative;
-  z-index: 1;
 
   div {
-    margin-bottom: 8px;
-    padding: 5px 0;
+    margin-bottom: 6px;
+    padding: 4px 0;
     border-bottom: 1px solid #f1f3f4;
 
     &:last-child {
@@ -455,21 +345,21 @@ const VariationDetails = styled.div`
 
     strong {
       color: #2c3e50;
-      margin-right: 10px;
+      margin-right: 8px;
     }
   }
 `;
 
 // Policy Section
 const PolicyContainer = styled.div`
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 `;
 
 const PolicyGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 25px;
-  margin-top: 30px;
+  gap: 20px;
+  margin-top: 20px;
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
@@ -478,16 +368,10 @@ const PolicyGrid = styled.div`
 
 const PolicyCard = styled.div`
   background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-  border-left: 5px solid #667eea;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-  }
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #667eea;
 
   &.refund {
     border-left-color: #10b981;
@@ -495,35 +379,17 @@ const PolicyCard = styled.div`
 
   h3 {
     color: #2c3e50;
-    font-size: 1.4rem;
-    margin-bottom: 20px;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
     display: flex;
     align-items: center;
-    gap: 10px;
-
-    &::before {
-      content: "📋";
-      font-size: 1.2rem;
-    }
-  }
-
-  &.refund h3::before {
-    content: "✓";
-    background: #10b981;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
+    gap: 8px;
   }
 `;
 
 const PolicySection = styled.div`
-  margin-bottom: 20px;
-  padding-bottom: 20px;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
   border-bottom: 1px solid #e9ecef;
 
   &:last-child {
@@ -535,379 +401,48 @@ const PolicySection = styled.div`
 
 const PolicySectionTitle = styled.h4`
   color: #1a1a1a;
-  font-size: 1.1rem;
-  margin-bottom: 12px;
+  font-size: 1rem;
+  margin-bottom: 10px;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 `;
 
 const PolicyDetails = styled.div`
   display: grid;
-  gap: 10px;
-  margin-left: 0;
+  gap: 8px;
 `;
 
 const PolicyItem = styled.div`
   background: #f8f9fa;
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
   border-left: 3px solid #667eea;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #555;
-  line-height: 1.5;
+  line-height: 1.4;
 
   strong {
     color: #2c3e50;
   }
-
-  &.highlight {
-    background: #e3f2fd;
-    border-left-color: #2196f3;
-  }
-
-  &.warning {
-    background: #fff3e0;
-    border-left-color: #f57c00;
-    color: #e65100;
-  }
-
-  &.success {
-    background: #e8f5e9;
-    border-left-color: #10b981;
-    color: #1b5e20;
-  }
 `;
 
-const RefundRuleItem = styled.div`
-  background: white;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 12px;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-
-  .rule-time {
-    color: #f57c00;
-    font-weight: 700;
-    font-size: 1.05rem;
-    margin-bottom: 8px;
-  }
-
-  .rule-refund {
-    color: #10b981;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-
-  .rule-note {
-    color: #666;
-    font-size: 0.9rem;
-    font-style: italic;
-    margin-top: 8px;
-  }
-`;
-
-// Floating Book Button
-const FloatingBookButton = styled.button`
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  background: linear-gradient(145deg, rgb(212, 175, 55), rgb(196, 69, 54));
-  color: white;
-  border: none;
-  padding: 20px 40px;
-  border-radius: 60px;
-  font-size: 1.2rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-
-  &::before {
-    content: "⚡";
-    font-size: 1.3rem;
-  }
-
-  &:hover {
-    transform: translateY(-8px) scale(1.05);
-    box-shadow: 0 15px 40px rgba(234, 172, 102, 0.6);
-    animation: ${pulse} 2s infinite;
-  }
-
-  &:active {
-    transform: translateY(-4px) scale(1.02);
-  }
-
-  @media (max-width: 768px) {
-    bottom: 20px;
-    right: 20px;
-    padding: 15px 30px;
-    font-size: 1rem;
-  }
-`;
-
-// Loading Component
-const LoadingContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 80vh;
-  /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
-`;
-
-const LoadingCard = styled.div`
-  background: white;
-  padding: 60px 40px;
-  border-radius: 20px;
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-
-  .spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 20px;
-  }
-
-  @keyframes spin {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-
-  p {
-    color: #666;
-    font-size: 1.1rem;
-    margin: 0;
-  }
-`;
-
-const ServiceDetails = () => {
-  const { serviceId } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [service, setService] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const ServiceDetailsView = ({ service, onClose }) => {
   const [selectedImage, setSelectedImage] = useState(0);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [combinedModalOpen, setCombinedModalOpen] = useState(false);
-  const [chosenService, setChosenService] = useState(null);
-  const [chosenVariation, setChosenVariation] = useState(null);
-  const [disabledDateKeys, setDisabledDateKeys] = useState(new Set());
-  const [selectateddate, setselecteddate] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [bookingData, setBookingData] = useState([]);
-  const { customerData } = useCustomerAuth();
-  const [preSelectedDate, setPreSelectedDate] = useState(null);
 
-  useEffect(() => {
-    fetchServiceDetails();
-  }, [serviceId]);
+  if (!service) {
+    return (
+      <ModalOverlay onClick={onClose}>
+        <ModalContainer>
+          <CloseButton onClick={onClose}>×</CloseButton>
+          <div style={{ padding: "40px", textAlign: "center" }}>
+            <p>No service data available</p>
+          </div>
+        </ModalContainer>
+      </ModalOverlay>
+    );
+  }
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const urlDate = params.get("date");
-    if (urlDate) {
-      // Validate date format (YYYY-MM-DD)
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const [year, month, day] = urlDate.split("-");
-      const preDate = new Date(year, month - 1, day);
-
-      if (preDate >= today) {
-        setPreSelectedDate(urlDate);
-        // Auto-open the combined modal if date is in URL
-        setTimeout(() => setCombinedModalOpen(true), 500);
-      }
-    }
-  }, [location.search]);
-
-  const handleConfirmBooking = async () => {
-    let latestBooking = null;
-    const id = localStorage.getItem("customerRefCode");
-    setIsLoading(true);
-
-    try {
-      await processBooking(bookingData);
-      const res = await getServiceBookings(id);
-      latestBooking = res[res.length - 1];
-
-      if (latestBooking?.ref_code) {
-        const data = { ref_code: latestBooking.ref_code };
-        const paymentRes = await processpayment(data);
-
-        if (paymentRes?.data?.payment?.status === "F") {
-          const cancelData = {
-            booking_data: {
-              cust_ref_code: customerData.custRefCode,
-              call_mode: "CANCEL",
-              booking_ref_code: latestBooking.ref_code,
-              remarks: `Payment failed or cancelled for ${latestBooking.ref_code}`,
-            },
-          };
-
-          await processBooking(cancelData);
-
-          navigate("/customer-bookings", {
-            state: {
-              message:
-                "❌ Payment failed or was cancelled. Booking has been cancelled.",
-            },
-          });
-        } else if (paymentRes?.data?.payment?.status === "P") {
-          navigate("/customer-bookings", {
-            state: {
-              message:
-                "⚠️ Payment process was not completed. Please check your bookings.",
-              booking: latestBooking,
-            },
-          });
-        } else {
-          navigate("/customer-bookings", {
-            state: {
-              message: "🎉 Booking and payment successful!",
-              booking: latestBooking,
-            },
-          });
-        }
-      }
-
-      setShowConfirmation(false);
-    } catch (error) {
-      console.error("Error while confirming booking:", error);
-      navigate("/customer-bookings", {
-        state: {
-          message: "❌ Something went wrong while confirming your booking.",
-        },
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const onCombinedBookingConfirm = async (selectedDate, selectedVariation) => {
-    setCombinedModalOpen(false);
-    setselecteddate(selectedDate);
-    setChosenVariation(selectedVariation || null);
-
-    if (!chosenService) return;
-
-    const booking = {
-      booking_data: {
-        cust_ref_code: customerData.custRefCode,
-        call_mode: "ADD_BOOKING",
-        service_id: chosenService.service_id,
-        service_variation_id:
-          selectedVariation?.id || selectedVariation?.variation_id || null,
-        booking_date: toAPIDate(selectedDate || ""),
-        end_date: toAPIDate(selectedDate || ""),
-        start_time: selectedVariation?.start_time || "",
-        end_time: selectedVariation?.end_time || "",
-        notes: "",
-        quantity: selectedVariation?.max_participant || 1,
-        duration: Number.parseInt(
-          chosenService.duration_minutes || chosenService.duration || 60,
-          10
-        ),
-        unit_price: Number.parseFloat(
-          (Number.parseFloat(selectedVariation?.base_price) || 0) +
-            (Number.parseFloat(
-              selectedVariation?.pricing_rule_data?.week_day_price
-            ) || 0) +
-            (Number.parseFloat(
-              selectedVariation?.pricing_rule_data?.time_price
-            ) || 0) +
-            (Number.parseFloat(
-              selectedVariation?.pricing_rule_data?.date_price
-            ) || 0)
-        ),
-      },
-    };
-
-    setBookingData(booking);
-    await loadDisabledDates(chosenService.service_id, selectedVariation);
-    setShowConfirmation(true);
-  };
-
-  const loadDisabledDates = async (serviceId, variationOrNull) => {
-    const starttime = variationOrNull?.start_time;
-    const endtime = variationOrNull?.end_time;
-    try {
-      const bookings = await getServiceBookings(1, "user");
-      const filteredServices = bookings.filter(
-        (service) =>
-          !serviceId ||
-          (service?.service_data?.service_id === serviceId &&
-            service?.status !== "X")
-      );
-      setDisabledDateKeys(
-        extractDisabledDatesFromBookings(
-          selectedCategory === "PUJA" ? [] : filteredServices,
-          starttime,
-          endtime
-        )
-      );
-    } catch (e) {
-      console.warn(
-        "Could not fetch booked dates, proceeding without disabled dates."
-      );
-      setDisabledDateKeys(new Set());
-    }
-  };
-
-  const fetchServiceDetails = async () => {
-    try {
-      setLoading(true);
-      const services = await getTempleServicesList();
-      const foundService = services.find((s) => s.service_id === serviceId);
-      setChosenService(foundService);
-      if (foundService) {
-        setService(foundService);
-        const images = [
-          foundService.image,
-          foundService.image_1,
-          foundService.image_2,
-          foundService.image_3,
-          foundService.image_4,
-          foundService.image_5,
-        ].filter((img) => img != null);
-
-        setService((prev) => ({ ...prev, allImages: images }));
-      } else {
-        setError("Service not found");
-      }
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBookNow = () => {
-    setCombinedModalOpen(true);
-  };
-
+  // Get all service images
   const getServiceImages = () => {
-    if (!service) return [];
     return [
       service.image,
       service.image_1,
@@ -918,331 +453,204 @@ const ServiceDetails = () => {
     ].filter((img) => img != null);
   };
 
-  if (loading) {
-    return (
-      <CustomerLayout>
-        <LoadingContainer>
-          <LoadingCard>
-            <div className="spinner"></div>
-            <p>Loading service details...</p>
-          </LoadingCard>
-        </LoadingContainer>
-      </CustomerLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <CustomerLayout>
-        <LoadingContainer>
-          <LoadingCard>
-            <p style={{ color: "red" }}>Error: {error}</p>
-          </LoadingCard>
-        </LoadingContainer>
-      </CustomerLayout>
-    );
-  }
-
-  if (!service) {
-    return (
-      <CustomerLayout>
-        <LoadingContainer>
-          <LoadingCard>
-            <p>Service not found</p>
-          </LoadingCard>
-        </LoadingContainer>
-      </CustomerLayout>
-    );
-  }
-
   const images = getServiceImages();
 
   return (
-    <CustomerLayout>
-      <DetailsContainer>
-        <HeroSection>
-          <HeroBackground
-            bgImage={images[selectedImage] || "/placeholder-image.jpg"}
-          />
-          <HeroOverlay>
-            <BackButton onClick={() => navigate(-1)}>
-              ← Back to Services
-            </BackButton>
+    <ModalOverlay>
+      <ModalContainer>
+        <CloseButton onClick={onClose}>×</CloseButton>
 
-            <ServiceTitle>{service.name}</ServiceTitle>
-            <TempleName>{service.temple_name}</TempleName>
-          </HeroOverlay>
-        </HeroSection>
+        <DetailsContainer>
+          {/* Hero Section */}
+          <HeroSection>
+            <HeroBackground
+              bgImage={images[selectedImage] || "/placeholder-image.jpg"}
+            />
+            <HeroOverlay>
+              <ServiceTitle>{service.name}</ServiceTitle>
+              <TempleName>{service.temple_name}</TempleName>
 
-        <MainContent>
-          <ContentWrapper>
-            <ContentSection>
-              <SectionTitle>About This Service</SectionTitle>
-              <Description>{service.description}</Description>
+              <QuickStats>
+                <StatItem>
+                  <span className="stat-value">
+                    {service.capacity || "N/A"}
+                  </span>
+                  <span className="stat-label">Capacity</span>
+                </StatItem>
+                <StatItem>
+                  <span className="stat-value">
+                    {service.totalBookings || 0}
+                  </span>
+                  <span className="stat-label">Bookings</span>
+                </StatItem>
+                <StatItem>
+                  <span className="stat-value">
+                    {service.service_type_str || service.service_type}
+                  </span>
+                  <span className="stat-label">Type</span>
+                </StatItem>
+              </QuickStats>
+            </HeroOverlay>
+          </HeroSection>
 
-              {images.length > 0 && (
-                <GallerySection>
-                  <SectionTitle>Gallery</SectionTitle>
-                  <MainImageContainer
-                    onClick={() =>
-                      setSelectedImage((selectedImage + 1) % images.length)
-                    }
-                  >
-                    <MainImage
-                      src={images[selectedImage] || "/placeholder-image.jpg"}
-                      alt={service.name}
-                    />
-                    {images.length > 1 && (
-                      <ImageCounter>
-                        {selectedImage + 1} / {images.length}
-                      </ImageCounter>
-                    )}
-                  </MainImageContainer>
+          {/* Main Content */}
+          <MainContent>
+            <ContentWrapper>
+              <ContentSection>
+                {/* Description */}
+                <SectionTitle>About This Service</SectionTitle>
+                <Description>
+                  {service.description || "No description available."}
+                </Description>
 
-                  {images.length > 1 && (
-                    <ThumbnailGrid>
-                      {images.map((img, index) => (
-                        <Thumbnail
-                          key={index}
-                          active={index === selectedImage}
-                          onClick={() => setSelectedImage(index)}
-                        >
-                          <img
-                            src={img || "/placeholder.svg"}
-                            alt={`${service.name} ${index + 1}`}
-                          />
-                        </Thumbnail>
-                      ))}
-                    </ThumbnailGrid>
-                  )}
-                </GallerySection>
-              )}
-
-              {service.service_variation_list &&
-                service.service_variation_list.length > 0 && (
-                  <>
-                    <SectionTitle>Service Variations</SectionTitle>
-                    <VariationsGrid>
-                      {service.service_variation_list.map(
-                        (variation, index) => (
-                          <VariationCard key={variation.id || index}>
-                            <VariationHeader>
-                              <VariationType>
-                                {variation.pricing_type_str}
-                              </VariationType>
-                              <VariationPrice>
-                                ₹
-                                {(
-                                  (Number.parseFloat(variation.base_price) ||
-                                    0) +
-                                  (Number.parseFloat(
-                                    variation.pricing_rule_data?.week_day_price
-                                  ) || 0) +
-                                  (Number.parseFloat(
-                                    variation.pricing_rule_data?.time_price
-                                  ) || 0) +
-                                  (Number.parseFloat(
-                                    variation.pricing_rule_data?.date_price
-                                  ) || 0)
-                                ).toLocaleString()}
-                              </VariationPrice>
-                            </VariationHeader>
-                            <VariationDetails>
-                              <div>
-                                <strong>Time:</strong> {variation.start_time} -{" "}
-                                {variation.end_time}
-                              </div>
-                              <div>
-                                <strong>Max Participants:</strong>{" "}
-                                {variation.max_participant}
-                              </div>
-                              {variation.max_no_per_day && (
-                                <div>
-                                  <strong>Max per day:</strong>{" "}
-                                  {variation.max_no_per_day}
-                                </div>
-                              )}
-                            </VariationDetails>
-                          </VariationCard>
-                        )
+                {/* Image Gallery */}
+                {images.length > 0 && (
+                  <GallerySection>
+                    <SectionTitle>Gallery</SectionTitle>
+                    <MainImageContainer>
+                      <MainImage
+                        src={images[selectedImage] || "/placeholder-image.jpg"}
+                        alt={service.name}
+                      />
+                      {images.length > 1 && (
+                        <ImageCounter>
+                          {selectedImage + 1} / {images.length}
+                        </ImageCounter>
                       )}
-                    </VariationsGrid>
-                  </>
+                    </MainImageContainer>
+
+                    {images.length > 1 && (
+                      <ThumbnailGrid>
+                        {images.map((img, index) => (
+                          <Thumbnail
+                            key={index}
+                            active={index === selectedImage}
+                            onClick={() => setSelectedImage(index)}
+                          >
+                            <img
+                              src={img || "/placeholder.svg"}
+                              alt={`${service.name} ${index + 1}`}
+                            />
+                          </Thumbnail>
+                        ))}
+                      </ThumbnailGrid>
+                    )}
+                  </GallerySection>
                 )}
 
-              <PolicyContainer>
-                <SectionTitle>Policies & Terms</SectionTitle>
-                <PolicyGrid>
-                  {service.adv_policy_data && (
-                    <PolicyCard>
-                      <h3>Advance Payment Policy</h3>
-
-                      <PolicySection>
-                        <PolicySectionTitle>
-                          💰 Payment Requirements
-                        </PolicySectionTitle>
-                        <PolicyDetails>
-                          <PolicyItem highlight>
-                            <strong>Policy Name:</strong>{" "}
-                            {service.adv_policy_data.name}
-                          </PolicyItem>
-                          <PolicyItem highlight>
-                            <strong>Advance Required:</strong>{" "}
-                            {service.adv_policy_data.percent}% of total booking
-                            amount
-                          </PolicyItem>
-                          <PolicyItem warning>
-                            <strong>Minimum Amount:</strong> ₹
-                            {service.adv_policy_data.min_amount}
-                          </PolicyItem>
-                        </PolicyDetails>
-                      </PolicySection>
-
-                      <PolicySection>
-                        <PolicySectionTitle>
-                          📅 Payment Timeline
-                        </PolicySectionTitle>
-                        <PolicyDetails>
-                          <PolicyItem>
-                            <strong>Payment Due:</strong>{" "}
-                            {service.adv_policy_data.due_days_before} days
-                            before your booking date
-                          </PolicyItem>
-                          <PolicyItem>
-                            The advance amount must be received by the deadline
-                            to confirm your booking
-                          </PolicyItem>
-                        </PolicyDetails>
-                      </PolicySection>
-
-                      <PolicySection>
-                        <PolicySectionTitle>ℹ️ How it works</PolicySectionTitle>
-                        <PolicyDetails>
-                          <PolicyItem>
-                            1. Pay{" "}
-                            <strong>{service.adv_policy_data.percent}%</strong>{" "}
-                            advance now
-                          </PolicyItem>
-                          <PolicyItem>
-                            2. Pay remaining balance before your service date
-                          </PolicyItem>
-                          <PolicyItem>
-                            3. Your booking is confirmed once advance is
-                            received
-                          </PolicyItem>
-                        </PolicyDetails>
-                      </PolicySection>
-                    </PolicyCard>
+                {/* Service Variations */}
+                {service.service_variation_list &&
+                  service.service_variation_list.length > 0 && (
+                    <>
+                      <SectionTitle>Service Variations</SectionTitle>
+                      <VariationsGrid>
+                        {service.service_variation_list.map(
+                          (variation, index) => (
+                            <VariationCard key={variation.id || index}>
+                              <VariationHeader>
+                                <VariationType>
+                                  {variation.pricing_type_str}
+                                </VariationType>
+                                <VariationPrice>
+                                  ₹
+                                  {Number.parseFloat(
+                                    variation.base_price || 0
+                                  ).toLocaleString()}
+                                </VariationPrice>
+                              </VariationHeader>
+                              <VariationDetails>
+                                <div>
+                                  <strong>Time:</strong> {variation.start_time}{" "}
+                                  - {variation.end_time}
+                                </div>
+                                <div>
+                                  <strong>Max Participants:</strong>{" "}
+                                  {variation.max_participant}
+                                </div>
+                                {variation.max_no_per_day && (
+                                  <div>
+                                    <strong>Max per day:</strong>{" "}
+                                    {variation.max_no_per_day}
+                                  </div>
+                                )}
+                              </VariationDetails>
+                            </VariationCard>
+                          )
+                        )}
+                      </VariationsGrid>
+                    </>
                   )}
 
-                  {service.refund_policy_data &&
-                    service.refund_policy_data.refund_rules && (
-                      <PolicyCard className="refund">
-                        <h3>Refund Policy</h3>
-
+                {/* Policies */}
+                <PolicyContainer>
+                  <SectionTitle>Policies & Terms</SectionTitle>
+                  <PolicyGrid>
+                    {/* Advance Payment Policy */}
+                    {service.adv_policy_data && (
+                      <PolicyCard>
+                        <h3>📋 Advance Payment Policy</h3>
                         <PolicySection>
                           <PolicySectionTitle>
-                            🔄 Policy Overview
+                            Payment Requirements
                           </PolicySectionTitle>
                           <PolicyDetails>
-                            <PolicyItem success>
-                              <strong>Policy Name:</strong>{" "}
-                              {service.refund_policy_data.name}
+                            <PolicyItem>
+                              <strong>Policy:</strong>{" "}
+                              {service.adv_policy_data.name}
                             </PolicyItem>
                             <PolicyItem>
-                              Refund eligibility depends on when you cancel your
-                              booking. Review the cancellation timeline below.
-                            </PolicyItem>
-                          </PolicyDetails>
-                        </PolicySection>
-
-                        <PolicySection>
-                          <PolicySectionTitle>
-                            📋 Cancellation Refund Rules
-                          </PolicySectionTitle>
-                          <div style={{ display: "grid", gap: "12px" }}>
-                            {service.refund_policy_data.refund_rules.map(
-                              (rule, index) => (
-                                <RefundRuleItem key={rule.id || index}>
-                                  <div className="rule-time">
-                                    ⏱️ Cancel at least{" "}
-                                    <strong>
-                                      {rule.min_hours_before
-                                        ? rule.min_hours_before
-                                        : rule.min_days_before}
-                                      {rule.min_hours_before ? "hours" : "days"}
-                                    </strong>{" "}
-                                    before
-                                  </div>
-                                  <div className="rule-refund">
-                                    💵 Refund:{" "}
-                                    <strong>{rule.refund_percent}%</strong> of
-                                    amount paid
-                                  </div>
-                                  {rule.notes && (
-                                    <div className="rule-note">
-                                      📌 Note: {rule.notes}
-                                    </div>
-                                  )}
-                                </RefundRuleItem>
-                              )
-                            )}
-                          </div>
-                        </PolicySection>
-
-                        <PolicySection>
-                          <PolicySectionTitle>
-                            ⚠️ Important Notes
-                          </PolicySectionTitle>
-                          <PolicyDetails>
-                            <PolicyItem warning>
-                              Cancellations must be done through your account
-                              dashboard
-                            </PolicyItem>
-                            <PolicyItem warning>
-                              Refunds will be processed within 5-7 business days
+                              <strong>Advance:</strong>{" "}
+                              {service.adv_policy_data.percent}% of total
                             </PolicyItem>
                             <PolicyItem>
-                              Advance payment is non-refundable if you don't
-                              meet the cancellation deadline
+                              <strong>Minimum:</strong> ₹
+                              {service.adv_policy_data.min_amount}
                             </PolicyItem>
                           </PolicyDetails>
                         </PolicySection>
                       </PolicyCard>
                     )}
-                </PolicyGrid>
-              </PolicyContainer>
-            </ContentSection>
-          </ContentWrapper>
-        </MainContent>
 
-        <FloatingBookButton onClick={handleBookNow}>
-          Book Now
-        </FloatingBookButton>
-
-        <CombinedBookingModal
-          open={combinedModalOpen}
-          service={chosenService}
-          onClose={() => setCombinedModalOpen(false)}
-          onConfirm={onCombinedBookingConfirm}
-          preSelectedDate={preSelectedDate}
-        />
-
-        {showConfirmation && (
-          <BookingConfirmationPopup
-            booking={service}
-            onConfirm={handleConfirmBooking}
-            onCancel={() => setShowConfirmation(false)}
-            isLoading={isLoading}
-            variationId={chosenVariation?.id || chosenVariation?.variation_id}
-            bookingDate={
-              bookingData.booking_data && bookingData.booking_data.booking_date
-            }
-          />
-        )}
-      </DetailsContainer>
-    </CustomerLayout>
+                    {/* Refund Policy */}
+                    {service.refund_policy_data && (
+                      <PolicyCard className="refund">
+                        <h3>🔄 Refund Policy</h3>
+                        <PolicySection>
+                          <PolicySectionTitle>
+                            Policy Details
+                          </PolicySectionTitle>
+                          <PolicyDetails>
+                            <PolicyItem>
+                              <strong>Policy:</strong>{" "}
+                              {service.refund_policy_data.name}
+                            </PolicyItem>
+                            {service.refund_policy_data.refund_rules?.map(
+                              (rule, index) => (
+                                <PolicyItem key={index}>
+                                  <strong>
+                                    Cancel{" "}
+                                    {rule.min_hours_before
+                                      ? `${rule.min_hours_before} hours`
+                                      : `${rule.min_days_before} days`}{" "}
+                                    before:
+                                  </strong>{" "}
+                                  {rule.refund_percent}% refund
+                                </PolicyItem>
+                              )
+                            )}
+                          </PolicyDetails>
+                        </PolicySection>
+                      </PolicyCard>
+                    )}
+                  </PolicyGrid>
+                </PolicyContainer>
+              </ContentSection>
+            </ContentWrapper>
+          </MainContent>
+        </DetailsContainer>
+      </ModalContainer>
+    </ModalOverlay>
   );
 };
 
-export default ServiceDetails;
+export default ServiceDetailsView;
