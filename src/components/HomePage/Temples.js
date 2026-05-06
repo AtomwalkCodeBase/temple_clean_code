@@ -386,7 +386,7 @@ const locations = [
   {
     name: "Odisha",
     image:
-      "https://imgs.search.brave.com/KdvZBl6XFP-z5-8FMlxDWzjwaFXgd52N4k1N9dLkp8s/rs:fit:500:0:1:0/g:ce/aHR0cHM6Ly91cGxv/YWQud2lraW1lZGlh/Lm9yZy93aWtpcGVk/aWEvY29tbW9ucy81/LzU1L0phZ2FubmF0/aF9UZW1wbGUsX1B1/cmkuanBn",
+      "https://static.investindia.gov.in/s3fs-public/2019-09/odisha%20blog_0.jpg"
   },
   {
     name: "Punjab",
@@ -695,8 +695,7 @@ const Temples = () => {
             timingsText = timingsObj.selected_time_slots
               .map(
                 (slot) =>
-                  `${slot.name ? slot.name + ": " : ""}${slot.start || ""} - ${
-                    slot.end || ""
+                  `${slot.name ? slot.name + ": " : ""}${slot.start || ""} - ${slot.end || ""
                   }`
               )
               .join(", ");
@@ -765,10 +764,10 @@ const Temples = () => {
     selectedLocation === "All"
       ? temples
       : temples.filter((temple) =>
-          (temple.location || "")
-            .toLowerCase()
-            .includes(selectedLocation.toLowerCase())
-        );
+        (temple.location || "")
+          .toLowerCase()
+          .includes(selectedLocation.toLowerCase())
+      );
   return (
     <TemplesContainer>
       <HeroSection
@@ -882,7 +881,11 @@ const Temples = () => {
                   </TempleImageContainer>
 
                   <TempleInfo>
-                    <TempleName>{temple.name}</TempleName>
+                    <TempleName>
+                      {temple.name.length > 18
+                        ? temple.name.substring(0, 18) + "..."
+                        : temple.name}
+                    </TempleName>
                     <TempleLocation>📍 {temple.location}</TempleLocation>
 
                     <TempleDetail>
@@ -897,7 +900,9 @@ const Temples = () => {
                         🕒
                       </span>
                       <DetailLabel>Timings:</DetailLabel>
-                      <DetailValue>{temple.timings || "—"}</DetailValue>
+                      <DetailValue>{temple?.timings?.length > 0
+                        ? temple?.timings?.substring(0, 40) + "..."
+                        : " ---"}</DetailValue>
                     </TempleDetail>
 
                     <ActionButtons>

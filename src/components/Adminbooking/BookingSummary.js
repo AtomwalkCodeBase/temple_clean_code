@@ -531,13 +531,21 @@ const BookingSummary = ({
   const [isServiceBlocked, setIsServiceBlocked] = useState(false);
   const [blockMessage, setBlockMessage] = useState("");
   const basePrice = parseFloat(variation.base_price) || 0;
-
+  const refcode = localStorage.getItem("customerRefCode") || "";
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
         const data = await getCustomerList();
-        setCustomers(data);
-        setFilteredCustomers(data);
+        if (refcode) {
+          const filteredData = data.filter(
+            (customer) => customer.cust_ref_code === refcode
+          );
+          setCustomers(filteredData);
+          setFilteredCustomers(filteredData);
+        } else {
+          setCustomers(data);
+          setFilteredCustomers(data);
+        }
       } catch (err) {
         console.error("Error fetching customers:", err);
       }
@@ -690,6 +698,16 @@ const BookingSummary = ({
     }
   };
 
+  useEffect(() => {
+    // If there's exactly one filtered customer and none is selected yet, select it by default
+    if (!selectedCustomer && filteredCustomers.length === 1) {
+      const single = filteredCustomers[0];
+      setSelectedCustomer(single);
+      setSearchQuery(single.name || "");
+      setShowDropdown(false);
+    }
+  }, [filteredCustomers, selectedCustomer]);
+
   return (
     <SummaryContainer>
       <Header>
@@ -766,17 +784,24 @@ const BookingSummary = ({
       </SummaryGrid>
 
       <CustomerSection>
-        <SectionTitle $icon="👤">Select Customer</SectionTitle>
+        <SectionTitle $icon="👤">
+          {refcode ? "Your Details" : "Select Customer"}
+        </SectionTitle>
         <CustomerSelectWrapper>
-          <SearchIcon>🔍</SearchIcon>
-          <SearchInput
-            type="text"
-            placeholder="Search by name, mobile or email..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onFocus={() => setShowDropdown(true)}
-            disabled={isServiceBlocked}
-          />
+          {!refcode && (
+            <>
+              <SearchIcon>🔍</SearchIcon>
+
+              <SearchInput
+                type="text"
+                placeholder="Search by name, mobile or email..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                onFocus={() => setShowDropdown(true)}
+                disabled={isServiceBlocked}
+              />
+            </>
+          )}
           {showDropdown && filteredCustomers.length > 0 && (
             <CustomerList>
               {filteredCustomers.map((customer) => (
@@ -817,7 +842,9 @@ const BookingSummary = ({
                 </CustomerBadge>
               </CustomerDetails>
             </div>
-            <ClearButton onClick={handleClearCustomer}>Clear</ClearButton>
+            {!refcode && (
+              <ClearButton onClick={handleClearCustomer}>Clear</ClearButton>
+            )}
           </SelectedCustomerDisplay>
         )}
       </CustomerSection>

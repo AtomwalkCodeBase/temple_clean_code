@@ -51,6 +51,7 @@ import DemoMode from "./components/Admin/DemoMode";
 import CustomerLayout from "./components/Customer/CustomerLayout";
 import ServiceBlockList from "./components/Admin/ServiceBlockList.js";
 import AnalyticsDashboard from "./components/Admin/AnalyticsDashboard.js";
+import Calender from "./components/HomePage/Calender.js";
 
 function AppContent() {
   const location = useLocation();
@@ -104,6 +105,7 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/temples" element={<Temples />} />
         <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/calender" element={<Calender />} />
         <Route path="/templeDetails/:templeId" element={<TempleDetails />} />
         <Route path="/demomode" element={<DemoMode />} />
         {/* Admin routes */}

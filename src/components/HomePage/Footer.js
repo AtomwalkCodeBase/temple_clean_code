@@ -1,4 +1,3 @@
-"use client";
 import styled from "styled-components";
 // import { motion } from "framer-motion"
 import footerTree from "../../assets/img/footer_01.png";

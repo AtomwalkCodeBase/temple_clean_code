@@ -309,12 +309,12 @@ const AdminSidebar = ({
           label: "Dashboard",
           badge: null,
         },
-        {
-          path: "/analytics-dashboard",
-          icon: ChartBar,
-          label: "Analytics Dashboard",
-          badge: null,
-        },
+        // {
+        //   path: "/analytics-dashboard",
+        //   icon: ChartBar,
+        //   label: "Analytics Dashboard",
+        //   badge: null,
+        // },
       ],
     },
     {

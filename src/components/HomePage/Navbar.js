@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
@@ -285,6 +284,7 @@ const Navbar = () => {
     { path: "/", label: "Home" },
     { path: "/temples", label: "Temples" },
     { path: "/about-us", label: "About Us" },
+    { path: "/calender", label: "Calender" },
   ];
 
   const loginOptions = [
